@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizFlow - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/16/solid/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .role-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .navbar button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .navbar button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 18px;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .menu-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .menu-item .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .menu-item .label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .token-section {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🚀 BizFlow Admin</h1>
+        <div class="user-info">
+            <span class="role-badge">👑 ADMIN</span>
+            <span id="userGreeting">Xin chào, <strong>Admin</strong></span>
+            <button onclick="logout()">Đăng xuất</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success">
+            ✅ Đã đăng nhập với tư cách <strong>ADMIN</strong>. Bạn có full quyền truy cập tất cả chức năng.
+        </div>
+
+        <div class="card">
+            <h2>👤 Thông tin quản trị viên</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>User ID</label>
+                    <div class="value" id="userId">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Username</label>
+                    <div class="value" id="username">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Role</label>
+                    <div class="value"><span class="badge">ADMIN</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔐 Thông tin Token</h2>
+            <div class="info-item">
+                <label>Access Token</label>
+                <div class="token-section" id="tokenInfo">Token sẽ hiển thị ở đây</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Bảng điều khiển quản lý</h2>
+            <div class="menu">
+                <div class="menu-item" onclick="alert('💼 Chức năng Bán hàng\n\nCác tính năng:\n- Xem đơn hàng\n- Tạo đơn bán\n- Quản lý giá\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v15.75C1.5 21.16 2.339 22 3.375 22h17.25c1.035 0 1.875-.84 1.875-1.875V4.875c0-1.036-.84-1.875-1.875-1.875H3.375zm0 1.5h17.25a.375.375 0 0 1 .375.375v15.75a.375.375 0 0 1-.375.375H3.375a.375.375 0 0 1-.375-.375V4.875a.375.375 0 0 1 .375-.375zm9.75 11.25a.75.75 0 0 0 0 1.5H15a.75.75 0 0 0 0-1.5h-2.375z"/></svg></div>
+                    <div class="label">Bán hàng</div>
+                </div>
+                <div class="menu-item" onclick="alert('📦 Chức năng Tồn kho\n\nCác tính năng:\n- Nhập kho\n- Xuất kho\n- Kiểm kho\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v15.75C1.5 21.16 2.339 22 3.375 22h17.25c1.035 0 1.875-.84 1.875-1.875V4.875c0-1.036-.84-1.875-1.875-1.875H3.375zm0 1.5h17.25a.375.375 0 0 1 .375.375v3h-18v-3a.375.375 0 0 1 .375-.375zm0 6h17.25v9.75a.375.375 0 0 1-.375.375H3.375a.375.375 0 0 1-.375-.375v-9.75z"/></svg></div>
+                    <div class="label">Tồn kho</div>
+                </div>
+                <div class="menu-item" onclick="alert('👥 Chức năng Khách hàng\n\nCác tính năng:\n- Danh sách khách\n- Thêm khách hàng\n- Quản lý công nợ\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path fill-rule="evenodd" d="M12 15a6 6 0 0 1 6 6H6a6 6 0 0 1 6-6Zm8-7a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/><path d="M20.745 19.644A8.025 8.025 0 0 0 15.2622 15.73a6 6 0 1 1 5.714 3.914Z"/></svg></div>
+                    <div class="label">Khách hàng</div>
+                </div>
+                <div class="menu-item" onclick="alert('🛠️ Chức năng Cài đặt\n\nCác tính năng:\n- Quản lý tài khoản\n- Quản lý người dùng\n- Logs hệ thống\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path fill-rule="evenodd" d="M11.078 2.207a.75.75 0 0 1 1.844 0c.115 1.312.949 2.473 2.204 2.88.593.202 1.126.541 1.581.987.461.458.797.99 1 1.584 1.311.115 2.473.949 2.88 2.204.202.593.541 1.126.987 1.581.458.461.997.798 1.584 1 .115 1.312.949 2.473 2.204 2.88a3.75 3.75 0 0 0 0 1.584c-1.312.115-2.473.949-2.88 2.204a3.75 3.75 0 0 0-1.584 1-.461.461 0 0 0-.987-.587 3.75 3.75 0 0 1-2.204-2.88 3.75 3.75 0 0 0-1.584-1c-1.312-.115-2.473-.949-2.88-2.204a3.75 3.75 0 0 0-1 1.581 3.75 3.75 0 0 1-1.584-1c-1.312-.115-2.473-.949-2.88-2.204a3.75 3.75 0 0 0-1.581-1.003 3.75 3.75 0 0 1 1 1.581c.593-.202 1.126-.541 1.581-.987.458-.461.797-.99 1-1.584 1.311-.115 2.473-.949 2.88-2.204.202-.593.541-1.126.987-1.581.458-.461.997-.798 1.584-1 .115-1.312.949-2.473 2.204-2.88a3.75 3.75 0 0 0 0-1.584c-1.312-.115-2.473-.949-2.88-2.204Zm0 0a.75.75 0 0 0-1.084-1.084 3.75 3.75 0 0 1 0 1.584Z"/><path fill-rule="evenodd" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg></div>
+                    <div class="label">Cài đặt</div>
+                </div>
+                <div class="menu-item" onclick="alert('📈 Chức năng Báo cáo\n\nCác tính năng:\n- Doanh thu\n- Chi phí\n- Thống kê\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75z"/><path d="M9.75 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/><path d="M16.5 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/><path d="M3 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 0 1 3 9.75V7.5z"/><path d="M9.75 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V7.5z"/><path d="M16.5 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V7.5z"/></svg></div>
+                    <div class="label">Báo cáo</div>
+                </div>
+                <div class="menu-item" onclick="alert('💰 Chức năng Tài chính\n\nCác tính năng:\n- Công nợ\n- Thu chi\n- Hóa đơn\n\n(Sẽ được phát triển)')">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M10.464 8.746c.422-.33.85-.4 1.273-.13.573.343.925.1.915-.733-.01-.8-.674-1.447-1.539-1.384-.433.035-.851.13-1.227.246.48-.423 1.09-.77 1.706-.916 2.482-.592 5.344.865 6.7 3.71 1.081 2.227.343 4.661-1.823 5.8-1.457.761-2.816.325-2.979-1.268a.684.684 0 0 0-.722-.572h-5.8a.75.75 0 0 0-.75.75v2.25c0 .414.336.75.75.75h5.8c.38 0 .722-.272.722-.572 0-.707.252-1.36.671-1.868-.404.159-.944.243-1.670.243-1.539 0-2.799-.944-2.799-2.111 0-.444.178-.858.477-1.198l-4.411 3.596a.75.75 0 1 0 .934 1.141l4.411-3.596c.25.23.577.413.954.542.929.314 2.027.218 2.934-.384 1.866-1.175 2.822-3.583 1.906-5.538-.544-1.12-1.496-1.957-2.655-2.36Z"/><path d="M7.5 10.5c1.382 0 2.5-1.118 2.5-2.5S8.882 5.5 7.5 5.5 5 6.618 5 8s1.118 2.5 2.5 2.5Z"/></svg></div>
+                    <div class="label">Tài chính</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Thông tin hệ thống</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Phiên bản</label>
+                    <div class="value">1.0.0</div>
+                </div>
+                <div class="info-item">
+                    <label>Trạng thái</label>
+                    <div class="value">✅ Online</div>
+                </div>
+                <div class="info-item">
+                    <label>Loại tài khoản</label>
+                    <div class="value">👑 Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra đăng nhập và role
+        window.addEventListener('load', function() {
+            const token = sessionStorage.getItem('accessToken');
+            const role = sessionStorage.getItem('role');
+            
+            if (!token) {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            
+            // Nếu không phải ADMIN, redirect đúng dashboard theo role
+            if (role !== 'ADMIN') {
+                if (role === 'OWNER') {
+                    window.location.href = '/pages/owner-dashboard.html';
+                } else {
+                    window.location.href = '/pages/employee-dashboard.html';
+                }
+                return;
+            }
+            
+            loadUserInfo();
+        });
+
+        function loadUserInfo() {
+            const userId = sessionStorage.getItem('userId');
+            const username = sessionStorage.getItem('username');
+            const token = sessionStorage.getItem('accessToken');
+
+            document.getElementById('userId').textContent = userId || '-';
+            document.getElementById('username').textContent = username || '-';
+            document.getElementById('userGreeting').innerHTML = `Xin chào, <strong>${username || 'Admin'}</strong>`;
+            document.getElementById('tokenInfo').textContent = token || 'Token không tìm thấy';
+        }
+
+        function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                sessionStorage.clear();
+                window.location.href = '/pages/login.html';
+            }
+        }
+    </script>
+    <script src="../assets/js/admin-dashboard.js"></script>
+</body>
+</html>
