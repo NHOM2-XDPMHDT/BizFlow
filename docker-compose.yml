@@ -1,0 +1,133 @@
+services:
+
+  # =========================
+  # 1. MYSQL DATABASE
+  # =========================
+  mysql:
+    image: mysql:8.0
+    container_name: bizflow-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bizflow_db}
+      MYSQL_USER: ${MYSQL_USER:-bizflow}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bizflow123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 2. REDIS CACHE
+  # =========================
+  redis:
+    image: redis:7
+    container_name: bizflow-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 3. RABBITMQ (Message Queue)
+  # =========================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: bizflow-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672" # dashboard
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 4. BACKEND API (JAVA SPRING BOOT)
+  # =========================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bizflow-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-bizflow_db}?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-bizflow}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-bizflow123}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      AI_SERVICE_URL: http://ai_service:5000
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - ai_service
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 5. AI SERVICE (PYTHON FASTAPI)
+  # =========================
+  ai_service:
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+    container_name: bizflow-ai
+    restart: always
+    ports:
+      - "5000:5000"
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 6. FRONTEND WEB (NGINX)
+  # =========================
+  frontend:
+    build:
+      context: ./FE
+      dockerfile: Dockerfile
+    container_name: bizflow-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - bizflow-net
+# =========================
+  # 7. PHPMYADMIN (DB WEB UI)
+  # =========================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: bizflow-phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER:-bizflow}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-bizflow123}
+    depends_on:
+      - mysql
+    networks:
+      - bizflow-net
+# =========================
+# VOLUMES
+# =========================
+volumes:
+  mysql_data:
+
+# =========================
+# NETWORK
+# =========================
+networks:
+  bizflow-net:
+    driver: bridge
