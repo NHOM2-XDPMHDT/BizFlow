@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizFlow POS - Bán hàng</title>
+    <link rel="stylesheet" href="../assets/css/employee-dashboard.css">
+</head>
+<body class="pos-body">
+    <!-- Top bar / hóa đơn tab -->
+    <header class="pos-header">
+        <div class="brand">BizFlow POS</div>
+        <div class="order-tabs">
+            <button class="order-tab active">Hóa đơn 1</button>
+            <button class="order-tab ghost" title="Thêm hóa đơn">+</button>
+            <button class="order-tab ghost">HĐ lưu tạm</button>
+        </div>
+        <div class="header-actions">
+            <div class="store">Tại cửa hàng</div>
+            <div class="user-chip" id="userBtn">
+                <span id="userInitial">E</span>
+                <span id="userNameDropdown">Nhân viên</span>
+            </div>
+            <button id="logoutBtn" class="icon-btn" title="Đăng xuất">⎋</button>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <section class="pos-toolbar">
+        <div class="toolbar-search">
+            <span class="key-hint">F3</span>
+            <input id="searchInput" type="text" placeholder="Nhập tên hàng hóa, mã vạch, mã SKU">
+        </div>
+        <div class="toolbar-qty">
+            <label for="qtyInput">SL</label>
+            <input id="qtyInput" type="number" min="1" value="1">
+        </div>
+        <div class="toolbar-toggle">
+            <label><input type="checkbox" id="splitLine"> Tách dòng</label>
+        </div>
+        <div class="toolbar-actions">
+            <button class="ghost-btn" id="customerQuickBtn">Chọn khách hàng</button>
+        </div>
+    </section>
+
+    <!-- Layout -->
+    <section class="pos-layout">
+        <div class="product-panel">
+            <div class="chip-row" id="categoryChips">
+                <button class="chip active" data-category="all">Tất cả</button>
+                <button class="chip" data-category="1">Áo</button>
+                <button class="chip" data-category="2">Quần</button>
+                <button class="chip" data-category="3">Giày</button>
+                <button class="chip" data-category="4">Phụ kiện</button>
+            </div>
+
+            <div class="products-toolbar">
+                <div class="sort-filter">
+                    <select id="sortSelect">
+                        <option value="name">Sắp xếp: Tên A-Z</option>
+                        <option value="price-low">Giá thấp đến cao</option>
+                        <option value="price-high">Giá cao đến thấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <aside class="side-panel">
+            <div class="customer-panel">
+                <div class="customer-search-box">
+                    <input id="customerSearch" type="text" placeholder="(F4) Tìm khách hàng">
+                </div>
+                <div class="customer-list" id="customerList">
+                    <div class="customer-item active" data-customer-id="0">
+                        <div>
+                            <p class="customer-name">Khách lẻ</p>
+                            <p class="customer-phone">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-panel">
+                <div class="cart-header">
+                    <h3>Giỏ hàng</h3>
+                    <button id="clearCartBtn" class="ghost-btn">Xóa</button>
+                </div>
+
+                <div class="current-customer" id="selectedCustomer">Khách lẻ</div>
+                <div class="cart-items" id="cartItems">
+                    <div class="empty-cart">Chưa có hàng hóa nào</div>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Tạm tính</span>
+                        <span id="subtotal">0đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Giảm giá</span>
+                        <input id="discountInput" type="number" min="0" placeholder="0">
+                    </div>
+                    <div class="summary-row total">
+                        <span>Tổng cộng</span>
+                        <span id="totalAmount">0đ</span>
+                    </div>
+                </div>
+
+                <div class="quick-cash">
+                    <button class="chip" data-cash="500000">500.000</button>
+                    <button class="chip" data-cash="200000">200.000</button>
+                    <button class="chip" data-cash="100000">100.000</button>
+                </div>
+
+                <div class="cart-actions">
+                    <button id="saveBillBtn" class="ghost-btn">Lưu tạm</button>
+                    <button id="checkoutBtn" class="primary-btn">Thu tiền</button>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <script src="../assets/js/employee-dashboard.js"></script>
+</body>
+</html>

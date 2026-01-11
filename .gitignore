@@ -8,3 +8,24 @@
 .settings/
 .idea/
 .vscode/
+# Build outputs
+/target/
+
+# IDE metadata
+/.idea/
+/.project
+/.classpath
+/.settings/
+/.vscode/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node (if present in FE)
+/FE/node_modules/

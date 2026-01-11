@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizFlow - Owner Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/16/solid/index.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .navbar { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar h1 { font-size: 24px; }
+        .navbar .user-info { display: flex; align-items: center; gap: 20px; }
+        .role-badge { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .navbar button { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+        .navbar button:hover { background: rgba(255,255,255,0.3); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h2 { color: #333; margin-bottom: 15px; border-bottom: 2px solid #ff7e5f; padding-bottom: 10px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .info-item { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #ff7e5f; }
+        .info-item label { font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
+        .info-item .value { font-size: 18px; color: #333; word-break: break-all; }
+        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .menu-item { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .menu-item .label { font-weight: bold; font-size: 14px; }
+        .token-section { background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; max-height: 100px; overflow-y: auto; }
+        .badge { display: inline-block; background: #ff7e5f; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🏪 BizFlow Owner</h1>
+        <div class="user-info">
+            <span class="role-badge">🧑‍💼 OWNER</span>
+            <span id="userGreeting">Xin chào, <strong>Owner</strong></span>
+            <button onclick="logout()">Đăng xuất</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>👤 Thông tin chủ cửa hàng</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>User ID</label>
+                    <div class="value" id="userId">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Username</label>
+                    <div class="value" id="username">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Role</label>
+                    <div class="value"><span class="badge">OWNER</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔐 Thông tin Token</h2>
+            <div class="info-item">
+                <label>Access Token</label>
+                <div class="token-section" id="tokenInfo">Token sẽ hiển thị ở đây</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Bảng điều khiển chủ cửa hàng</h2>
+            <div class="menu">
+                <div class="menu-item" onclick="alert('📦 Quản lý Sản phẩm\n\n- Tạo/Cập nhật/Ngừng bán\n- Thuộc tính, giá, khuyến mãi\n(Sẽ được phát triển)')">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3 7.5c0-.621.504-1.125 1.125-1.125h2.25C7 6.375 7.5 6.879 7.5 7.5v2.25C7.5 10.371 6.996 10.875 6.375 10.875H4.125A1.125 1.125 0 0 1 3 9.75V7.5zm0 6.75c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 0 1 3 16.5V14.25zM9.75 7.5c0-.621.504-1.125 1.125-1.125h9a1.125 1.125 0 0 1 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-9A1.125 1.125 0 0 1 9.75 9.75V7.5zm0 6.75c0-.621.504-1.125 1.125-1.125h9c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-9a1.125 1.125 0 0 1-1.125-1.125V14.25z"/></svg>
+                    </div>
+                    <div class="label">Sản phẩm</div>
+                </div>
+                <div class="menu-item" onclick="alert('🏬 Quản lý Tồn kho\n\n- Nhập/Xuất kho\n- Mức tồn tối thiểu\n(Sẽ được phát triển)')">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v15.75C1.5 21.16 2.339 22 3.375 22h17.25c1.035 0 1.875-.84 1.875-1.875V4.875c0-1.036-.84-1.875-1.875-1.875H3.375zm0 1.5h17.25a.375.375 0 0 1 .375.375v3h-18v-3a.375.375 0 0 1 .375-.375zm0 6h17.25v9.75a.375.375 0 0 1-.375.375H3.375a.375.375 0 0 1-.375-.375v-9.75z"/></svg>
+                    </div>
+                    <div class="label">Tồn kho</div>
+                </div>
+                <div class="menu-item" onclick="alert('👥 Khách hàng\n\n- Thêm/Cập nhật\n- Lịch sử mua hàng\n- Công nợ\n(Sẽ được phát triển)')">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path fill-rule="evenodd" d="M12 15a6 6 0 0 1 6 6H6a6 6 0 0 1 6-6Zm8-7a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/><path d="M20.745 19.644A8.025 8.025 0 0 0 15.2622 15.73a6 6 0 1 1 5.714 3.914Z"/></svg>
+                    </div>
+                    <div class="label">Khách hàng</div>
+                </div>
+                <div class="menu-item" onclick="alert('📈 Báo cáo & Phân tích\n\n- Doanh thu\n- Sản phẩm bán chạy\n- Hàng sắp hết\n(Sẽ được phát triển)')">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75z"/><path d="M9.75 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/><path d="M16.5 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/></svg>
+                    </div>
+                    <div class="label">Báo cáo</div>
+                </div>
+                <div class="menu-item" onclick="alert('🧑‍🤝‍🧑 Nhân sự\n\n- Tạo/Reset/Ngừng hoạt động nhân viên\n- Phân quyền\n(Sẽ được phát triển)')">
+                    <div class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M7.5 10.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M.75 19.5a6.75 6.75 0 0 1 13.5 0v.75H.75V19.5Zm14.25 0a6.75 6.75 0 0 1 13.5 0v.75h-13.5V19.5Z"/></svg>
+                    </div>
+                    <div class="label">Nhân viên</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Thông tin hệ thống</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Phiên bản</label>
+                    <div class="value">1.0.0</div>
+                </div>
+                <div class="info-item">
+                    <label>Trạng thái</label>
+                    <div class="value">✅ Online</div>
+                </div>
+                <div class="info-item">
+                    <label>Loại tài khoản</label>
+                    <div class="value">🧑‍💼 Owner</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra đăng nhập và role
+        window.addEventListener('load', function() {
+            const token = sessionStorage.getItem('accessToken');
+            const role = sessionStorage.getItem('role');
+
+            if (!token) {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            // Nếu không phải OWNER, điều hướng đúng dashboard
+            if (role !== 'OWNER') {
+                if (role === 'ADMIN') {
+                    window.location.href = '/pages/admin-dashboard.html';
+                } else {
+                    window.location.href = '/pages/employee-dashboard.html';
+                }
+                return;
+            }
+
+            loadUserInfo();
+        });
+
+        function loadUserInfo() {
+            const userId = sessionStorage.getItem('userId');
+            const username = sessionStorage.getItem('username');
+            const token = sessionStorage.getItem('accessToken');
+
+            document.getElementById('userId').textContent = userId || '-';
+            document.getElementById('username').textContent = username || '-';
+            document.getElementById('userGreeting').innerHTML = `Xin chào, <strong>${username || 'Owner'}</strong>`;
+            document.getElementById('tokenInfo').textContent = token || 'Token không tìm thấy';
+        }
+
+        function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                sessionStorage.clear();
+                window.location.href = '/pages/login.html';
+            }
+        }
+    </script>
+</body>
+</html>

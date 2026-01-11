@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizFlow POS - Khuyen mai</title>
+    <link rel="stylesheet" href="../assets/css/employee-dashboard.css">
+    <link rel="stylesheet" href="../assets/css/promotions.css">
+</head>
+<body class="pos-body">
+    <header class="pos-header">
+        <div class="header-left">
+            <button class="icon-btn" type="button" aria-label="Quay lai" onclick="window.location.href='/pages/employee-dashboard.html'">
+                <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
+                    <path d="M15 6l-6 6 6 6" />
+                </svg>
+            </button>
+            <div class="logo-mark" aria-label="BizFlow">BizFlow POS</div>
+            <span class="app-icon app-green app-badge">KM</span>
+            <div class="page-title">Khuyen mai</div>
+        </div>
+        <div class="header-actions">
+            <div class="store">TRUONG CHINH</div>
+            <div class="user-chip">
+                <span id="userInitial">E</span>
+                <span id="userName">Nhan vien</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="promo-page">
+        <section class="promo-hero">
+            <div class="promo-hero-text">
+                <h1>Khuyen mai dang ap dung</h1>
+                <p id="promoSummary">Dang tai...</p>
+            </div>
+            <div class="promo-controls">
+                <label class="promo-search">
+                    <svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M16.5 16.5L21 21" />
+                    </svg>
+                    <input id="promoSearch" type="text" placeholder="Tim san pham hoac khuyen mai">
+                </label>
+                <select id="promoTypeFilter">
+                    <option value="ALL">Tat ca</option>
+                    <option value="PERCENT">Giam %</option>
+                    <option value="FIXED">Giam tien</option>
+                    <option value="BUNDLE">Combo</option>
+                </select>
+                <button id="promoReloadBtn" class="ghost-btn" type="button">Tai lai</button>
+            </div>
+        </section>
+
+        <section class="promo-grid" id="promoGrid" aria-live="polite"></section>
+        <div class="promo-empty" id="promoEmpty" hidden>Khong tim thay san pham dang khuyen mai.</div>
+    </main>
+
+    <script src="../assets/js/promotions.js"></script>
+    <script src="../assets/js/app-shell.js"></script>
+</body>
+</html>
