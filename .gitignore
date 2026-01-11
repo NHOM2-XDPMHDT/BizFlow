@@ -1,0 +1,10 @@
+# Maven
+/target/
+*.class
+
+# IDE
+.project
+.classpath
+.settings/
+.idea/
+.vscode/
