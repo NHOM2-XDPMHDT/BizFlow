@@ -1,3 +1,13 @@
+# Maven
+/target/
+*.class
+
+# IDE
+.project
+.classpath
+.settings/
+.idea/
+.vscode/
 # Build outputs
 /target/
 
