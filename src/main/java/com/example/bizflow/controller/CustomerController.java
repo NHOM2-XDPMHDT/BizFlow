@@ -1,8 +1,9 @@
 package com.example.bizflow.controller;
 
+import com.example.bizflow.dto.OrderSummaryResponse;
 import com.example.bizflow.entity.Customer;
 import com.example.bizflow.repository.CustomerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.bizflow.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,9 +14,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
-    
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
+    private final OrderService orderService;
+
+    public CustomerController(CustomerRepository customerRepository,
+                              OrderService orderService) {
+        this.customerRepository = customerRepository;
+        this.orderService = orderService;
+    }
     
     @GetMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'OWNER', 'ADMIN')")
@@ -41,7 +47,7 @@ public class CustomerController {
     }
     
     @PostMapping
-    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'OWNER', 'ADMIN')")
     public ResponseEntity<?> createCustomer(@RequestBody @NonNull Customer customer) {
         try {
             Customer saved = customerRepository.save(customer);
@@ -49,5 +55,11 @@ public class CustomerController {
         } catch (Exception e) {
             return ResponseEntity.status(400).body("Error creating customer: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}/orders")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'OWNER', 'ADMIN')")
+    public ResponseEntity<List<OrderSummaryResponse>> getCustomerOrderHistory(@PathVariable @NonNull Long id) {
+        return ResponseEntity.ok(orderService.getCustomerOrderHistory(id));
     }
 }
