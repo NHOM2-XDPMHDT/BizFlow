@@ -30,17 +30,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            System.out.println("Login request for username: " + loginRequest.getUsername());
             LoginResponse response = authService.authenticate(loginRequest);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            System.out.println("Login failed: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         } catch (Exception e) {
-            System.out.println("Unexpected error during login: " + e.getMessage());
-            e.printStackTrace();
             Map<String, String> error = new HashMap<>();
             error.put("error", "Đã xảy ra lỗi, vui lòng thử lại sau");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

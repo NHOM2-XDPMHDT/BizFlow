@@ -1,71 +1,102 @@
 package com.example.bizflow.service;
 
-import java.math.BigDecimal;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.example.bizflow.entity.Customer;
-import com.example.bizflow.entity.CustomerTier;
 import com.example.bizflow.entity.PointHistory;
 import com.example.bizflow.repository.CustomerRepository;
 import com.example.bizflow.repository.PointHistoryRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.TimeUnit;
 
 @Service
+@Transactional
 public class PointService {
 
     private final CustomerRepository customerRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
-    // ✅ CONSTRUCTOR INJECTION (CHẮC CHẮN CHẠY)
     public PointService(CustomerRepository customerRepository,
-                        PointHistoryRepository pointHistoryRepository) {
+                        PointHistoryRepository pointHistoryRepository,
+                        RedisTemplate<String, Integer> redisTemplate) {
         this.customerRepository = customerRepository;
         this.pointHistoryRepository = pointHistoryRepository;
+        this.redisTemplate = redisTemplate;
     }
 
-    @Transactional
-    public void addPoints(Long customerId,
-                          BigDecimal totalAmount,
-                          String reference) {
+    private String redisKey(Long customerId) {
+        return "customer:points:" + customerId;
+    }
 
-        // 1️⃣ chống cộng trùng
-        if (pointHistoryRepository.existsByReference(reference)) {
+    /**
+     * 1.000 VNĐ = 1 điểm
+     */
+    public void addPoints(Long customerId, BigDecimal totalAmount, String reason) {
+
+        System.out.println("🔥 addPoints CALLED - customerId=" + customerId + ", reason=" + reason);
+
+        if (customerId == null || totalAmount == null) return;
+
+        // ✅ chống cộng trùng
+        if (pointHistoryRepository.existsByCustomerIdAndReason(customerId, reason)) {
+            System.out.println("⚠️ Points already added, skip");
             return;
         }
 
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer = customerRepository
+                .findByIdForUpdate(customerId)
+                .orElse(null);
 
-        // 2️⃣ 1000đ = 1 điểm
-        int points = totalAmount
-                .divide(BigDecimal.valueOf(1000))
+        if (customer == null) return;
+
+        int earnedPoints = totalAmount
+                .divide(BigDecimal.valueOf(1000), RoundingMode.DOWN)
                 .intValue();
 
-        if (points <= 0) return;
+        if (earnedPoints <= 0) return;
 
-        // 3️⃣ lưu lịch sử điểm
+        // ✅ cộng DB
+        customer.addPoints(earnedPoints);
+        customerRepository.save(customer);
+
+        // ✅ lưu lịch sử
         PointHistory history = new PointHistory();
         history.setCustomer(customer);
-        history.setPoints(points);
-        history.setType("EARN");
-        history.setReference(reference);
+        history.setPoints(earnedPoints);
+        history.setReason(reason);
         pointHistoryRepository.save(history);
 
-        // 4️⃣ cập nhật customer
-        customer.addPoints(points);
+        // ✅ update redis SAU – không ảnh hưởng transaction
+        redisTemplate.opsForValue().set(
+                redisKey(customerId),
+                customer.getTotalPoints(),
+                1,
+                TimeUnit.DAYS
+        );
 
-        // 5️⃣ update tier
-        customer.setTier(calculateTier(customer.getTotalPoints()));
-
-        customerRepository.save(customer);
+        System.out.println("✅ Added " + earnedPoints + " points for customer " + customerId);
     }
 
-    private CustomerTier calculateTier(int totalPoints) {
-        if (totalPoints >= 50000) return CustomerTier.KIM_CUONG;
-        if (totalPoints >= 30000) return CustomerTier.BACH_KIM;
-        if (totalPoints >= 15000) return CustomerTier.VANG;
-        if (totalPoints >= 5000)  return CustomerTier.BAC;
-        return CustomerTier.DONG;
+    public Integer getTotalPoints(Long customerId) {
+        String key = redisKey(customerId);
+
+        Integer cached = redisTemplate.opsForValue().get(key);
+        if (cached != null) return cached;
+
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        if (customer == null) return 0;
+
+        redisTemplate.opsForValue().set(
+                key,
+                customer.getTotalPoints(),
+                1,
+                TimeUnit.DAYS
+        );
+
+        return customer.getTotalPoints();
     }
 }

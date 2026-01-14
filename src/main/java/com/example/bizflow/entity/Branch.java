@@ -1,9 +1,10 @@
 package com.example.bizflow.entity;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "branches")
+@JsonIgnoreProperties({"owner"})
 public class Branch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
