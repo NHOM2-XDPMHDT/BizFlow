@@ -4,7 +4,6 @@ import com.example.bizflow.entity.Product;
 import com.example.bizflow.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +34,10 @@ public class ProductController {
     
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'OWNER', 'ADMIN')")
-    public ResponseEntity<?> getProductById(@PathVariable @NonNull Long id) {
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
+        if (id == null || id <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             return productRepository.findById(id)
                     .map(ResponseEntity::ok)
@@ -47,7 +49,10 @@ public class ProductController {
     
     @PostMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public ResponseEntity<?> createProduct(@RequestBody @NonNull Product product) {
+    public ResponseEntity<?> createProduct(@RequestBody Product product) {
+        if (product == null) {
+            return ResponseEntity.badRequest().body("Product is required");
+        }
         try {
             Product saved = productRepository.save(product);
             return ResponseEntity.ok(saved);

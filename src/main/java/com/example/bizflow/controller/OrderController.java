@@ -91,6 +91,9 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderDetail(@PathVariable Long orderId) {
+        if (orderId == null || orderId <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
         Optional<OrderResponse> order = orderService.getOrderDetail(orderId);
         return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -104,19 +107,22 @@ public class OrderController {
 
     @PostMapping
     @Transactional
+    @SuppressWarnings("null")
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
         if (request.getItems() == null || request.getItems().isEmpty()) {
             return ResponseEntity.badRequest().body("Order items are required");
         }
 
         User user = null;
-        if (request.getUserId() != null) {
-            user = userRepository.findById(request.getUserId()).orElse(null);
+        if (request.getUserId() != null && request.getUserId() > 0) {
+            Long userId = request.getUserId();
+            user = userRepository.findById(userId).orElse(null);
         }
 
         Customer customer = null;
         if (request.getCustomerId() != null && request.getCustomerId() > 0) {
-            customer = customerRepository.findById(request.getCustomerId()).orElse(null);
+            Long customerId = request.getCustomerId();
+            customer = customerRepository.findById(customerId).orElse(null);
         }
 
         String orderType = request.getOrderType();
@@ -153,7 +159,7 @@ public class OrderController {
         BigDecimal total = BigDecimal.ZERO;
         List<OrderItem> items = new ArrayList<>();
         for (OrderItemRequest itemRequest : request.getItems()) {
-            if (itemRequest == null || itemRequest.getProductId() == null) {
+            if (itemRequest == null || itemRequest.getProductId() == null || itemRequest.getProductId() <= 0) {
                 return ResponseEntity.badRequest().body("Product id is required.");
             }
 
@@ -165,7 +171,8 @@ public class OrderController {
                 return ResponseEntity.badRequest().body("Quantity must not be 0.");
             }
 
-            Product product = productRepository.findById(itemRequest.getProductId()).orElse(null);
+            Long productId = itemRequest.getProductId();
+            Product product = productRepository.findById(productId).orElse(null);
             if (product == null) {
                 return ResponseEntity.badRequest().body("Product not found: " + itemRequest.getProductId());
             }
@@ -219,9 +226,15 @@ public class OrderController {
 
     @PostMapping("/{orderId}/pay")
     @Transactional
+    @SuppressWarnings("null")
     public ResponseEntity<?> payOrder(@PathVariable Long orderId,
                                       @RequestBody Map<String, String> body) {
-        Order order = orderRepository.findById(orderId).orElse(null);
+        if (orderId == null || orderId <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        Long id = orderId;
+        Order order = orderRepository.findById(id).orElse(null);
         if (order == null) {
             return ResponseEntity.notFound().build();
         }
@@ -238,11 +251,14 @@ public class OrderController {
         orderRepository.save(order);
 
         if (order.getCustomer() != null) {
-            pointService.addPoints(
-                    order.getCustomer().getId(),
-                    order.getTotalAmount(),
-                    "ORDER_" + order.getId()
-            );
+            Long customerId = order.getCustomer().getId();
+            if (customerId != null) {
+                pointService.addPoints(
+                        customerId,
+                        order.getTotalAmount(),
+                        "ORDER_" + order.getId()
+                );
+            }
         }
 
         return ResponseEntity.ok("Payment recorded & points added");

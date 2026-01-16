@@ -46,7 +46,24 @@ services:
       - bizflow-net
 
   # =========================
-  # 4. BACKEND API (JAVA SPRING BOOT)
+  # 4. API GATEWAY (SPRING CLOUD GATEWAY)
+  # =========================
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: bizflow-gateway
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+      - ai_service
+    networks:
+      - bizflow-net
+
+  # =========================
+  # 5. BACKEND API (JAVA SPRING BOOT)
   # =========================
   backend:
     build:
@@ -60,6 +77,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-bizflow_db}?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-bizflow}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-bizflow123}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_HOST: rabbitmq
@@ -74,7 +92,7 @@ services:
       - bizflow-net
 
   # =========================
-  # 5. AI SERVICE (PYTHON FASTAPI)
+  # 6. AI SERVICE (PYTHON FASTAPI)
   # =========================
   ai_service:
     build:
@@ -88,7 +106,7 @@ services:
       - bizflow-net
 
   # =========================
-  # 6. FRONTEND WEB (NGINX)
+  # 7. FRONTEND WEB (NGINX)
   # =========================
   frontend:
     build:
@@ -98,11 +116,12 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - gateway
     networks:
       - bizflow-net
-      # =========================
-  # 7. PHPMYADMIN (DB WEB UI)
+
+  # =========================
+  # 8. PHPMYADMIN (DB WEB UI)
   # =========================
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

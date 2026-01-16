@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: bizflow-gateway
+  cloud:
+    gateway:
+      default-filters: []
+      routes:
+        - id: backend
+          uri: "http://backend:8080/"
+          predicates:
+            - Path=/api/**
+        - id: ai-service
+          uri: "http://bizflow-ai_service:5000/"
+          predicates:
+            - Path=/ai/**
+
+server:
+  port: 8000
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+    com.example.gateway: DEBUG

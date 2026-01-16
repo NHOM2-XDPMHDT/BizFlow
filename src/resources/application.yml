@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: bizflow
+
+  # ================= DATABASE =================
+  datasource:
+    url: jdbc:mysql://localhost:3306/bizflow_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ================= JPA =================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  # ================= REDIS CACHE =================
+  cache:
+    type: redis
+
+  # ✅ REDIS (NEW – SPRING BOOT 3.x)
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 6000
+  # ================= CORS =================
+  mvc:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: false
+      max-age: 3600
+
+# ================= SERVER =================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# ================= JWT =================
+app:
+  jwt:
+    secret: my-secret-key-for-jwt-token-generation-and-verification
+    access-token-expiration: 3600000
+    refresh-token-expiration: 86400000
+  invoice:
+    branch-prefix: TC
+
+# ================= LOGGING =================
+logging:
+  level:
+    root: WARN
+    com.example.bizflow: WARN

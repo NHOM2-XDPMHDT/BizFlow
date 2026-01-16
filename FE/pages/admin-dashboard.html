@@ -4,301 +4,963 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BizFlow - Admin Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/16/solid/index.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #1f2937;
+            --accent: #0f766e;
+            --accent-soft: #e6fffb;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
+            margin: 0;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
         }
 
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .layout {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: #111827;
+            color: #e5e7eb;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
             color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
         }
 
-        .navbar h1 {
-            font-size: 24px;
+        .brand-title {
+            font-weight: 700;
         }
 
-        .navbar .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .role-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 12px;
-            border-radius: 20px;
+        .brand-subtitle {
             font-size: 12px;
-            font-weight: bold;
+            color: #94a3b8;
         }
 
-        .navbar button {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid white;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 5px;
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-title {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6b7280;
+            padding: 0 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #e5e7eb;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-item.active {
+            background: rgba(15, 118, 110, 0.2);
+            border-left-color: var(--accent);
+            color: #fff;
+        }
+
+        .nav-item .icon {
+            width: 18px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            color: #cbd5f5;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 24px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            min-width: 0;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 320px;
+        }
+
+        .search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pill {
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid rgba(15, 118, 110, 0.2);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: #111827;
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+
+        .icon-btn {
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 10px;
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
-        .navbar button:hover {
-            background: rgba(255,255,255,0.3);
+        .main {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
         }
 
         .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: var(--shadow);
         }
 
-        .card h2 {
-            color: #333;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .card-subtitle {
+            color: var(--muted);
+            font-size: 13px;
         }
 
-        .info-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
-        }
-
-        .info-item label {
-            font-weight: bold;
-            color: #666;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .info-item .value {
-            font-size: 18px;
-            color: #333;
-            word-break: break-all;
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #28a745;
-            color: #155724;
-        }
-
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .menu-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .menu-item .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .menu-item .label {
-            font-weight: bold;
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-top: 12px;
             font-size: 14px;
         }
 
-        .token-section {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            max-height: 100px;
-            overflow-y: auto;
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 16px;
         }
 
-        .badge {
-            display: inline-block;
-            background: #28a745;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table th,
+        .table td {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            font-weight: 700;
+            color: var(--muted);
             font-size: 12px;
-            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .empty-box {
+            border: 1px dashed #cbd5f5;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            color: var(--muted);
+            background: #f8fafc;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .status-message {
+            font-size: 13px;
+        }
+
+        .status-success {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .status-error {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input-wrapper input {
+            width: 100%;
+            padding-right: 42px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+
+        .toggle-password svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 1100px) {
+            .layout { grid-template-columns: 72px 1fr; }
+            .brand,
+            .nav-title,
+            .sidebar-footer { display: none; }
+            .nav-item { justify-content: center; }
+            .nav-item span:not(.icon) { display: none; }
+            .search { min-width: 200px; }
+            .grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>🚀 BizFlow Admin</h1>
-        <div class="user-info">
-            <span class="role-badge">👑 ADMIN</span>
-            <span id="userGreeting">Xin chào, <strong>Admin</strong></span>
-            <button onclick="logout()">Đăng xuất</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="alert alert-success">
-            ✅ Đã đăng nhập với tư cách <strong>ADMIN</strong>. Bạn có full quyền truy cập tất cả chức năng.
-        </div>
-
-        <div class="card">
-            <h2>👤 Thông tin quản trị viên</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>User ID</label>
-                    <div class="value" id="userId">-</div>
-                </div>
-                <div class="info-item">
-                    <label>Username</label>
-                    <div class="value" id="username">-</div>
-                </div>
-                <div class="info-item">
-                    <label>Role</label>
-                    <div class="value"><span class="badge">ADMIN</span></div>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">BF</div>
+                <div>
+                    <div class="brand-title">BizFlow</div>
+                    <div class="brand-subtitle">Admin Control</div>
                 </div>
             </div>
-        </div>
 
-        <div class="card">
-            <h2>🔐 Thông tin Token</h2>
-            <div class="info-item">
-                <label>Access Token</label>
-                <div class="token-section" id="tokenInfo">Token sẽ hiển thị ở đây</div>
+            <div class="nav-group">
+                <div class="nav-title">Tổng quan</div>
+                <a class="nav-item active" href="#"><span class="icon">📊</span><span>Dashboard</span></a>
+                <a class="nav-item" href="#"><span class="icon">🏬</span><span>Chi nhánh</span></a>
+                <a class="nav-item" href="#"><span class="icon">👥</span><span>Người dùng</span></a>
+                <a class="nav-item" href="#"><span class="icon">📦</span><span>Sản phẩm</span></a>
+                <a class="nav-item" href="#"><span class="icon">🧾</span><span>Đơn hàng</span></a>
             </div>
-        </div>
 
-        <div class="card">
-            <h2>📊 Bảng điều khiển quản lý</h2>
-            <div class="menu">
-                <div class="menu-item" onclick="alert('💼 Chức năng Bán hàng\n\nCác tính năng:\n- Xem đơn hàng\n- Tạo đơn bán\n- Quản lý giá\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v15.75C1.5 21.16 2.339 22 3.375 22h17.25c1.035 0 1.875-.84 1.875-1.875V4.875c0-1.036-.84-1.875-1.875-1.875H3.375zm0 1.5h17.25a.375.375 0 0 1 .375.375v15.75a.375.375 0 0 1-.375.375H3.375a.375.375 0 0 1-.375-.375V4.875a.375.375 0 0 1 .375-.375zm9.75 11.25a.75.75 0 0 0 0 1.5H15a.75.75 0 0 0 0-1.5h-2.375z"/></svg></div>
-                    <div class="label">Bán hàng</div>
-                </div>
-                <div class="menu-item" onclick="alert('📦 Chức năng Tồn kho\n\nCác tính năng:\n- Nhập kho\n- Xuất kho\n- Kiểm kho\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v15.75C1.5 21.16 2.339 22 3.375 22h17.25c1.035 0 1.875-.84 1.875-1.875V4.875c0-1.036-.84-1.875-1.875-1.875H3.375zm0 1.5h17.25a.375.375 0 0 1 .375.375v3h-18v-3a.375.375 0 0 1 .375-.375zm0 6h17.25v9.75a.375.375 0 0 1-.375.375H3.375a.375.375 0 0 1-.375-.375v-9.75z"/></svg></div>
-                    <div class="label">Tồn kho</div>
-                </div>
-                <div class="menu-item" onclick="alert('👥 Chức năng Khách hàng\n\nCác tính năng:\n- Danh sách khách\n- Thêm khách hàng\n- Quản lý công nợ\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path fill-rule="evenodd" d="M12 15a6 6 0 0 1 6 6H6a6 6 0 0 1 6-6Zm8-7a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/><path d="M20.745 19.644A8.025 8.025 0 0 0 15.2622 15.73a6 6 0 1 1 5.714 3.914Z"/></svg></div>
-                    <div class="label">Khách hàng</div>
-                </div>
-                <div class="menu-item" onclick="alert('🛠️ Chức năng Cài đặt\n\nCác tính năng:\n- Quản lý tài khoản\n- Quản lý người dùng\n- Logs hệ thống\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path fill-rule="evenodd" d="M11.078 2.207a.75.75 0 0 1 1.844 0c.115 1.312.949 2.473 2.204 2.88.593.202 1.126.541 1.581.987.461.458.797.99 1 1.584 1.311.115 2.473.949 2.88 2.204.202.593.541 1.126.987 1.581.458.461.997.798 1.584 1 .115 1.312.949 2.473 2.204 2.88a3.75 3.75 0 0 0 0 1.584c-1.312.115-2.473.949-2.88 2.204a3.75 3.75 0 0 0-1.584 1-.461.461 0 0 0-.987-.587 3.75 3.75 0 0 1-2.204-2.88 3.75 3.75 0 0 0-1.584-1c-1.312-.115-2.473-.949-2.88-2.204a3.75 3.75 0 0 0-1 1.581 3.75 3.75 0 0 1-1.584-1c-1.312-.115-2.473-.949-2.88-2.204a3.75 3.75 0 0 0-1.581-1.003 3.75 3.75 0 0 1 1 1.581c.593-.202 1.126-.541 1.581-.987.458-.461.797-.99 1-1.584 1.311-.115 2.473-.949 2.88-2.204.202-.593.541-1.126.987-1.581.458-.461.997-.798 1.584-1 .115-1.312.949-2.473 2.204-2.88a3.75 3.75 0 0 0 0-1.584c-1.312-.115-2.473-.949-2.88-2.204Zm0 0a.75.75 0 0 0-1.084-1.084 3.75 3.75 0 0 1 0 1.584Z"/><path fill-rule="evenodd" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg></div>
-                    <div class="label">Cài đặt</div>
-                </div>
-                <div class="menu-item" onclick="alert('📈 Chức năng Báo cáo\n\nCác tính năng:\n- Doanh thu\n- Chi phí\n- Thống kê\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75z"/><path d="M9.75 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/><path d="M16.5 13.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125v-6.75z"/><path d="M3 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 0 1 3 9.75V7.5z"/><path d="M9.75 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V7.5z"/><path d="M16.5 7.5c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V7.5z"/></svg></div>
-                    <div class="label">Báo cáo</div>
-                </div>
-                <div class="menu-item" onclick="alert('💰 Chức năng Tài chính\n\nCác tính năng:\n- Công nợ\n- Thu chi\n- Hóa đơn\n\n(Sẽ được phát triển)')">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M10.464 8.746c.422-.33.85-.4 1.273-.13.573.343.925.1.915-.733-.01-.8-.674-1.447-1.539-1.384-.433.035-.851.13-1.227.246.48-.423 1.09-.77 1.706-.916 2.482-.592 5.344.865 6.7 3.71 1.081 2.227.343 4.661-1.823 5.8-1.457.761-2.816.325-2.979-1.268a.684.684 0 0 0-.722-.572h-5.8a.75.75 0 0 0-.75.75v2.25c0 .414.336.75.75.75h5.8c.38 0 .722-.272.722-.572 0-.707.252-1.36.671-1.868-.404.159-.944.243-1.670.243-1.539 0-2.799-.944-2.799-2.111 0-.444.178-.858.477-1.198l-4.411 3.596a.75.75 0 1 0 .934 1.141l4.411-3.596c.25.23.577.413.954.542.929.314 2.027.218 2.934-.384 1.866-1.175 2.822-3.583 1.906-5.538-.544-1.12-1.496-1.957-2.655-2.36Z"/><path d="M7.5 10.5c1.382 0 2.5-1.118 2.5-2.5S8.882 5.5 7.5 5.5 5 6.618 5 8s1.118 2.5 2.5 2.5Z"/></svg></div>
-                    <div class="label">Tài chính</div>
-                </div>
+            <div class="nav-group">
+                <div class="nav-title">Hệ thống</div>
+                <a class="nav-item" href="#"><span class="icon">🧰</span><span>Phân quyền</span></a>
+                <a class="nav-item" href="#"><span class="icon">📈</span><span>Báo cáo</span></a>
+                <a class="nav-item" href="#"><span class="icon">⚙️</span><span>Cấu hình</span></a>
+                <a class="nav-item" href="#"><span class="icon">🧩</span><span>Tích hợp</span></a>
             </div>
-        </div>
 
-        <div class="card">
-            <h2>📋 Thông tin hệ thống</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Phiên bản</label>
-                    <div class="value">1.0.0</div>
-                </div>
-                <div class="info-item">
-                    <label>Trạng thái</label>
-                    <div class="value">✅ Online</div>
-                </div>
-                <div class="info-item">
-                    <label>Loại tài khoản</label>
-                    <div class="value">👑 Administrator</div>
-                </div>
+            <div class="sidebar-footer">
+                <div>Trạng thái hệ thống: Online</div>
+                <div>Cập nhật: <span id="sidebarTime">--:--</span></div>
             </div>
+        </aside>
+
+        <div class="content">
+            <header class="topbar">
+                <div class="top-left">
+                    <div class="page-title">Quản trị hệ thống</div>
+                    <div class="search">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Tìm nhanh người dùng, chi nhánh, cấu hình..." />
+                    </div>
+                </div>
+                <div class="top-right">
+                    <span class="pill">ADMIN</span>
+                    <div class="user-chip">
+                        <div class="avatar" id="userAvatar">AD</div>
+                        <div>
+                            <div id="userGreeting">Admin</div>
+                            <div style="font-size:12px;color:#6b7280;">Quản trị viên</div>
+                        </div>
+                        <button class="icon-btn" title="Đăng xuất" onclick="logout()">⎋</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main">
+                <section class="cards">
+                    <div class="card">
+                        <div class="card-title">Tổng quan người dùng</div>
+                        <div class="card-subtitle">Số liệu sẽ được lấy từ hệ thống</div>
+                        <div class="status-row">
+                            <span>Tổng tài khoản</span>
+                            <strong id="totalUsers">--</strong>
+                        </div>
+                        <div class="status-row">
+                            <span>Nhân viên hoạt động</span>
+                            <strong id="activeEmployees">--</strong>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Chi nhánh</div>
+                        <div class="card-subtitle">Quản lý điểm bán</div>
+                        <div class="status-row">
+                            <span>Tổng chi nhánh</span>
+                            <strong id="totalBranches">--</strong>
+                        </div>
+                        <div class="status-row">
+                            <span>Chi nhánh đang mở</span>
+                            <strong id="openBranches">--</strong>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Danh mục dữ liệu</div>
+                        <div class="card-subtitle">Tổng quan kho dữ liệu</div>
+                        <div class="status-row">
+                            <span>Tổng sản phẩm</span>
+                            <strong id="totalProducts">--</strong>
+                        </div>
+                        <div class="status-row">
+                            <span>Tổng khách hàng</span>
+                            <strong id="totalCustomers">--</strong>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Thao tác nhanh</div>
+                        <div class="card-subtitle">Quản lý cấu hình quan trọng</div>
+                        <div class="actions">
+                            <button class="action-btn primary" type="button" onclick="document.getElementById('createUserCard').scrollIntoView({behavior: 'smooth'})">Tạo tài khoản</button>
+                            <button class="action-btn" type="button" onclick="document.getElementById('createBranchCard').scrollIntoView({behavior: 'smooth'})">Tạo chi nhánh</button>
+                            <button class="action-btn">Xem báo cáo</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="grid-2">
+                    <div class="card">
+                        <div class="card-title">Danh sách người dùng gần đây</div>
+                        <div class="card-subtitle">Cập nhật tài khoản mới nhất</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Họ tên</th>
+                                    <th>Vai trò</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentUsersBody">
+                                <tr>
+                                    <td colspan="4" class="empty-box">Chưa có dữ liệu người dùng gần đây.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Tình trạng hệ thống</div>
+                        <div class="card-subtitle">Nhật ký và cảnh báo mới</div>
+                        <div class="empty-box">Chưa có cảnh báo hệ thống.</div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">Quản lý chi nhánh</div>
+                    <div class="card-subtitle">Theo dõi hoạt động theo từng điểm bán</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tên chi nhánh</th>
+                                <th>Quản lý</th>
+                                <th>Trạng thái</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchTableBody">
+                            <tr>
+                                <td colspan="4" class="empty-box">Chưa có dữ liệu chi nhánh.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="card" id="createUserCard">
+                    <div class="card-title">Tạo tài khoản nhân sự</div>
+                    <div class="card-subtitle">Admin tạo tài khoản cho Owner/Manager/Employee</div>
+                    <form id="adminCreateUserForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="adminFullName">Họ tên</label>
+                                <input id="adminFullName" name="fullName" type="text" placeholder="Nguyễn Văn A" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="adminUsername">Username</label>
+                                <input id="adminUsername" name="username" type="text" placeholder="username" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="adminEmail">Email</label>
+                                <input id="adminEmail" name="email" type="email" placeholder="email@bizflow.vn" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="adminPhone">Số điện thoại</label>
+                                <input id="adminPhone" name="phoneNumber" type="tel" placeholder="0901234567" />
+                            </div>
+                            <div class="form-group">
+                                <label for="adminRole">Vai trò</label>
+                                <select id="adminRole" name="role">
+                                    <option value="OWNER">Owner</option>
+                                    <option value="MANAGER">Manager</option>
+                                    <option value="EMPLOYEE">Employee</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminBranch">Chi nhánh</label>
+                                <select id="adminBranch" name="branchId">
+                                    <option value="">Đang tải chi nhánh...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminPassword">Mật khẩu tạm</label>
+                                <div class="password-input-wrapper">
+                                    <input id="adminPassword" name="password" type="password" placeholder="Tối thiểu 6 ký tự" required />
+                                    <button type="button" class="toggle-password" id="toggleAdminPassword" aria-label="Ẩn/hiện mật khẩu">
+                                        <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        <svg class="eye-slash-icon" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 10.07 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                            <line x1="1" y1="1" x2="23" y2="23"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="action-btn primary" type="submit">Tạo tài khoản</button>
+                            <span id="adminUserStatus" class="status-message"></span>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="card" id="createBranchCard">
+                    <div class="card-title">Tạo chi nhánh mới</div>
+                    <div class="card-subtitle">Quản lý điểm bán và chủ chi nhánh</div>
+                    <form id="adminCreateBranchForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="branchName">Tên chi nhánh</label>
+                                <input id="branchName" name="name" type="text" placeholder="Chi nhánh Trung Tâm" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="branchAddress">Địa chỉ</label>
+                                <input id="branchAddress" name="address" type="text" placeholder="Số 123, Quận 1" />
+                            </div>
+                            <div class="form-group">
+                                <label for="branchPhone">Số điện thoại</label>
+                                <input id="branchPhone" name="phone" type="tel" placeholder="0909876543" />
+                            </div>
+                            <div class="form-group">
+                                <label for="branchEmail">Email</label>
+                                <input id="branchEmail" name="email" type="email" placeholder="chinhanh@bizflow.vn" />
+                            </div>
+                            <div class="form-group">
+                                <label for="branchOwner">Owner phụ trách</label>
+                                <select id="branchOwner" name="ownerId">
+                                    <option value="">Chưa gán owner</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="branchActive">Trạng thái</label>
+                                <select id="branchActive" name="isActive">
+                                    <option value="true">Đang hoạt động</option>
+                                    <option value="false">Tạm ngưng</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="action-btn primary" type="submit">Tạo chi nhánh</button>
+                            <span id="adminBranchStatus" class="status-message"></span>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">Phiên đăng nhập</div>
+                    <div class="card-subtitle">Thông tin xác thực dùng cho kiểm thử</div>
+                    <div class="status-row">
+                        <span>User ID</span>
+                        <strong id="userId">-</strong>
+                    </div>
+                    <div class="status-row">
+                        <span>Username</span>
+                        <strong id="username">-</strong>
+                    </div>
+                    <div class="status-row">
+                        <span>Access Token</span>
+                        <strong id="tokenInfo">-</strong>
+                    </div>
+                </section>
+            </main>
         </div>
     </div>
 
     <script>
-        // Kiểm tra đăng nhập và role
-        window.addEventListener('load', function() {
+        const apiEndpoints = {
+            adminSummary: '/api/dashboard/admin-summary',
+            recentUsers: '/api/dashboard/recent-users',
+            branches: '/api/dashboard/branches',
+            createUser: '/api/users',
+            createBranch: '/api/branches',
+            owners: '/api/users'
+        };
+
+        window.addEventListener('load', () => {
+            enforceAuth();
+            renderHeader();
+            fillSessionInfo();
+            loadAdminSummary();
+            loadRecentUsers();
+            loadBranches();
+            loadBranchOptions();
+            loadOwnerOptions();
+            wireCreateUserForm();
+            wireCreateBranchForm();
+            wirePasswordToggle('adminPassword', 'toggleAdminPassword');
+        });
+
+        function enforceAuth() {
             const token = sessionStorage.getItem('accessToken');
             const role = sessionStorage.getItem('role');
-            
             if (!token) {
                 window.location.href = '/pages/login.html';
                 return;
             }
-            
-            // Nếu không phải ADMIN, redirect đúng dashboard theo role
             if (role !== 'ADMIN') {
                 if (role === 'OWNER') {
                     window.location.href = '/pages/owner-dashboard.html';
                 } else {
                     window.location.href = '/pages/employee-dashboard.html';
                 }
-                return;
             }
-            
-            loadUserInfo();
-        });
+        }
 
-        function loadUserInfo() {
+        function renderHeader() {
+            const username = sessionStorage.getItem('username') || 'Admin';
+            document.getElementById('userGreeting').textContent = username;
+            document.getElementById('userAvatar').textContent = initials(username);
+            document.getElementById('sidebarTime').textContent = new Date().toLocaleString('vi-VN', { hour12: false });
+        }
+
+        async function loadAdminSummary() {
+            try {
+                const response = await fetch(apiEndpoints.adminSummary);
+                if (!response.ok) {
+                    throw new Error('Không thể tải dữ liệu tổng quan');
+                }
+                const data = await response.json();
+                document.getElementById('totalUsers').textContent = formatNumber(data.totalUsers);
+                document.getElementById('activeEmployees').textContent = formatNumber(data.totalEmployees);
+                document.getElementById('totalBranches').textContent = formatNumber(data.totalBranches);
+                document.getElementById('openBranches').textContent = formatNumber(data.activeBranches);
+                document.getElementById('totalProducts').textContent = formatNumber(data.totalProducts);
+                document.getElementById('totalCustomers').textContent = formatNumber(data.totalCustomers);
+            } catch (error) {
+                setTextContent('totalUsers', '--');
+                setTextContent('activeEmployees', '--');
+                setTextContent('totalBranches', '--');
+                setTextContent('openBranches', '--');
+                setTextContent('totalProducts', '--');
+                setTextContent('totalCustomers', '--');
+            }
+        }
+
+        async function loadRecentUsers() {
+            const body = document.getElementById('recentUsersBody');
+            try {
+                const response = await fetch(apiEndpoints.recentUsers);
+                if (!response.ok) {
+                    throw new Error('Không thể tải dữ liệu người dùng');
+                }
+                const users = await response.json();
+                body.innerHTML = '';
+                if (!users.length) {
+                    body.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu người dùng gần đây.</td></tr>';
+                    return;
+                }
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${escapeHtml(user.username || '-') }</td>
+                        <td>${escapeHtml(user.fullName || '-') }</td>
+                        <td>${escapeHtml(user.role || '-') }</td>
+                        <td>${formatTimestamp(user.createdAt) }</td>
+                    `;
+                    body.appendChild(row);
+                });
+            } catch (error) {
+                body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu người dùng.</td></tr>';
+            }
+        }
+
+        async function loadBranches() {
+            const body = document.getElementById('branchTableBody');
+            try {
+                const response = await fetch(apiEndpoints.branches);
+                if (!response.ok) {
+                    throw new Error('Không thể tải dữ liệu chi nhánh');
+                }
+                const branches = await response.json();
+                body.innerHTML = '';
+                if (!branches.length) {
+                    body.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu chi nhánh.</td></tr>';
+                    return;
+                }
+                branches.forEach(branch => {
+                    const statusText = branch.active ? 'Đang hoạt động' : 'Tạm ngưng';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${escapeHtml(branch.name || '-') }</td>
+                        <td>${escapeHtml(branch.ownerName || '-') }</td>
+                        <td>${statusText}</td>
+                        <td>${escapeHtml(branch.note || '-')}</td>
+                    `;
+                    body.appendChild(row);
+                });
+            } catch (error) {
+                body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu chi nhánh.</td></tr>';
+            }
+        }
+
+        async function loadBranchOptions() {
+            const branchSelect = document.getElementById('adminBranch');
+            try {
+                const response = await fetch(apiEndpoints.branches);
+                if (!response.ok) {
+                    throw new Error('Không thể tải chi nhánh');
+                }
+                const branches = await response.json();
+                branchSelect.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+                branches.forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch.id;
+                    option.textContent = branch.name || `Chi nhánh #${branch.id}`;
+                    branchSelect.appendChild(option);
+                });
+                if (!branches.length) {
+                    branchSelect.innerHTML = '<option value="">Chưa có chi nhánh</option>';
+                }
+            } catch (error) {
+                branchSelect.innerHTML = '<option value="">Không tải được chi nhánh</option>';
+            }
+        }
+
+        async function loadOwnerOptions() {
+            const ownerSelect = document.getElementById('branchOwner');
+            try {
+                const response = await fetch(apiEndpoints.owners);
+                if (!response.ok) {
+                    throw new Error('Không thể tải danh sách user');
+                }
+                const users = await response.json();
+                const owners = users.filter(user => user.role === 'OWNER');
+                ownerSelect.innerHTML = '<option value="">Chưa gán owner</option>';
+                owners.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.fullName ? `${user.fullName} (${user.username})` : user.username;
+                    ownerSelect.appendChild(option);
+                });
+                if (!owners.length) {
+                    ownerSelect.innerHTML = '<option value="">Chưa có owner</option>';
+                }
+            } catch (error) {
+                ownerSelect.innerHTML = '<option value="">Không tải được owner</option>';
+            }
+        }
+
+        function wireCreateUserForm() {
+            const form = document.getElementById('adminCreateUserForm');
+            const status = document.getElementById('adminUserStatus');
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                status.textContent = '';
+                status.className = 'status-message';
+                const data = Object.fromEntries(new FormData(form).entries());
+                const payload = {
+                    username: (data.username || '').trim(),
+                    password: data.password || '',
+                    email: (data.email || '').trim(),
+                    fullName: (data.fullName || '').trim(),
+                    phoneNumber: (data.phoneNumber || '').trim() || null,
+                    role: data.role,
+                    branchId: data.branchId ? Number(data.branchId) : null
+                };
+
+                try {
+                    const response = await fetch(apiEndpoints.createUser, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        const message = await response.text();
+                        throw new Error(message || 'Không thể tạo tài khoản');
+                    }
+                    status.textContent = 'Tạo tài khoản thành công.';
+                    status.classList.add('status-success');
+                    form.reset();
+                    await loadAdminSummary();
+                    await loadRecentUsers();
+                    await loadOwnerOptions();
+                } catch (error) {
+                    status.textContent = error.message || 'Có lỗi xảy ra.';
+                    status.classList.add('status-error');
+                }
+            });
+        }
+
+        function wireCreateBranchForm() {
+            const form = document.getElementById('adminCreateBranchForm');
+            const status = document.getElementById('adminBranchStatus');
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                status.textContent = '';
+                status.className = 'status-message';
+                const data = Object.fromEntries(new FormData(form).entries());
+                const payload = {
+                    name: (data.name || '').trim(),
+                    address: (data.address || '').trim() || null,
+                    phone: (data.phone || '').trim() || null,
+                    email: (data.email || '').trim() || null,
+                    ownerId: data.ownerId ? Number(data.ownerId) : null,
+                    isActive: data.isActive === 'true'
+                };
+
+                try {
+                    const response = await fetch(apiEndpoints.createBranch, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        const message = await response.text();
+                        throw new Error(message || 'Không thể tạo chi nhánh');
+                    }
+                    status.textContent = 'Tạo chi nhánh thành công.';
+                    status.classList.add('status-success');
+                    form.reset();
+                    await loadBranches();
+                    await loadBranchOptions();
+                    await loadAdminSummary();
+                } catch (error) {
+                    status.textContent = error.message || 'Có lỗi xảy ra.';
+                    status.classList.add('status-error');
+                }
+            });
+        }
+
+        function fillSessionInfo() {
             const userId = sessionStorage.getItem('userId');
-            const username = sessionStorage.getItem('username');
+            const username = sessionStorage.getItem('username') || 'Admin';
             const token = sessionStorage.getItem('accessToken');
-
             document.getElementById('userId').textContent = userId || '-';
-            document.getElementById('username').textContent = username || '-';
-            document.getElementById('userGreeting').innerHTML = `Xin chào, <strong>${username || 'Admin'}</strong>`;
-            document.getElementById('tokenInfo').textContent = token || 'Token không tìm thấy';
+            document.getElementById('username').textContent = username;
+            document.getElementById('tokenInfo').textContent = token || '-';
         }
 
         function logout() {
@@ -307,7 +969,63 @@
                 window.location.href = '/pages/login.html';
             }
         }
+
+        function initials(name) {
+            return name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase() || 'AD';
+        }
+
+        function wirePasswordToggle(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const toggleBtn = document.getElementById(buttonId);
+            if (!input || !toggleBtn) {
+                return;
+            }
+            const eyeIcon = toggleBtn.querySelector('.eye-icon');
+            const eyeSlashIcon = toggleBtn.querySelector('.eye-slash-icon');
+            toggleBtn.addEventListener('click', () => {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                if (eyeIcon && eyeSlashIcon) {
+                    eyeIcon.style.display = isPassword ? 'none' : 'block';
+                    eyeSlashIcon.style.display = isPassword ? 'block' : 'none';
+                }
+            });
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined) {
+                return '--';
+            }
+            return new Intl.NumberFormat('vi-VN').format(value);
+        }
+
+        function formatTimestamp(value) {
+            if (!value) {
+                return '--';
+            }
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) {
+                return value;
+            }
+            return parsed.toLocaleString('vi-VN', { hour12: false });
+        }
+
+        function setTextContent(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, match => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[match]));
+        }
     </script>
-    <script src="../assets/js/admin-dashboard.js"></script>
 </body>
 </html>

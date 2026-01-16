@@ -57,7 +57,6 @@ public class JwtUtil {
                     .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            System.out.println("Token validation failed: " + e.getMessage());
             return false;
         }
     }
@@ -71,7 +70,6 @@ public class JwtUtil {
                     .getBody();
             return claims.getSubject();
         } catch (Exception e) {
-            System.out.println("Failed to extract username from token: " + e.getMessage());
             return null;
         }
     }
@@ -85,7 +83,6 @@ public class JwtUtil {
                     .getBody();
             return claims.get("userId", Long.class);
         } catch (Exception e) {
-            System.out.println("Failed to extract userId from token: " + e.getMessage());
             return null;
         }
     }
@@ -99,7 +96,6 @@ public class JwtUtil {
                     .getBody();
             return claims.get("role", String.class);
         } catch (Exception e) {
-            System.out.println("Failed to extract role from token: " + e.getMessage());
             return null;
         }
     }
