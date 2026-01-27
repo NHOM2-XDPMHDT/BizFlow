@@ -33,7 +33,7 @@ services:
       - "6379:6379"
     networks:
       - bizflow-net
-    mem_limit: 256m
+    mem_limit: 128m
 
   # =========================
   # 3. RABBITMQ (Message Queue)
@@ -101,7 +101,7 @@ services:
       - rabbitmq
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 6. CATALOG SERVICE (SPRING BOOT)
@@ -123,7 +123,7 @@ services:
       - inventory-service
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 7. INVENTORY SERVICE (SPRING BOOT)
@@ -226,7 +226,7 @@ services:
       - authentication-service
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 11. AI SERVICE (PYTHON FASTAPI)
@@ -241,7 +241,7 @@ services:
       - "5000:5000"
     networks:
       - bizflow-net
-    mem_limit: 256m
+    mem_limit: 128m
   # =========================
   # 12. FRONTEND WEB (NGINX)
   # =========================
