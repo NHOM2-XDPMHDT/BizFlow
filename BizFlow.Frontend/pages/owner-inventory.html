@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - Qu?n l� kho</title>
+    <title>BizFlow - Quản lý kho</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -385,252 +385,248 @@
             </div>
             <nav class="nav">
                 <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                    <span class="icon">🏠</span><span>Tổng quan</span>
                 </a>
                 <a class="nav-item" href="owner-reports.html">
-                    <span class="icon">??</span><span>B�o c�o doanh thu</span>
+                    <span class="icon">📊</span><span>Báo cáo doanh thu</span>
                 </a>
                 <a class="nav-item" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">🛍️</span><span>Sản phẩm</span>
                 </a>
                 <a class="nav-item" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">📁</span><span>Danh mục</span>
                 </a>
                 <a class="nav-item active" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l� kho</span>
+                    <span class="icon">📦</span><span>Quản lý kho</span>
                 </a>
                 <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
-                    <span class="icon">??</span><span>Nh?p h�ng & Gi� v?n</span>
+                    <span class="icon">🚚</span><span>Nhập hàng & Giá vốn</span>
                 </a>
                 <a class="nav-item" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l� nh�n vi�n</span>
+                    <span class="icon">👤</span><span>Quản lý nhân viên</span>
                 </a>
                 <a class="nav-item" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m�i</span>
+                    <span class="icon">🎯</span><span>Khuyến mãi</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">⚙️</span><span>Thiết lập</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">?? Qu?n l� kho</h1>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn btn-success" onclick="openReceiptModal()">?? Nh?p kho</button>
-                    <button class="btn btn-warning" onclick="openAdjustModal()">?? Ki?m kho</button>
-                    <button class="btn btn-danger" onclick="openStockOutModal()">?? Xu?t kho</button>
-                </div>
+                <h1 class="page-title">Quản lý kho</h1>
+                <div style="display: flex; gap: 12px;"></div>
             </div>
 
             <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="totalProducts">--</div>
-                    <div class="stat-label">T?ng s?n ph?m</div>
+                    <div class="stat-label">Tổng sản phẩm</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="totalStock">--</div>
-                    <div class="stat-label">T?ng t?n kho</div>
+                    <div class="stat-label">Tổng tồn kho</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value warning" id="lowStockCount">--</div>
-                    <div class="stat-label">S?p h?t h�ng</div>
+                    <div class="stat-label">Sắp hết hàng</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value danger" id="outOfStockCount">--</div>
-                    <div class="stat-label">H?t h�ng</div>
+                    <div class="stat-label">Hết hàng</div>
                 </div>
             </div>
 
             <!-- Tabs -->
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="showTab('stock')">?? T?n kho</button>
-                <button class="tab-btn" onclick="showTab('history')">?? L?ch s?</button>
+                <button class="tab-btn active" onclick="showTab('stock')">Tồn kho</button>
+                <button class="tab-btn" onclick="showTab('history')">Lịch sử</button>
             </div>
 
             <!-- Stock Tab -->
             <div id="stockTab" class="card">
-                <div class="card-title">T�nh tr?ng t?n kho</div>
+                <div class="card-title">Tình trạng tồn kho</div>
                 <div class="toolbar">
                     <div class="search-box">
-                        <span>??</span>
-                        <input type="text" id="searchInput" placeholder="T�m s?n ph?m..." onkeyup="searchStock()">
+                        <span>&#128269;</span>
+                        <input type="text" id="searchInput" placeholder="Tìm sản phẩm..." onkeyup="searchStock()">
                     </div>
                     <select id="stockFilter" onchange="filterStock()">
-                        <option value="all">T?t c?</option>
-                        <option value="low">S?p h?t h�ng</option>
-                        <option value="out">H?t h�ng</option>
+                        <option value="all">Tất cả</option>
+                        <option value="low">Sắp hết hàng</option>
+                        <option value="out">Hết hàng</option>
                     </select>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>S?n ph?m</th>
-                            <th>M� SP</th>
-                            <th>T?n kho</th>
-                            <th>Tr?ng th�i</th>
-                            <th>Thao t�c</th>
+                            <th>Sản phẩm</th>
+                            <th>Mã SP</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="stockTableBody">
-                        <tr><td colspan="5" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- History Tab -->
             <div id="historyTab" class="card" style="display: none;">
-                <div class="card-title">L?ch s? xu?t nh?p kho</div>
+                <div class="card-title">Lịch số xuất nhập kho</div>
                 <div style="margin-bottom: 16px;">
-                    <label style="font-weight: 600; margin-right: 8px;">Ch?n s?n ph?m:</label>
+                    <label style="font-weight: 600; margin-right: 8px;">Chọn sản phẩm:</label>
                     <select id="historyProductId" onchange="loadHistory()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; min-width: 300px;">
-                        <option value="">-- Ch?n s?n ph?m d? xem l?ch s? --</option>
+                        <option value="">-- Chọn sản phẩm để xem lịch sử --</option>
                     </select>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Th?i gian</th>
-                            <th>S?n ph?m</th>
-                            <th>Lo?i</th>
-                            <th>S? lu?ng</th>
-                            <th>�on gi�</th>
-                            <th>Ghi ch�</th>
+                            <th>Thời gian</th>
+                            <th>Sản phẩm</th>
+                            <th>Loại</th>
+                            <th>Số lượng</th>
+                            <th>Đon giá</th>
+                            <th>Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
-                        <tr><td colspan="6" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="6" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Receipt Modal (Nh?p kho) -->
+    <!-- Receipt Modal (Nhập kho) -->
     <div class="modal" id="receiptModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">?? Nh?p kho</h3>
+                <h3 class="modal-title">Nhập kho</h3>
                 <button class="modal-close" onclick="closeModal('receiptModal')">&times;</button>
             </div>
             <form id="receiptForm" onsubmit="submitReceipt(event)">
                 <div class="form-group">
-                    <label>S?n ph?m *</label>
+                    <label>Sản phẩm *</label>
                     <select id="receiptProductId" required>
-                        <option value="">Ch?n s?n ph?m</option>
+                        <option value="">Chọn sản phẩm</option>
                     </select>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>S? lu?ng nh?p *</label>
+                        <label>Số lượng nhập *</label>
                         <input type="number" id="receiptQuantity" required min="1">
                     </div>
                     <div class="form-group">
-                        <label>�on gi� nh?p</label>
+                        <label>Đon giá nhập</label>
                         <input type="number" id="receiptUnitPrice" min="0">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Ghi ch�</label>
+                    <label>Ghi chú</label>
                     <textarea id="receiptNote" rows="2"></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal('receiptModal')">H?y</button>
-                    <button type="submit" class="btn btn-success">Nh?p kho</button>
+                    <button type="button" class="btn" onclick="closeModal('receiptModal')">Hủy</button>
+                    <button type="submit" class="btn btn-success">Nhập kho</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Adjust Modal (Ki?m kho) -->
+    <!-- Adjust Modal (Kiểm kho) -->
     <div class="modal" id="adjustModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">?? �i?u ch?nh t?n kho (Ki?m kho)</h3>
+                <h3 class="modal-title">Điều chỉnh tồn kho (Kiểm kho)</h3>
                 <button class="modal-close" onclick="closeModal('adjustModal')">&times;</button>
             </div>
             <form id="adjustForm" onsubmit="submitAdjust(event)">
                 <div class="form-group">
-                    <label>S?n ph?m *</label>
+                    <label>Sản phẩm *</label>
                     <select id="adjustProductId" required onchange="showCurrentStock('adjust')">
-                        <option value="">Ch?n s?n ph?m</option>
+                        <option value="">Chọn sản phẩm</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>T?n kho hi?n t?i</label>
+                    <label>Tồn kho hiện tải</label>
                     <input type="text" id="adjustCurrentStock" readonly style="background:#f3f4f6">
                 </div>
                 <div class="form-group">
-                    <label>S? lu?ng m?i (sau ki?m) *</label>
+                    <label>Số lượng mới (sau kiểm) *</label>
                     <input type="number" id="adjustNewQuantity" required min="0">
                 </div>
                 <div class="form-group">
-                    <label>L� do di?u ch?nh *</label>
+                    <label>Lý do điều chỉnh *</label>
                     <select id="adjustReason" required>
-                        <option value="">Ch?n l� do</option>
-                        <option value="INVENTORY_CHECK">Ki?m kho d?nh k?</option>
-                        <option value="DAMAGE">H�ng hu h?ng</option>
-                        <option value="EXPIRY">H?t h?n s? d?ng</option>
-                        <option value="ERROR_CORRECTION">S?a l?i nh?p li?u</option>
-                        <option value="OTHER">Kh�c</option>
+                        <option value="">Chọn lý do</option>
+                        <option value="INVENTORY_CHECK">Kiểm kho định kỳ</option>
+                        <option value="DAMAGE">Hàng hu hỏng</option>
+                        <option value="EXPIRY">Hết hạn sử dụng</option>
+                        <option value="ERROR_CORRECTION">Sửa lỗi nhập liệu</option>
+                        <option value="OTHER">Khác</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ghi ch�</label>
+                    <label>Ghi chú</label>
                     <textarea id="adjustNote" rows="2"></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal('adjustModal')">H?y</button>
-                    <button type="submit" class="btn btn-warning">�i?u ch?nh</button>
+                    <button type="button" class="btn" onclick="closeModal('adjustModal')">Hủy</button>
+                    <button type="submit" class="btn btn-warning">Điều chỉnh</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Stock Out Modal (Xu?t kho) -->
+    <!-- Stock Out Modal (Xuất kho) -->
     <div class="modal" id="stockOutModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">?? Xu?t kho th? c�ng</h3>
+                <h3 class="modal-title">Xuất kho thủ công</h3>
                 <button class="modal-close" onclick="closeModal('stockOutModal')">&times;</button>
             </div>
             <form id="stockOutForm" onsubmit="submitStockOut(event)">
                 <div class="form-group">
-                    <label>S?n ph?m *</label>
+                    <label>Sản phẩm *</label>
                     <select id="stockOutProductId" required onchange="showCurrentStock('stockOut')">
-                        <option value="">Ch?n s?n ph?m</option>
+                        <option value="">Chọn sản phẩm</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>T?n kho hi?n t?i</label>
+                    <label>Tồn kho hiện tải</label>
                     <input type="text" id="stockOutCurrentStock" readonly style="background:#f3f4f6">
                 </div>
                 <div class="form-group">
-                    <label>S? lu?ng xu?t *</label>
+                    <label>Số lượng xuất *</label>
                     <input type="number" id="stockOutQuantity" required min="1">
                 </div>
                 <div class="form-group">
-                    <label>L� do xu?t *</label>
+                    <label>Lý do xuất *</label>
                     <select id="stockOutReason" required>
-                        <option value="">Ch?n l� do</option>
-                        <option value="INTERNAL_USE">S? d?ng n?i b?</option>
-                        <option value="GIFT">T?ng kh�ch h�ng</option>
-                        <option value="SAMPLE">H�ng m?u</option>
-                        <option value="DAMAGE">H�ng hu h?ng</option>
-                        <option value="EXPIRY">H?t h?n s? d?ng</option>
-                        <option value="RETURN_SUPPLIER">Tr? nh� cung c?p</option>
-                        <option value="OTHER">Kh�c</option>
+                        <option value="">Chọn lý do</option>
+                        <option value="INTERNAL_USE">Sử dụng nội bộ</option>
+                        <option value="GIFT">Tổng khách hàng</option>
+                        <option value="SAMPLE">Hàng mẫu</option>
+                        <option value="DAMAGE">Hàng hu hỏng</option>
+                        <option value="EXPIRY">Hết hạn sử dụng</option>
+                        <option value="RETURN_SUPPLIER">Trả nhà cung cấp</option>
+                        <option value="OTHER">Khác</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ghi ch�</label>
+                    <label>Ghi chú</label>
                     <textarea id="stockOutNote" rows="2"></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal('stockOutModal')">H?y</button>
-                    <button type="submit" class="btn btn-danger">Xu?t kho</button>
+                    <button type="button" class="btn" onclick="closeModal('stockOutModal')">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xuất kho</button>
                 </div>
             </form>
         </div>
@@ -688,8 +684,8 @@
                 const select = document.getElementById(selectId);
                 if (!select) return;
                 const firstOption = selectId === 'historyProductId' 
-                    ? '<option value="">-- Ch?n s?n ph?m d? xem l?ch s? --</option>'
-                    : '<option value="">Ch?n s?n ph?m</option>';
+                    ? '<option value="">-- Chọn sản phẩm để xem lịch sử --</option>'
+                    : '<option value="">Chọn sản phẩm</option>';
                 select.innerHTML = firstOption;
                 allProducts.forEach(p => {
                     select.innerHTML += `<option value="${p.id}">${p.name} (${p.code || 'N/A'})</option>`;
@@ -707,19 +703,19 @@
         function renderStock(products) {
             const tbody = document.getElementById('stockTableBody');
             if (!products.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="loading">Kh�ng c� s?n ph?m</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">Không có sản phẩm</td></tr>';
                 return;
             }
 
             tbody.innerHTML = products.map(p => {
                 let stockClass = 'stock-ok';
-                let status = '? C�n h�ng';
+                let status = 'Còn hàng';
                 if (!p.stock || p.stock <= 0) {
                     stockClass = 'stock-low';
-                    status = '?? H?t h�ng';
+                    status = 'Hết hàng';
                 } else if (p.stock <= 10) {
                     stockClass = 'stock-warning';
-                    status = '?? S?p h?t';
+                    status = 'Sắp hết';
                 }
 
                 return `
@@ -729,7 +725,7 @@
                         <td class="${stockClass}">${p.stock || 0}</td>
                         <td>${status}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="openAdjustModalFor(${p.id})">?? �i?u ch?nh</button>
+                            <button class="btn btn-sm btn-primary" onclick="openAdjustModalFor(${p.id})">Điều chỉnh</button>
                         </td>
                     </tr>
                 `;
@@ -760,7 +756,7 @@
             const productId = document.getElementById('historyProductId').value;
             if (!productId) {
                 document.getElementById('historyTableBody').innerHTML = 
-                    '<tr><td colspan="6" class="loading">Vui l�ng ch?n s?n ph?m d? xem l?ch s?</td></tr>';
+                    '<tr><td colspan="6" class="loading">Vui lòng chọn sản phẩm để xem lịch sử</td></tr>';
                 return;
             }
             try {
@@ -779,7 +775,7 @@
         function renderHistory(items) {
             const tbody = document.getElementById('historyTableBody');
             if (!items.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">Chua c� l?ch s?</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">Chưa có lịch sử</td></tr>';
                 return;
             }
 
@@ -854,16 +850,16 @@
                 });
 
                 if (res.ok) {
-                    alert('Nh?p kho th�nh c�ng!');
+                    alert('Nhập kho thành công!');
                     closeModal('receiptModal');
                     loadProducts();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error:', e);
-                alert('L?i khi nh?p kho');
+                alert('Lỗi khi nhập kho');
             }
         }
 
@@ -885,16 +881,16 @@
                 });
 
                 if (res.ok) {
-                    alert('�i?u ch?nh t?n kho th�nh c�ng!');
+                    alert('Điều chỉnh tồn kho thành công!');
                     closeModal('adjustModal');
                     loadProducts();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error:', e);
-                alert('L?i khi di?u ch?nh');
+                alert('Lỗi khi điều chỉnh');
             }
         }
 
@@ -916,16 +912,16 @@
                 });
 
                 if (res.ok) {
-                    alert('Xu?t kho th�nh c�ng!');
+                    alert('Xuất kho thành công!');
                     closeModal('stockOutModal');
                     loadProducts();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error:', e);
-                alert('L?i khi xu?t kho');
+                alert('Lỗi khi xuất kho');
             }
         }
 
@@ -936,8 +932,8 @@
         
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="��ng">�</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h�ng & Gi� v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="Đóng">×</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nhập hàng & Giá vốn"></iframe>
     </aside>
     <script>
         (function () {

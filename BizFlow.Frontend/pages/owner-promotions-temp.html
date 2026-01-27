@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - Qu?n l� khuy?n m�i</title>
+    <title>BizFlow - Quản lý khuyến mãi</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -519,125 +519,125 @@
             </div>
             <nav class="nav">
                 <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                    <span class="icon">🏠</span><span>Tổng quan</span>
                 </a>
                 <a class="nav-item" href="owner-reports.html">
-                    <span class="icon">??</span><span>B�o c�o doanh thu</span>
+                    <span class="icon">📊</span><span>Báo cáo doanh thu</span>
                 </a>
                 <a class="nav-item" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">🛍️</span><span>Sản phẩm</span>
                 </a>
                 <a class="nav-item" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">📁</span><span>Danh mục</span>
                 </a>
                 <a class="nav-item" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l� kho</span>
+                    <span class="icon">📦</span><span>Quản lý kho</span>
                 </a>
                 <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
-                    <span class="icon">??</span><span>Nh?p h�ng & Gi� v?n</span>
+                    <span class="icon">🚚</span><span>Nhập hàng & Giá vốn</span>
                 </a>
                 <a class="nav-item" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l� nh�n vi�n</span>
+                    <span class="icon">👤</span><span>Quản lý nhân viên</span>
                 </a>
-                <a class="nav-item active" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m�i</span>
+                <a class="nav-item" href="owner-promotions.html">
+                    <span class="icon">🎯</span><span>Khuyến mãi</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">⚙️</span><span>Thiết lập</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">?? Qu?n l� khuy?n m�i</h1>
+                <h1 class="page-title">🎁 Quản lý khuyến mãi</h1>
                 <div class="actions">
-                    <button class="btn btn-primary" onclick="openCreateModal()">+ Th�m khuy?n m�i</button>
-                    <button class="btn btn-success" onclick="reloadPromotions()">? T?i l?i</button>
+                    <button class="btn btn-primary" onclick="openCreateModal()">+ Thêm khuyến mãi</button>
+                    <button class="btn btn-success" onclick="reloadPromotions()">🔄 Tải lại</button>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title">B? l?c & t�m ki?m</div>
+                <div class="card-title">Bộ lọc & tìm kiếm</div>
                 <div class="toolbar">
                     <label class="search-box">
-                        <span>??</span>
-                        <input type="text" id="searchInput" placeholder="T�m theo m� ho?c t�n khuy?n m�i..." oninput="applyFilters()">
+                        <span>🔍</span>
+                        <input type="text" id="searchInput" placeholder="Tìm theo mã hoặc tên khuyến mãi..." oninput="applyFilters()">
                     </label>
                     <select id="typeFilter" class="select-box" onchange="applyFilters()">
-                        <option value="ALL">T?t c? lo?i</option>
-                        <option value="PERCENT">Gi?m %</option>
-                        <option value="FIXED">Gi?m ti?n</option>
+                        <option value="ALL">Tất cả loại</option>
+                        <option value="PERCENT">Giảm %</option>
+                        <option value="FIXED">Giảm tiền</option>
                         <option value="BUNDLE">Combo</option>
                     </select>
                     <select id="targetFilter" class="select-box" onchange="applyFilters()">
-                        <option value="ALL">T?t c? d?i tu?ng</option>
-                        <option value="CATEGORY">Theo danh m?c</option>
-                        <option value="PRODUCT">Theo s?n ph?m</option>
+                        <option value="ALL">Tất cả đối tượng</option>
+                        <option value="CATEGORY">Theo danh mục</option>
+                        <option value="PRODUCT">Theo sản phẩm</option>
                     </select>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title">Danh s�ch khuy?n m�i</div>
+                <div class="card-title">Danh sách khuyến mãi</div>
                 <table>
                     <thead>
                         <tr>
-                            <th>M�</th>
-                            <th>T�n khuy?n m�i</th>
-                            <th>Lo?i</th>
-                            <th>Gi� tr?</th>
-                            <th>�?i tu?ng</th>
+                            <th>Mã</th>
+                            <th>Tên khuyến mãi</th>
+                            <th>Loại</th>
+                            <th>Giá trị</th>
+                            <th>Đối tượng</th>
                             <th>Combo</th>
-                            <th>Th?i gian</th>
-                            <th>Tr?ng th�i</th>
-                            <th>Thao t�c</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="promotionTableBody">
-                        <tr><td colspan="9" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="9" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
-                <div id="promoEmpty" class="status-text" style="display:none; padding-top: 12px;">Kh�ng c� khuy?n m�i ph� h?p.</div>
+                <div id="promoEmpty" class="status-text" style="display:none; padding-top: 12px;">Không có khuyến mãi phù hợp.</div>
             </div>
         </div>
     </div>
     <div class="modal" id="promotionModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Th�m khuy?n m�i</h3>
+                <h3 class="modal-title" id="modalTitle">Thêm khuyến mãi</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form id="promotionForm" onsubmit="savePromotion(event)">
                 <input type="hidden" id="promotionId">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>M� khuy?n m�i *</label>
+                        <label>Mã khuyến mãi *</label>
                         <input type="text" id="promoCode" required>
                     </div>
                     <div class="form-group">
-                        <label>T�n khuy?n m�i *</label>
+                        <label>Tên khuyến mãi *</label>
                         <div style="display: flex; gap: 8px;">
                             <input type="text" id="promoName" required style="flex: 1;">
-                            <button type="button" class="btn-ai-generate" onclick="generatePromotionDetails()" title="AI t? d?ng t?o t�n & code">
-                                ? AI
+                            <button type="button" class="btn-ai-generate" onclick="generatePromotionDetails()" title="AI tự động tạo tên & code">
+                                ✨ AI
                             </button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Lo?i gi?m *</label>
+                        <label>Loại giảm *</label>
                         <select id="promoType" required onchange="toggleBundleSection()">
-                            <option value="PERCENT">Gi?m %</option>
-                            <option value="FIXED">Gi?m ti?n</option>
+                            <option value="PERCENT">Giảm %</option>
+                            <option value="FIXED">Giảm tiền</option>
                             <option value="BUNDLE">Combo</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Gi� tr? gi?m *</label>
+                        <label>Giá trị giảm *</label>
                         <div class="value-field">
                             <input type="number" id="promoValue" min="0" step="0.01" required>
                             <select id="promoValuePercent" style="display:none;">
-                                <option value="">-- Ch?n % --</option>
+                                <option value="">-- Chọn % --</option>
                                 <option value="5">5%</option>
                                 <option value="10">10%</option>
                                 <option value="15">15%</option>
@@ -653,44 +653,44 @@
                                 <option value="100">100%</option>
                             </select>
                             <select id="promoValueBundle" style="display:none;">
-                                <option value="1:1">Mua 1 t?ng 1</option>
-                                <option value="2:1">Mua 2 t?ng 1</option>
-                                <option value="3:1">Mua 3 t?ng 1</option>
+                                <option value="1:1">Mua 1 tặng 1</option>
+                                <option value="2:1">Mua 2 tặng 1</option>
+                                <option value="3:1">Mua 3 tặng 1</option>
                             </select>
                             <span id="promoValueSuffix" class="value-suffix"></span>
                         </div>
                         <div id="promoValueHint" class="muted"></div>
                     </div>
                     <div class="form-group">
-                        <label>Ng�y b?t d?u</label>
+                        <label>Ngày bắt đầu</label>
                         <input type="datetime-local" id="promoStart" required>
                     </div>
                     <div class="form-group">
-                        <label>Ng�y k?t th�c</label>
+                        <label>Ngày kết thúc</label>
                         <input type="datetime-local" id="promoEnd" required>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>M� t?</label>
+                        <label>Mô tả</label>
                         <textarea id="promoDescription" rows="3"></textarea>
                     </div>
                 </div>
 
-                <div class="section-title">�?i tu?ng �p d?ng</div>
-                <div class="section-note">Th�m s?n ph?m ho?c danh m?c �p d?ng.</div>
+                <div class="section-title">Đối tượng áp dụng</div>
+                <div class="section-note">Thêm sản phẩm hoặc danh mục áp dụng.</div>
                 <div id="targetList" class="stack"></div>
-                <button type="button" class="btn btn-warning btn-sm" onclick="addTargetRow()">+ Th�m d?i tu?ng</button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="addTargetRow()">+ Thêm đối tượng</button>
 
                 <div id="bundleSection">
                     <div class="section-title">Combo / Bundle</div>
-                    <div class="section-note">Ch?n s?n ph?m mua v� s?n ph?m t?ng, k�m m?u combo.</div>
+                    <div class="section-note">Chọn sản phẩm mua và sản phẩm tặng, kèm mẫu combo.</div>
                     <div id="bundleList" class="stack"></div>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="addBundleRow()">+ Th�m combo</button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="addBundleRow()">+ Thêm combo</button>
                 </div>
 
                 <div class="form-actions">
                     <span id="formStatus" class="status-text"></span>
-                    <button type="button" class="btn" onclick="closeModal()">H?y</button>
-                    <button type="submit" class="btn btn-primary">Luu khuy?n m�i</button>
+                    <button type="button" class="btn" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu khuyến mãi</button>
                 </div>
             </form>
         </div>
@@ -698,8 +698,8 @@
 
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="��ng">�</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h�ng & Gi� v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="Đóng">×</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nhập hàng & Giá vốn"></iframe>
     </aside>
     <script>
         const API_BASE = resolveApiBase();
@@ -712,16 +712,16 @@
         let promoCodeAuto = true;
         let productPickerSeq = 0;
         const FALLBACK_CATEGORIES = [
-            { id: 1, name: 'Nu?c Gi?i Kh�t' },
-            { id: 2, name: '�? An V?t' },
-            { id: 3, name: 'H�a M? Ph?m' },
-            { id: 4, name: 'Gia V? & Nu?c Ch?m' },
-            { id: 5, name: 'S?n Ph?m Cham S�c Nh� C?a' },
-            { id: 6, name: 'B�nh K?o' },
-            { id: 7, name: 'Bia & Ru?u' },
-            { id: 8, name: 'M�, Ph?, Ch�o G�i' },
-            { id: 9, name: '�? H?p & Th?c Ph?m ��ng H?p' },
-            { id: 10, name: 'Thu?c L� & Di�m' }
+            { id: 1, name: 'Nước Giải Khát' },
+            { id: 2, name: 'Đồ Ăn Vặt' },
+            { id: 3, name: 'Hóa Mỹ Phẩm' },
+            { id: 4, name: 'Gia Vị & Nước Chấm' },
+            { id: 5, name: 'Sản Phẩm Chăm Sóc Nhà Cửa' },
+            { id: 6, name: 'Bánh Kẹo' },
+            { id: 7, name: 'Bia & Rượu' },
+            { id: 8, name: 'Mì, Phở, Cháo Gói' },
+            { id: 9, name: 'Đồ Hộp & Thực Phẩm Đóng Hộp' },
+            { id: 10, name: 'Thuốc Lá & Diêm' }
         ];
 
         function resolveApiBase() {
@@ -762,18 +762,26 @@
 
         async function loadPromotions(params) {
             const tbody = document.getElementById('promotionTableBody');
-            tbody.innerHTML = '<tr><td colspan="9" class="loading">�ang t?i...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">Đang tải...</td></tr>';
             document.getElementById('promoEmpty').style.display = 'none';
             try {
                 const url = params ? `${PROMOTION_API}${params}` : PROMOTION_API;
                 const res = await fetch(url, { headers: getAuthHeaders() });
+                if (res.status === 401 || res.status === 403) {
+                    console.error('Unauthorized access - redirecting to login');
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.location.href = '/pages/login.html';
+                    return;
+                }
                 if (!res.ok) {
-                    throw new Error('Kh�ng th? t?i danh s�ch khuy?n m�i');
+                    throw new Error('Không thể tải danh sách khuyến mãi');
                 }
                 promotions = await res.json();
                 renderTable(promotions);
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="9" class="loading">Kh�ng t?i du?c d? li?u.</td></tr>';
+                console.error('Load promotions error:', err);
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">Không tải được dữ liệu.</td></tr>';
             }
         }
 
@@ -822,8 +830,8 @@
                 const statusBadge = status.badgeClass;
                 const statusText = status.text;
                 const activeBtn = p.active === false
-                    ? `<button class="btn btn-sm btn-success" onclick="activatePromotion(${p.id})">??</button>`
-                    : `<button class="btn btn-sm btn-warning" onclick="deactivatePromotion(${p.id})">??</button>`;
+                    ? `<button class="btn btn-sm btn-success" onclick="activatePromotion(${p.id})">✅</button>`
+                    : `<button class="btn btn-sm btn-warning" onclick="deactivatePromotion(${p.id})">⏸️</button>`;
                 
                 rows.push(`<tr>
                     <td><strong>${escapeHtml(p.code || '-')}</strong></td>
@@ -840,8 +848,8 @@
                     <td class="muted">${formatDateRange(p.startDate, p.endDate)}</td>
                     <td><span class="badge ${statusBadge}">${statusText}</span></td>
                     <td class="actions">
-                        <button class="btn btn-sm btn-primary" onclick="openEditModal(${p.id})">??</button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePromotion(${p.id})">???</button>
+                        <button class="btn btn-sm btn-primary" onclick="openEditModal(${p.id})">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePromotion(${p.id})">🗑️</button>
                         ${activeBtn}
                     </td>
                 </tr>`);
@@ -850,7 +858,7 @@
         }
 
         async function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Th�m khuy?n m�i';
+            document.getElementById('modalTitle').textContent = 'Thêm khuyến mãi';
             document.getElementById('promotionForm').reset();
             document.getElementById('promotionId').value = '';
             promoCodeAuto = true;
@@ -879,7 +887,7 @@
             if (!promo) return;
             await Promise.all([loadProductsForTargets(), loadCategoriesForTargets()]);
 
-            document.getElementById('modalTitle').textContent = 'C?p nh?t khuy?n m�i';
+            document.getElementById('modalTitle').textContent = 'Cập nhật khuyến mãi';
             document.getElementById('promotionId').value = promo.id || '';
             promoCodeAuto = false;
             document.getElementById('promoCode').value = promo.code || '';
@@ -934,10 +942,10 @@
                     cachedProducts = await res.json();
                     productsLoaded = true;
                 } else {
-                    console.warn('Kh�ng th? t?i s?n ph?m:', res.status);
+                    console.warn('Không thể tải sản phẩm:', res.status);
                 }
             } catch (err) {
-                console.warn('Kh�ng th? t?i danh s�ch s?n ph?m cho d?i tu?ng khuy?n m�i.');
+                console.warn('Không thể tải danh sách sản phẩm cho đối tượng khuyến mãi.');
             }
             return cachedProducts;
         }
@@ -982,9 +990,9 @@
                         return list;
                     }
                 }
-                console.warn('Kh�ng th? t�m s?n ph?m:', res.status);
+                console.warn('Không thể tìm sản phẩm:', res.status);
             } catch (err) {
-                console.warn('Kh�ng th? t�m s?n ph?m.');
+                console.warn('Không thể tìm sản phẩm.');
             }
             return filterProductsByQuery(cachedProducts, q);
         }
@@ -1004,10 +1012,10 @@
                     }
                     categoriesLoaded = true;
                 } else {
-                    console.warn('Kh�ng th? t?i danh m?c:', res.status);
+                    console.warn('Không thể tải danh mục:', res.status);
                 }
             } catch (err) {
-                console.warn('Kh�ng th? t?i danh s�ch danh m?c cho d?i tu?ng khuy?n m�i.');
+                console.warn('Không thể tải danh sách danh mục cho đối tượng khuyến mãi.');
             }
             if (!cachedCategories.length) {
                 cachedCategories = FALLBACK_CATEGORIES.slice();
@@ -1018,10 +1026,10 @@
 
         function buildProductOptions(list, selectedId) {
             if (!Array.isArray(list) || !list.length) {
-                return '<option value="">Kh�ng c� s?n ph?m</option>';
+                return '<option value="">Không có sản phẩm</option>';
             }
             return list.map(p => {
-                const label = `${formatLabelId(p.id)} - ${p.name || p.code || 'S?n ph?m'}`;
+                const label = `${formatLabelId(p.id)} - ${p.name || p.code || 'Sản phẩm'}`;
                 const selected = selectedId && Number(selectedId) === Number(p.id) ? 'selected' : '';
                 return `<option value="${p.id}" ${selected}>${escapeHtml(label)}</option>`;
             }).join('');
@@ -1032,13 +1040,13 @@
                 return '';
             }
             return list.map(p => {
-                const label = `${formatLabelId(p.id)} - ${p.name || p.code || 'S?n ph?m'}`;
+                const label = `${formatLabelId(p.id)} - ${p.name || p.code || 'Sản phẩm'}`;
                 return `<option value="${escapeHtml(label)}"></option>`;
             }).join('');
         }
 
         function resolveProductIdFromInput(value, list) {
-            const products = Array.isArray(list) ? list : cachedProducts;
+            const products = Array.isArray(list) ? list : (Array.isArray(cachedProducts) ? cachedProducts : []);
             const text = (value || '').toString().trim();
             if (!text) return '';
             const match = text.match(/^(\d+)/);
@@ -1057,7 +1065,7 @@
         }
 
         function resolveExactMatch(value, list) {
-            const products = Array.isArray(list) ? list : cachedProducts;
+            const products = Array.isArray(list) ? list : (Array.isArray(cachedProducts) ? cachedProducts : []);
             const text = (value || '').toString().trim().toLowerCase();
             if (!text) return null;
             return products.find(p => {
@@ -1069,7 +1077,7 @@
         }
 
         function resolveSingleMatch(value, list) {
-            const products = Array.isArray(list) ? list : cachedProducts;
+            const products = Array.isArray(list) ? list : (Array.isArray(cachedProducts) ? cachedProducts : []);
             const text = (value || '').toString().trim().toLowerCase();
             if (!text) return null;
             const matches = products.filter(p =>
@@ -1079,9 +1087,9 @@
         }
 
         function setProductOptions(select, selectedId, list) {
-            const products = Array.isArray(list) ? list : cachedProducts;
+            const products = Array.isArray(list) ? list : (Array.isArray(cachedProducts) ? cachedProducts : []);
             const chosen = selectedId ?? select.value;
-            select.innerHTML = `<option value="">-- Ch?n s?n ph?m --</option>${buildProductOptions(products, chosen)}`;
+            select.innerHTML = `<option value="">-- Chọn sản phẩm --</option>${buildProductOptions(products, chosen)}`;
             const wrapper = select.closest('.product-picker');
             if (!wrapper) return;
             wrapper._products = products;
@@ -1093,17 +1101,17 @@
             if (input && chosen) {
                 const product = products.find(p => Number(p.id) === Number(chosen));
                 if (product) {
-                    input.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'S?n ph?m'}`;
+                    input.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'Sản phẩm'}`;
                 }
             }
         }
 
         function buildCategoryOptions(selectedId) {
             if (!Array.isArray(cachedCategories) || !cachedCategories.length) {
-                return '<option value="">Kh�ng c� danh m?c</option>';
+                return '<option value="">Không có danh mục</option>';
             }
             return cachedCategories.map(c => {
-                const label = `${formatLabelId(c.id)} - ${c.name || 'Danh m?c'}`;
+                const label = `${formatLabelId(c.id)} - ${c.name || 'Danh mục'}`;
                 const selected = selectedId && Number(selectedId) === Number(c.id) ? 'selected' : '';
                 return `<option value="${c.id}" ${selected}>${escapeHtml(label)}</option>`;
             }).join('');
@@ -1127,7 +1135,7 @@
                     return data?.code || '';
                 }
             } catch (err) {
-                console.warn('Kh�ng th? sinh m� khuy?n m�i.');
+                console.warn('Không thể sinh mã khuyến mãi.');
             }
             return '';
         }
@@ -1181,10 +1189,10 @@
             row.className = 'inline-row';
             row.innerHTML = `
                 <select class="target-type">
-                    <option value="PRODUCT">S?n ph?m</option>
-                    <option value="CATEGORY">Danh m?c</option>
+                    <option value="PRODUCT">Sản phẩm</option>
+                    <option value="CATEGORY">Danh mục</option>
                 </select>
-                <button type="button" class="btn btn-danger btn-sm">X�a</button>
+                <button type="button" class="btn btn-danger btn-sm">Xóa</button>
             `;
             row.querySelector('button').addEventListener('click', () => row.remove());
             const typeSelect = row.querySelector('.target-type');
@@ -1227,7 +1235,7 @@
             const search = document.createElement('input');
             search.className = 'product-search';
             search.type = 'text';
-            search.placeholder = 'T�m s?n ph?m...';
+            search.placeholder = 'Tìm sản phẩm...';
             search.autocomplete = 'off';
 
             const dropdown = document.createElement('div');
@@ -1245,14 +1253,14 @@
             let searchTimer = null;
             const showDropdown = (dropdownEl, products, inputEl, selectEl) => {
                 if (!Array.isArray(products) || products.length === 0) {
-                    dropdownEl.innerHTML = '<div class="product-dropdown-empty">Kh�ng t�m th?y s?n ph?m</div>';
+                    dropdownEl.innerHTML = '<div class="product-dropdown-empty">Không tìm thấy sản phẩm</div>';
                     dropdownEl.classList.add('active');
                     return;
                 }
                 dropdownEl.innerHTML = products.slice(0, 10).map(p => `
                     <div class="product-dropdown-item" data-id="${p.id}">
                         <div class="product-dropdown-item-id">ID: ${formatLabelId(p.id)}</div>
-                        <div class="product-dropdown-item-name">${escapeHtml(p.name || p.code || 'S?n ph?m')}</div>
+                        <div class="product-dropdown-item-name">${escapeHtml(p.name || p.code || 'Sản phẩm')}</div>
                     </div>
                 `).join('');
                 dropdownEl.classList.add('active');
@@ -1262,16 +1270,16 @@
                         const productId = item.dataset.id;
                         const product = products.find(p => String(p.id) === String(productId));
                         if (product) {
-                            // �?m b?o option t?n t?i trong select
+                            // Đảm bảo option tồn tại trong select
                             const existingOption = Array.from(selectEl.options).find(opt => opt.value === String(product.id));
                             if (!existingOption) {
                                 const newOption = document.createElement('option');
                                 newOption.value = String(product.id);
-                                newOption.textContent = `${formatLabelId(product.id)} - ${product.name || product.code || 'S?n ph?m'}`;
+                                newOption.textContent = `${formatLabelId(product.id)} - ${product.name || product.code || 'Sản phẩm'}`;
                                 selectEl.appendChild(newOption);
                             }
                             selectEl.value = String(product.id);
-                            inputEl.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'S?n ph?m'}`;
+                            inputEl.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'Sản phẩm'}`;
                             dropdownEl.classList.remove('active');
                             console.log('Selected product:', product.id, product.name, 'Select value:', selectEl.value, 'Select has value:', selectEl.value !== '');
                         }
@@ -1318,7 +1326,7 @@
                         const products = wrapper._products || cachedProducts;
                         const chosen = products.find(p => String(p.id) === String(select.value));
                         if (chosen) {
-                            search.value = `${formatLabelId(chosen.id)} - ${chosen.name || chosen.code || 'S?n ph?m'}`;
+                            search.value = `${formatLabelId(chosen.id)} - ${chosen.name || chosen.code || 'Sản phẩm'}`;
                         }
                     }
                 }, 200);
@@ -1327,7 +1335,7 @@
                 const products = wrapper._products || cachedProducts;
                 const product = products.find(p => String(p.id) === String(select.value));
                 if (product) {
-                    search.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'S?n ph?m'}`;
+                    search.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'Sản phẩm'}`;
                 } else {
                     search.value = '';
                 }
@@ -1343,7 +1351,7 @@
                     const products = cachedProducts;
                     const product = products.find(p => String(p.id) === String(selectedId));
                     if (product) {
-                        search.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'S?n ph?m'}`;
+                        search.value = `${formatLabelId(product.id)} - ${product.name || product.code || 'Sản phẩm'}`;
                         select.value = String(product.id);
                     }
                     wrapper._products = products;
@@ -1359,17 +1367,17 @@
             row.className = 'inline-row bundle';
             row.innerHTML = `
                 <div class="bundle-field">
-                    <label>S?n ph?m mua</label>
+                    <label>Sản phẩm mua</label>
                 </div>
                 <div class="bundle-field">
-                    <label>Qu� t?ng</label>
+                    <label>Quà tặng</label>
                 </div>
                 <select class="bundle-pattern">
-                    <option value="1:1">Mua 1 t?ng 1</option>
-                    <option value="2:1">Mua 2 t?ng 1</option>
-                    <option value="3:1">Mua 3 t?ng 1</option>
+                    <option value="1:1">Mua 1 tặng 1</option>
+                    <option value="2:1">Mua 2 tặng 1</option>
+                    <option value="3:1">Mua 3 tặng 1</option>
                 </select>
-                <button type="button" class="btn btn-danger btn-sm">X�a</button>
+                <button type="button" class="btn btn-danger btn-sm">Xóa</button>
             `;
             row.querySelector('button').addEventListener('click', () => row.remove());
             const selectA = createProductSelect('bundle-product-a', data?.mainProductId || data?.productIdA || data?.productId || '');
@@ -1435,8 +1443,8 @@
             const bundleNote = document.querySelector('#bundleSection .section-note');
             if (bundleNote) {
                 bundleNote.textContent = type === 'BUNDLE'
-                    ? 'B?t bu?c �t nh?t 1 combo khi ch?n lo?i Combo.'
-                    : 'Ch? b?t bu?c khi ch?n lo?i Combo.';
+                    ? 'Bắt buộc ít nhất 1 combo khi chọn loại Combo.'
+                    : 'Chỉ bắt buộc khi chọn loại Combo.';
             }
             const bundleSection = document.getElementById('bundleSection');
             if (bundleSection) {
@@ -1473,24 +1481,24 @@
                 if (valueInput.value && !percentSelect.value) {
                     const custom = document.createElement('option');
                     custom.value = String(valueInput.value);
-                    custom.textContent = `${valueInput.value}% (t�y ch?nh)`;
+                    custom.textContent = `${valueInput.value}% (tùy chỉnh)`;
                     percentSelect.appendChild(custom);
                     percentSelect.value = custom.value;
                 }
                 suffix.textContent = '%';
-                hint.textContent = 'Ch?n m?c gi?m theo ph?n tram.';
+                hint.textContent = 'Chọn mức giảm theo phần trăm.';
             } else if (type === 'FIXED') {
                 valueInput.style.display = 'block';
                 valueInput.required = true;
                 valueInput.min = '0';
                 valueInput.step = '1000';
                 suffix.textContent = 'd';
-                hint.textContent = 'Nh?p s? ti?n gi?m (VND).';
+                hint.textContent = 'Nhập số tiền giảm (VND).';
             } else if (type === 'BUNDLE') {
                 bundleSelect.style.display = 'block';
                 bundleSelect.required = true;
                 valueInput.value = '0';
-                hint.textContent = 'Ch?n m?u combo (mua x t?ng y).';
+                hint.textContent = 'Chọn mẫu combo (mua x tặng y).';
             }
         }
         function buildPayload() {
@@ -1501,6 +1509,24 @@
             const bundleMainQty = Number(bundlePattern[0]) || 1;
             const bundleGiftQty = Number(bundlePattern[1]) || 1;
             const invalidBundleRows = [];
+            // Get or generate default dates
+            const startInput = document.getElementById('promoStart');
+            const endInput = document.getElementById('promoEnd');
+            
+            let startDate = formatDateValue(startInput.value);
+            let endDate = formatDateValue(endInput.value);
+            
+            // Auto-fill dates if empty
+            if (!startDate) {
+                const now = new Date();
+                startDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T00:00:00`;
+            }
+            if (!endDate) {
+                const futureDate = new Date();
+                futureDate.setMonth(futureDate.getMonth() + 1); // Default: 1 month from now
+                endDate = `${futureDate.getFullYear()}-${String(futureDate.getMonth()+1).padStart(2,'0')}-${String(futureDate.getDate()).padStart(2,'0')}T23:59:59`;
+            }
+            
             const payload = {
                 id: id ? Number(id) : undefined,
                 code: document.getElementById('promoCode').value.trim(),
@@ -1512,8 +1538,8 @@
                     : promoType === 'BUNDLE'
                         ? 0
                         : Number(document.getElementById('promoValue').value),
-                startDate: formatDateValue(document.getElementById('promoStart').value),
-                endDate: formatDateValue(document.getElementById('promoEnd').value),
+                startDate: startDate,
+                endDate: endDate,
                 active: true
             };
 
@@ -1523,7 +1549,7 @@
                 console.log('Target row:', { type, targetIdElement, value: targetIdElement?.value });
                 let idVal = Number(targetIdElement?.value || 0);
                 
-                // N?u kh�ng c� gi� tr? t? select box, th? l?y t? product-search input
+                // N?u không có giá tr? t? select box, th? l?y t? product-search input
                 if (!idVal && type === 'PRODUCT') {
                     const searchInput = row.querySelector('.product-search');
                     const picker = row.querySelector('.product-picker');
@@ -1550,7 +1576,7 @@
                     let productA = selectA?.value ? Number(selectA.value) : 0;
                     let productB = selectB?.value ? Number(selectB.value) : 0;
                     
-                    // N?u chua c� gi� tr? t? select, th? l?y t? product-search input
+                    // N?u chua có giá tr? t? select, th? l?y t? product-search input
                     if (!productA && selectA) {
                         const inputA = selectA.closest('.product-picker')?.querySelector('.product-search');
                         const productsA = selectA.closest('.product-picker')?._products || cachedProducts;
@@ -1661,12 +1687,12 @@
                 
                 // Validate inputs
                 if (!discountType) {
-                    alert('?? Vui l�ng ch?n lo?i gi?m gi� tru?c!');
+                    alert('⚠️ Vui lòng chọn loại giảm giá trước!');
                     return;
                 }
                 
                 if (!discountValue || discountValue <= 0) {
-                    alert('?? Vui l�ng nh?p gi� tr? gi?m tru?c!');
+                    alert('⚠️ Vui lòng nhập giá trị giảm trước!');
                     return;
                 }
                 
@@ -1698,7 +1724,7 @@
                 document.getElementById('promoDescription').value = data.description;
                 
                 // Show success message
-                setFormStatus('? AI d� t?o t�n & code th�nh c�ng!', true);
+                setFormStatus('✨ AI đã tạo tên & code thành công!', true);
                 
                 // Add animation effect
                 const nameInput = document.getElementById('promoName');
@@ -1713,7 +1739,7 @@
                 
             } catch (error) {
                 console.error('AI generation error:', error);
-                setFormStatus('? Kh�ng th? k?t n?i AI Service. Vui l�ng ki?m tra service dang ch?y.', false);
+                setFormStatus('⚠️ Không thể kết nối AI Service. Vui lòng kiểm tra service đang chạy.', false);
             } finally {
                 // Re-enable button
                 btn.disabled = false;
@@ -1732,37 +1758,63 @@
             await loadProductsForTargets();
             const { payload, invalidBundleRows } = buildPayload();
             if (payload.discountType === 'BUNDLE' && invalidBundleRows.length) {
-                setFormStatus('Combo thi?u s?n ph?m mua ho?c qu� t?ng. H�y ch?n t? danh s�ch.', false);
+                setFormStatus('Combo thiếu sản phẩm mua hoặc quà tặng. Hãy chọn từ danh sách.', false);
                 invalidBundleRows[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
             if (payload.discountType === 'BUNDLE' && (!Array.isArray(payload.bundleItems) || !payload.bundleItems.length)) {
-                setFormStatus('Combo c?n �t nh?t 1 s?n ph?m mua v� 1 qu� t?ng.', false);
+                setFormStatus('Combo cần ít nhất 1 sản phẩm mua và 1 quà tặng.', false);
                 return;
             }
             const id = document.getElementById('promotionId').value;
             const url = id ? `${PROMOTION_API}/${id}` : PROMOTION_API;
             const method = id ? 'PUT' : 'POST';
+            
+            // Debug: Check token
+            const token = sessionStorage.getItem('accessToken') || localStorage.getItem('token');
+            console.log('[savePromotion] Token exists:', !!token);
+            console.log('[savePromotion] Method:', method);
+            console.log('[savePromotion] URL:', url);
+            console.log('[savePromotion] Payload:', payload);
+            
             try {
                 const res = await fetch(url, {
                     method,
                     headers: getAuthHeaders(),
                     body: JSON.stringify(payload)
                 });
-                if (!res.ok) {
-                    const msg = await res.text();
-                    throw new Error(msg || 'Kh�ng th? luu khuy?n m�i');
+                
+                console.log('[savePromotion] Response status:', res.status);
+                
+                if (res.status === 401 || res.status === 403) {
+                    console.error('[savePromotion] Authentication error - redirecting to login');
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                    window.location.href = '/pages/login.html';
+                    return;
                 }
-                setFormStatus('Luu khuy?n m�i th�nh c�ng.', true);
+                
+                if (!res.ok) {
+                    let errorMsg = 'Không thể lưu khuyến mãi';
+                    try {
+                        const errorData = await res.json();
+                        errorMsg = errorData.message || errorMsg;
+                    } catch {
+                        errorMsg = await res.text() || errorMsg;
+                    }
+                    throw new Error(errorMsg);
+                }
+                setFormStatus('Lưu khuyến mãi thành công.', true);
                 closeModal();
                 await loadPromotions();
             } catch (err) {
-                setFormStatus(err.message || 'C� l?i x?y ra.', false);
+                setFormStatus(err.message || 'Có lỗi xảy ra.', false);
             }
         }
 
         async function deletePromotion(id) {
-            if (!confirm('B?n c� ch?c mu?n x�a khuy?n m�i n�y?')) return;
+            if (!confirm('Bạn có chắc muốn xóa khuyến mãi này?')) return;
             try {
                 const res = await fetch(`${PROMOTION_API}/${id}`, {
                     method: 'DELETE',
@@ -1770,11 +1822,11 @@
                 });
                 if (!res.ok) {
                     const msg = await res.text();
-                    throw new Error(msg || 'Kh�ng th? x�a khuy?n m�i');
+                    throw new Error(msg || 'Không thể xóa khuyến mãi');
                 }
                 await loadPromotions();
             } catch (err) {
-                alert(err.message || 'L?i khi x�a.');
+                alert(err.message || 'Lỗi khi xóa.');
             }
         }
 
@@ -1786,11 +1838,11 @@
                 });
                 if (!res.ok) {
                     const msg = await res.text();
-                    throw new Error(msg || 'Kh�ng th? t?m d?ng');
+                    throw new Error(msg || 'Không thể tạm dừng');
                 }
                 await loadPromotions();
             } catch (err) {
-                alert(err.message || 'L?i khi t?m d?ng.');
+                alert(err.message || 'Lỗi khi tạm dừng.');
             }
         }
 
@@ -1802,11 +1854,11 @@
                 });
                 if (!res.ok) {
                     const msg = await res.text();
-                    throw new Error(msg || 'Kh�ng th? ti?p t?c');
+                    throw new Error(msg || 'Không thể tiếp tục');
                 }
                 await loadPromotions();
             } catch (err) {
-                alert(err.message || 'L?i khi ti?p t?c.');
+                alert(err.message || 'Lỗi khi tiếp tục.');
             }
         }
 
@@ -1827,8 +1879,8 @@
 
         function getTypeLabel(type) {
             const normalized = normalizeType(type);
-            if (normalized === 'PERCENT') return 'Gi?m %';
-            if (normalized === 'FIXED') return 'Gi?m ti?n';
+            if (normalized === 'PERCENT') return 'Giảm %';
+            if (normalized === 'FIXED') return 'Giảm tiền';
             if (normalized === 'BUNDLE') return 'Combo';
             return normalized;
         }
@@ -1842,22 +1894,25 @@
         }
 
         function formatTargets(targets) {
-            if (!targets?.length) return 'Kh�ng c�';
+            if (!targets?.length) return 'Không có';
             const results = [];
+            const products = Array.isArray(cachedProducts) ? cachedProducts : [];
+            const categories = Array.isArray(cachedCategories) ? cachedCategories : [];
+            
             for (const t of targets) {
                 if (t.targetType === 'PRODUCT') {
                     let name = null;
-                    for (const p of cachedProducts) {
+                    for (const p of products) {
                         if (Number(p.id) === Number(t.targetId)) {
                             name = p.name || p.code;
                             break;
                         }
                     }
-                    if (!name) name = 'S?n ph?m #' + t.targetId;
+                    if (!name) name = 'Sản phẩm #' + t.targetId;
                     results.push(`<span class="badge badge-target">${escapeHtml(name)}</span>`);
                 } else if (t.targetType === 'CATEGORY') {
                     let name = null;
-                    for (const c of cachedCategories) {
+                    for (const c of categories) {
                         if (Number(c.id) === Number(t.targetId) || Number(c.category_id) === Number(t.targetId)) {
                             name = c.name;
                             break;
@@ -1866,7 +1921,7 @@
                     if (!name) {
                         // Fallback to FALLBACK_CATEGORIES
                         const fallback = FALLBACK_CATEGORIES.find(fc => Number(fc.id) === Number(t.targetId));
-                        name = fallback ? fallback.name : ('Danh m?c #' + t.targetId);
+                        name = fallback ? fallback.name : ('Danh mục #' + t.targetId);
                     }
                     results.push(`<span class="badge badge-target">${escapeHtml(name)}</span>`);
                 } else {
@@ -1879,20 +1934,22 @@
         function formatBundles(bundleItems) {
             if (!bundleItems?.length) return '-';
             const results = [];
+            const products = Array.isArray(cachedProducts) ? cachedProducts : [];
+            
             for (const b of bundleItems) {
                 const mainId = Number(b.mainProductId || b.productId || 0);
                 const giftId = Number(b.giftProductId || 0);
                 let mainName = '#' + mainId;
                 let giftName = '#' + giftId;
                 
-                for (const p of cachedProducts) {
+                for (const p of products) {
                     if (Number(p.id) === mainId) mainName = p.name || p.code || mainName;
                     if (Number(p.id) === giftId) giftName = p.name || p.code || giftName;
                 }
                 
                 const qty1 = b.mainQuantity || b.quantity || 1;
                 const qty2 = b.giftQuantity || 1;
-                results.push(`${qty1} � ${mainName} ? ${qty2} � ${giftName}`);
+                results.push(`${qty1} × ${mainName} → ${qty2} × ${giftName}`);
             }
             return results.join('<br>');
         }
@@ -1900,27 +1957,27 @@
         function formatDateRange(start, end) {
             const startText = formatDate(start);
             const endText = formatDate(end);
-            if (startText === '-' && endText === '-') return 'Kh�ng gi?i h?n';
-            return `${startText} ? ${endText}`;
+            if (startText === '-' && endText === '-') return 'Không giới hạn';
+            return `${startText} → ${endText}`;
         }
 
         function getPromotionStatus(promo) {
             if (!promo) {
-                return { badgeClass: 'badge-inactive', text: 'Kh�ng x�c d?nh', isRunning: false };
+                return { badgeClass: 'badge-inactive', text: 'Không xác định', isRunning: false };
             }
             if (promo.active === false) {
-                return { badgeClass: 'badge-inactive', text: 'T?m d?ng', isRunning: false };
+                return { badgeClass: 'badge-inactive', text: 'Tạm dừng', isRunning: false };
             }
             const now = new Date();
             const start = parseDate(promo.startDate);
             const end = parseDate(promo.endDate);
             if (start && now < start) {
-                return { badgeClass: 'badge-inactive', text: 'Ch? ch?y', isRunning: false };
+                return { badgeClass: 'badge-inactive', text: 'Chờ chạy', isRunning: false };
             }
             if (end && now > end) {
-                return { badgeClass: 'badge-inactive', text: 'H?t h?n', isRunning: false };
+                return { badgeClass: 'badge-inactive', text: 'Hết hạn', isRunning: false };
             }
-            return { badgeClass: 'badge-active', text: '�ang ch?y', isRunning: true };
+            return { badgeClass: 'badge-active', text: 'Đang chạy', isRunning: true };
         }
 
         function formatDate(value) {

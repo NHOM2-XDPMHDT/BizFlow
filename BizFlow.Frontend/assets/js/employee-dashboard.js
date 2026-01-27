@@ -24,8 +24,8 @@ let employees = [];
 let exchangeDraft = null;
 let promotionIndex = null;
 let activeInventoryProductId = null;
-let allPromotions = []; // Luu t?t c? khuy?n m�i cho AI combo
-let isAnalyzingCombo = false; // Flag d? tr�nh v�ng l?p v� h?n
+let allPromotions = []; // Luu t?t c? khuy?n m×i cho AI combo
+let isAnalyzingCombo = false; // Flag d? tr×nh v×ng l?p v× h?n
 const TIER_DISCOUNT_BY_100 = {
     DONG: 10000,
     BAC: 12000,
@@ -42,43 +42,44 @@ const PRODUCT_ICON = `
 `;
 const PRODUCT_IMAGE_LIST_URL = '/assets/data/product-image-files.json';
 const productImageMap = new Map();
+const productImageEntries = [];
 let productImageMapReady = false;
 const POINTS_EARN_RATE_VND = 1000;
 
 const FALLBACK_PRODUCTS = [
     {
         id: 1,
-        name: 'S?a tuoi nguy�n kem',
+        name: 'Sữa tươi nguyên kem',
         code: 'SGL330',
         barcode: '8931234567012',
         price: 15000,
         unit: 'lon',
         stock: 120,
-        description: 'S?a tuoi ti?t tr�ng 330ml'
+        description: 'Sữa tươi tiệt trùng 330ml'
     },
     {
         id: 2,
-        name: 'G?o thom d�ng g�i',
+        name: 'Gạo thơm đóng gói',
         code: 'CQ-DY160',
         barcode: '8931234567029',
         price: 18000,
-        unit: 'g�i',
+        unit: 'gói',
         stock: 60,
-        description: 'G?o thom 1kg'
+        description: 'Gạo thơm 1kg'
     },
     {
         id: 3,
-        name: 'C� ph� h�a tan',
+        name: 'Cà phê hòa tan',
         code: 'CC330',
         barcode: '8931234567036',
         price: 10000,
         unit: 'lon',
         stock: 200,
-        description: 'C� ph� s?a 330ml'
+        description: 'Cà phê sữa 330ml'
     },
     {
         id: 4,
-        name: 'Nu?c ng?t c� ga',
+        name: 'Nước ngọt có ga',
         code: 'NGC240',
         barcode: '8931234567043',
         price: 12000,
@@ -88,23 +89,23 @@ const FALLBACK_PRODUCTS = [
     },
     {
         id: 5,
-        name: 'B�nh quy bo',
+        name: 'Bánh quy bơ',
         code: 'BQB120',
         barcode: '8931234567050',
         price: 22000,
-        unit: 'h?p',
+        unit: 'hộp',
         stock: 45,
-        description: 'B�nh quy bo 120g'
+        description: 'Bánh quy bơ 120g'
     },
     {
         id: 6,
-        name: 'M� ly an li?n',
+        name: 'Mì ly ăn liền',
         code: 'MLY105',
         barcode: '8931234567067',
         price: 14000,
         unit: 'ly',
         stock: 90,
-        description: 'M� ly 105g'
+        description: 'Mì ly 105g'
     }
 ];
 
@@ -113,10 +114,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     loadUserInfo();
     await loadCurrentEmployee();
     fixPaymentPanelText();
-    selectedCustomer = { id: 0, name: 'Kh�ch l?', phone: '-', totalPoints: 0, monthlyPoints: 0, tier: '' };
+    selectedCustomer = { id: 0, name: 'Khách lẻ', phone: '-', totalPoints: 0, monthlyPoints: 0, tier: '' };
     const selectedCustomerLabel = document.getElementById('selectedCustomer');
     if (selectedCustomerLabel) {
-        selectedCustomerLabel.textContent = 'Kh�ch l?';
+        selectedCustomerLabel.textContent = 'Khách lẻ';
     }
     setupEventListeners();
     setupCustomerModal();
@@ -130,7 +131,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     initInvoices();
 
     document.getElementById('productsGrid').innerHTML =
-        '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">�ang t?i...</div>';
+        '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Đang tải...</div>';
 
     await Promise.all([loadProductImageMap(), loadProducts()]);
     applyExchangeDraft();
@@ -202,7 +203,7 @@ function applyExchangeDraft() {
     if (exchangeDraft.customerId) {
         selectedCustomer = {
             id: exchangeDraft.customerId,
-            name: exchangeDraft.customerName || 'Kh�ch h�ng',
+            name: exchangeDraft.customerName || 'Kh×ch h×ng',
             phone: exchangeDraft.customerPhone || '-',
             totalPoints: 0,
             monthlyPoints: 0,
@@ -334,7 +335,7 @@ function loadUserInfo() {
     const userInitial = (username ? username[0] : 'E').toUpperCase();
 
     document.getElementById('userInitial').textContent = userInitial;
-    document.getElementById('userNameDropdown').textContent = username || 'Nh�n vi�n';
+    document.getElementById('userNameDropdown').textContent = username || 'Nhân viên';
 }
 
 async function loadCurrentEmployee() {
@@ -354,7 +355,7 @@ async function loadCurrentEmployee() {
                 window.location.href = '/pages/login.html';
                 return;
             }
-            throw new Error('Kh�ng t?i du?c th�ng tin nh�n vi�n');
+            throw new Error('Không tải được thông tin nhân viên');
         }
 
         const data = await res.json();
@@ -371,7 +372,7 @@ async function loadCurrentEmployee() {
 
         const userNameDropdown = document.getElementById('userNameDropdown');
         if (userNameDropdown) {
-            userNameDropdown.textContent = data.username || data.fullName || 'Nh�n vi�n';
+            userNameDropdown.textContent = data.username || data.fullName || 'Nhân viên';
         }
 
         const userInitialEl = document.getElementById('userInitial');
@@ -425,8 +426,11 @@ async function loadProductImageMap() {
             const filename = filePath.split('/').pop() || '';
             const baseName = filename.replace(/\.[^.]+$/, '');
             const key = normalizeProductKey(baseName);
-            if (!key || productImageMap.has(key)) return;
-            productImageMap.set(key, filePath);
+            if (!key) return;
+            if (!productImageMap.has(key)) {
+                productImageMap.set(key, filePath);
+            }
+            productImageEntries.push({ key, path: filePath });
         });
     } catch (err) {
     }
@@ -440,10 +444,24 @@ function normalizeProductKey(value) {
 function getProductImageSrc(product) {
     if (!productImageMap || productImageMap.size === 0) return '';
     const nameKey = normalizeProductKey(product?.name || '');
-    if (nameKey && productImageMap.has(nameKey)) {
+    if (!nameKey) return '';
+
+    if (productImageMap.has(nameKey)) {
         return productImageMap.get(nameKey);
     }
-    return '';
+
+    // Fallback: try to match by containment (product name is a subset of filename or vice versa)
+    let bestMatch = null;
+    for (const entry of productImageEntries) {
+        if (!entry || !entry.key) continue;
+        if (entry.key.includes(nameKey) || nameKey.includes(entry.key)) {
+            if (!bestMatch || entry.key.length < bestMatch.key.length) {
+                bestMatch = entry;
+            }
+        }
+    }
+
+    return bestMatch ? bestMatch.path : '';
 }
 
 function buildProductImageMarkup(product) {
@@ -451,7 +469,7 @@ function buildProductImageMarkup(product) {
     if (!imageSrc) {
         return PRODUCT_ICON;
     }
-    const safeName = escapeHtml(product?.name || 'S?n ph?m');
+    const safeName = escapeHtml(product?.name || 'Sản phẩm');
     return `<img src="${encodeURI(imageSrc)}" alt="${safeName}" loading="lazy" />`;
 }
 
@@ -502,7 +520,7 @@ function renderCustomers(customers) {
             <div class="customer-info">
                 <p class="customer-name">
                     <button type="button" class="customer-name-btn" data-customer-id="${customerId}" onclick="openCustomerDetailFromButton(event)">
-                        ${escapeHtml(c.name || 'Kh�ch h�ng')}
+                        ${escapeHtml(c.name || 'Kh×ch h×ng')}
                     </button>
                 </p>
                 <p class="customer-phone">${escapeHtml(phone)}</p>
@@ -515,7 +533,7 @@ function renderCustomers(customers) {
         `;
     }).join('');
 
-    list.innerHTML = customersHtml || '<div class="customer-empty">Chua c� kh�ch h�ng</div>';
+    list.innerHTML = customersHtml || '<div class="customer-empty">Chua c× kh×ch h×ng</div>';
 }
 
 function applyCustomerFilter() {
@@ -651,7 +669,7 @@ async function addToCart(productId, productName, productPrice) {
     renderCart();
     updateTotal();
     
-    // Ph�n t�ch combo sau khi th�m s?n ph?m
+    // Ph×n t×ch combo sau khi th×m s?n ph?m
     await analyzeCartForCombo();
 
     const qtyInput = document.getElementById('qtyInput');
@@ -784,7 +802,7 @@ function showTransferQrModal(orderId, amount, token) {
     const bankQuickId = 'VCB';
     const template = 'compact';
     const amountParam = Number.isFinite(Number(amount)) && amount > 0 ? `amount=${Math.round(amount)}` : '';
-    const addInfoParam = `addInfo=${encodeURIComponent('Thanh to�n don #' + orderId)}`;
+    const addInfoParam = `addInfo=${encodeURIComponent('Thanh to×n don #' + orderId)}`;
     const accountNameParam = `accountName=${encodeURIComponent(accountName)}`;
     const qrQuicklinkBase = `https://img.vietqr.io/image/${bankQuickId}-${account}-${template}.png`;
     const qrImgUrl = qrQuicklinkBase + (amountParam || addInfoParam || accountNameParam ? `?${[amountParam, addInfoParam, accountNameParam].filter(Boolean).join('&')}` : '');
@@ -965,7 +983,7 @@ async function updateInvoiceReceipt(receiptData) {
     setText('invoiceCode', receiptData.invoiceNumber || '-');
     setText('invoiceDate', formatDateTime(receiptData.createdAt));
     setText('invoiceCashier', receiptData.cashier || '-');
-    setText('invoiceCustomer', receiptData.customerName || 'Kh�ch l?');
+    setText('invoiceCustomer', receiptData.customerName || 'Khách lẻ');
     setText('invoicePhone', receiptData.customerPhone || '-');
     setText('invoiceMethod', mapPaymentMethod(receiptData.paymentMethod));
     setText('invoiceSubtotal', formatPrice(receiptData.subtotal || 0));
@@ -1033,9 +1051,9 @@ function buildReceiptData(orderResponse, options = {}) {
     return {
         invoiceNumber,
         createdAt: new Date(),
-        customerName: selectedCustomer?.name || 'Kh�ch l?',
+        customerName: selectedCustomer?.name || 'Khách lẻ',
         customerPhone: selectedCustomer?.phone || '-',
-        cashier: selectedEmployee?.name || sessionStorage.getItem('username') || 'Nh�n vi�n',
+        cashier: selectedEmployee?.name || sessionStorage.getItem('username') || 'Nhân viên',
         paymentMethod: currentPaymentMethod,
         note: document.getElementById('paymentNote')?.value?.trim() || '',
         subtotal,
@@ -1069,11 +1087,11 @@ function formatDateTime(value) {
 function mapPaymentMethod(method) {
     switch (method) {
         case 'CASH':
-            return 'Ti?n m?t';
+            return 'Tiền mặt';
         case 'TRANSFER':
-            return 'Chuy?n kho?n';
+            return 'Chuyển khoản';
         case 'CARD':
-            return 'Th?';
+            return 'Thẻ';
         default:
             return method || '-';
     }
@@ -1221,7 +1239,7 @@ function getPromoPrice(basePrice, promo, quantity = 1) {
             if (!Number.isFinite(value)) return NaN;
             return Math.max(0, basePrice - value);
         case 'BUNDLE':
-            // Bundle logic: "Mua X t?ng Y"
+            // Bundle logic: "Mua X tặng Y"
             // Example: Mua 3 t?ng 1 (value = 1)
             // - mainQuantity: 3 (s? lu?ng c?n mua)
             // - giftQuantity: 1 (s? lu?ng du?c t?ng)
@@ -1270,22 +1288,22 @@ function normalizeDiscountType(value) {
 }
 
 function formatPromotionLabel(promo) {
-    if (!promo) return 'Khuy?n m�i';
+    if (!promo) return 'Khuyến mãi';
     const value = Number(promo.discountValue);
     const type = normalizeDiscountType(promo.discountType);
     if (type === 'PERCENT' && Number.isFinite(value)) {
-        return `Giam ${value}%`;
+        return `Giảm ${value}%`;
     }
     if (type === 'FIXED' && Number.isFinite(value)) {
-        return `Giam ${formatPrice(value)}`;
+        return `Giảm ${formatPrice(value)}`;
     }
     if (type === 'BUNDLE') {
         return 'Combo';
     }
     if (type === 'FREE_GIFT') {
-        return 'Tang kem';
+        return 'Tặng kèm';
     }
-    return promo.discountType || 'Khuy?n m�i';
+    return promo.discountType || 'Khuyến mãi';
 }
 
 function isPromotionActive(promo) {
@@ -2112,7 +2130,7 @@ function createInvoiceState(name) {
         id,
         name: name || `H\u00f3a \u0111\u01a1n ${nextNumber}`,
         cart: [],
-        selectedCustomer: { id: 0, name: 'Kh�ch l?', phone: '-' },
+        selectedCustomer: { id: 0, name: 'Khách lẻ', phone: '-' },
         paymentMethod: 'CASH',
         cashReceived: '',
         paymentNote: '',
@@ -2137,7 +2155,7 @@ function saveActiveInvoiceState() {
     invoice.cart = cloneCart(cart);
     invoice.selectedCustomer = selectedCustomer
         ? { ...selectedCustomer }
-        : { id: 0, name: 'Kh�ch l?', phone: '-' };
+        : { id: 0, name: 'Khách lẻ', phone: '-' };
     invoice.paymentMethod = currentPaymentMethod;
     invoice.cashReceived = document.getElementById('cashReceivedInput')?.value || '';
     invoice.paymentNote = document.getElementById('paymentNote')?.value || '';
@@ -2351,7 +2369,7 @@ function renderSavedBills() {
     empty.style.display = 'none';
     list.innerHTML = savedInvoices.map(draft => {
         const total = draft.cart.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0);
-        const customerName = draft.selectedCustomer?.name || 'Kh�ch l?';
+        const customerName = draft.selectedCustomer?.name || 'Khách lẻ';
         return `
             <div class="saved-bill-item">
                 <button class="saved-bill-open" data-open-draft="${draft.id}">
@@ -2359,7 +2377,7 @@ function renderSavedBills() {
                     <span>${customerName}</span>
                     <span>${formatPrice(total)}</span>
                 </button>
-                <button class="saved-bill-remove" data-remove-draft="${draft.id}">�</button>
+                <button class="saved-bill-remove" data-remove-draft="${draft.id}">×</button>
             </div>
         `;
     }).join('');
@@ -2391,7 +2409,7 @@ function openSavedInvoice(draftId) {
     const emptyTarget = invoices.find(inv => isInvoiceEmpty(inv));
     if (emptyTarget) {
         emptyTarget.cart = cloneCart(draft.cart);
-        emptyTarget.selectedCustomer = draft.selectedCustomer ? { ...draft.selectedCustomer } : { id: 0, name: 'Kh�ch l?', phone: '-' };
+        emptyTarget.selectedCustomer = draft.selectedCustomer ? { ...draft.selectedCustomer } : { id: 0, name: 'Khách lẻ', phone: '-' };
         emptyTarget.paymentMethod = draft.paymentMethod || 'CASH';
         emptyTarget.cashReceived = draft.cashReceived || '';
         emptyTarget.paymentNote = draft.paymentNote || '';
@@ -2819,7 +2837,7 @@ function resetAddressInput(input) {
 
 function getAddressDisplayName(item) {
     const rawName = item?.name || '';
-    const cleaned = rawName.replace(/^(T?nh|Th�nh ph?)\s+/i, '').trim();
+    const cleaned = rawName.replace(/^(Tỉnh|Thành phố)\s+/i, '').trim();
     return cleaned || rawName;
 }
 
@@ -3192,18 +3210,18 @@ function setSuggestionMode(mode) {
 
     if (mode === 'bottom') {
         controls.style.display = 'flex';
-        title.textContent = 'TU V?N B�N H�NG';
+        title.textContent = 'TƯ VẤN BÁN HÀNG';
         return;
     }
 
     if (mode === 'top') {
         controls.style.display = 'none';
-        title.textContent = 'K?T QU? T�M KI?M';
+        title.textContent = 'KẾT QUẢ TÌM KIẾM';
         return;
     }
 
     controls.style.display = 'flex';
-    title.textContent = 'S?N PH?M B�N CH?Y';
+    title.textContent = 'SẢN PHẨM BÁN CHẠY';
 }
 
 function openProductDetail(productId) {
@@ -3213,7 +3231,7 @@ function openProductDetail(productId) {
     const modal = document.getElementById('productDetailModal');
     if (!modal) return;
 
-    document.getElementById('detailProductName').textContent = product.name || 'S?n ph?m';
+    document.getElementById('detailProductName').textContent = product.name || 'Sản phẩm';
     document.getElementById('detailProductSku').textContent = product.code || product.barcode || '-';
     document.getElementById('detailProductBarcode').textContent = product.barcode || '-';
     document.getElementById('detailProductUnit').textContent = product.unit || '-';
@@ -3222,17 +3240,17 @@ function openProductDetail(productId) {
     const promoPrice = pricing.hasPromo ? pricing.promoPrice : basePrice;
     const promoLabel = pricing.hasPromo && pricing.label ? ` (${pricing.label})` : '';
     const detailPrice = pricing.hasPromo
-        ? `${formatPrice(promoPrice)} (g?c ${formatPrice(basePrice)})${promoLabel}`
+        ? `${formatPrice(promoPrice)} (gốc ${formatPrice(basePrice)})${promoLabel}`
         : formatPrice(basePrice);
     document.getElementById('detailProductPrice').textContent = detailPrice;
     document.getElementById('detailProductStock').textContent = getStockValue(product);
-    document.getElementById('detailProductDescription').textContent = product.description || 'Chua c� m� t?';
+    document.getElementById('detailProductDescription').textContent = product.description || 'Chưa có mô tả';
 
     const detailImage = modal.querySelector('.detail-image');
     if (detailImage) {
         const imageSrc = getProductImageSrc(product);
         if (imageSrc) {
-            const safeName = escapeHtml(product?.name || 'S?n ph?m');
+            const safeName = escapeHtml(product?.name || 'Sản phẩm');
             detailImage.innerHTML = `<img src="${encodeURI(imageSrc)}" alt="${safeName}" />`;
         } else {
             detailImage.innerHTML = '<div class="detail-image-placeholder">Anh san pham</div>';
@@ -3537,7 +3555,7 @@ function renderToolbarSearchResults(rawKeyword) {
 
     empty.style.display = 'none';
     list.innerHTML = matches.map((p, idx) => {
-        const name = p.name || 'S?n ph?m';
+        const name = p.name || 'Sản phẩm';
         const code = p.code || p.barcode || '-';
         const sku = p.sku || p.skuCode || p.skuId || p.code || p.barcode || '-';
         const unit = p.unit || '-';
@@ -3587,8 +3605,8 @@ function openCustomerDetail(customerId) {
     setText('detailCustomerTier', formatTierLabel(detailTier));
     setText('detailCustomerPoints', formatCompactNumber(detailPoints));
     setText('detailCustomerPointsUsed', formatCompactNumber(Math.floor(detailPoints / 100) * 100));
-    setText('detailEarnPolicy', `${formatCompactNumber(POINTS_EARN_RATE_VND)}d = 1 di?m`);
-    setText('detailRedeemPolicy', redeemRate ? `100 di?m = ${formatCompactNumber(redeemRate)}d` : '-');
+    setText('detailEarnPolicy', `${formatCompactNumber(POINTS_EARN_RATE_VND)}đ = 1 điểm`);
+    setText('detailRedeemPolicy', redeemRate ? `100 điểm = ${formatCompactNumber(redeemRate)}d` : '-');
 
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
@@ -3637,7 +3655,7 @@ async function loadEmployees() {
     const dropdown = document.getElementById('employeeList');
     if (!dropdown) return;
 
-    dropdown.innerHTML = '<div class="employee-empty">�ang t?i...</div>';
+    dropdown.innerHTML = '<div class="employee-empty">Đang tải...</div>';
 
     try {
         const response = await fetch(`${API_BASE}/users`, {
@@ -3662,7 +3680,7 @@ async function loadEmployees() {
         employeesLoaded = true;
         renderEmployees();
     } catch (err) {
-        dropdown.innerHTML = '<div class="employee-empty">L?i t?i danh s�ch nh�n vi�n</div>';
+        dropdown.innerHTML = '<div class="employee-empty">Lỗi tải danh sách nhân viên</div>';
     }
 }
 
@@ -3671,12 +3689,12 @@ function renderEmployees() {
     if (!dropdown) return;
 
     if (!employees || employees.length === 0) {
-        dropdown.innerHTML = '<div class="employee-empty">Chua c� nh�n vi�n</div>';
+        dropdown.innerHTML = '<div class="employee-empty">Chưa có nhân viên</div>';
         return;
     }
 
     const employeesHtml = employees.map(emp => {
-        const roleDisplay = emp.role ? (typeof emp.role === 'object' && emp.role.displayName ? emp.role.displayName : 'Nh�n vi�n') : 'Nh�n vi�n';
+        const roleDisplay = emp.role ? (typeof emp.role === 'object' && emp.role.displayName ? emp.role.displayName : 'Nhân viên') : 'Nhân viên';
         return `
         <div class="employee-item" data-employee-id="${emp.id}" onclick="selectEmployee(event, ${emp.id}, '${emp.username.replace(/'/g, "\\'")}', '${(emp.fullName || emp.username).replace(/'/g, "\\'")}')">
             <div class="employee-info">
@@ -3687,7 +3705,7 @@ function renderEmployees() {
         `;
     }).join('');
 
-    dropdown.innerHTML = employeesHtml || '<div class="employee-empty">Chua c� nh�n vi�n</div>';
+    dropdown.innerHTML = employeesHtml || '<div class="employee-empty">Chưa có nhân viên</div>';
 }
 
 function selectEmployee(evt, employeeId, employeeUsername, employeeName) {
@@ -3715,18 +3733,18 @@ function selectEmployee(evt, employeeId, employeeUsername, employeeName) {
 
 // ==================== AI COMBO PROMOTION FUNCTIONS ====================
 
-// ComboPromotionAI v� ComboPromotionUI du?c load t? file combo-promotion-ai.js
+// ComboPromotionAI v× ComboPromotionUI du?c load t? file combo-promotion-ai.js
 
 /**
- * Ph�n t�ch gi? h�ng v� t? d?ng th�m qu� t?ng combo
+ * Ph×n t×ch gi? h×ng v× t? d?ng th×m qu× t?ng combo
  */
 async function analyzeCartForCombo() {
-    // Tr�nh v�ng l?p v� h?n
+    // Tr×nh v×ng l?p v× h?n
     if (isAnalyzingCombo) {
         return;
     }
     
-    // Ki?m tra c� promotions kh�ng
+    // Ki?m tra c× promotions kh×ng
     if (!allPromotions || allPromotions.length === 0) {
         return;
     }
@@ -3734,7 +3752,7 @@ async function analyzeCartForCombo() {
     isAnalyzingCombo = true;
     
     try {
-        // Chuy?n d?i gi? h�ng sang format cho AI (ch? s?n ph?m th?t)
+        // Chuy?n d?i gi? h×ng sang format cho AI (ch? s?n ph?m th?t)
         const cartItems = cart
             .filter(item => !item.isFreeGift)
             .map(item => ({
@@ -3753,30 +3771,30 @@ async function analyzeCartForCombo() {
         // Format promotions cho AI
         const formattedPromotions = ComboPromotionAI.formatPromotions(allPromotions);
         
-        console.log('[analyzeCartForCombo] ?? Analyzing:', {
+        console.log('[analyzeCartForCombo] Analyzing:', {
             cartItems: cartItems.length,
             promotions: formattedPromotions.length,
             cart: cartItems
         });
         
-        // G?i AI ph�n t�ch
+        // G?i AI ph×n t×ch
         const result = await ComboPromotionAI.analyzeCart(cartItems, formattedPromotions);
         
-        console.log('[analyzeCartForCombo] ?? AI result:', result);
+        console.log('[analyzeCartForCombo] AI result:', result);
         
         // Hi?n th? suggestions (ELIGIBLE ho?c UPSELL)
         if (result.suggestions && result.suggestions.length > 0) {
             displayComboSuggestions(result.suggestions);
         }
         
-        // T? d?ng th�m/c?p nh?t qu� t?ng
+        // T? d?ng th×m/c?p nh?t qu× t?ng
         if (result.auto_add_gifts && result.auto_add_gifts.length > 0) {
             result.auto_add_gifts.forEach(gift => {
                 autoAddGiftToCart(gift);
             });
         }
         
-        // X�a qu� t?ng kh�ng h?p l?
+        // X×a qu× t?ng kh×ng hộp l?
         await removeIneligibleGifts(result.auto_add_gifts || []);
         
     } catch (error) {
@@ -3787,15 +3805,15 @@ async function analyzeCartForCombo() {
 }
 
 /**
- * Hi?n th? g?i � combo
+ * Hi?n th? g?i × combo
  */
 function displayComboSuggestions(suggestions) {
     suggestions.forEach(suggestion => {
         if (suggestion.suggestion_type === 'ELIGIBLE') {
-            // �? di?u ki?n - Hi?n th? th�ng b�o th�nh c�ng
+            // ×? di?u ki?n - Hi?n th? th×ng b×o th×nh c×ng
             ComboPromotionUI.showNotification(suggestion.message, 'success');
         } else if (suggestion.suggestion_type === 'UPSELL') {
-            // G?n d? - Hi?n th? modal g?i � (ch? hi?n th? 1 l?n)
+            // G?n d? - Hi?n th? modal g?i × (ch? hi?n th? 1 l?n)
             if (!document.querySelector('.upsell-modal')) {
                 ComboPromotionUI.showUpsellModal(suggestion, handleUpsellAddMore);
             }
@@ -3804,25 +3822,25 @@ function displayComboSuggestions(suggestions) {
 }
 
 /**
- * X? l� khi ngu?i d�ng nh?n "Th�m ngay" trong modal upsell
+ * X? l× khi ngu?i d×ng nh?n "Th×m ngay" trong modal upsell
  */
 function handleUpsellAddMore(suggestion) {
     console.log('[handleUpsellAddMore] Adding more:', suggestion);
     
-    // T�m s?n ph?m trong gi?
+    // T×m s?n ph?m trong gi?
     const cartItem = cart.find(item => 
         item.productId === suggestion.main_product_id && !item.isFreeGift
     );
     
     if (cartItem) {
-        // Tang s? lu?ng l�n d? d? nh?n qu�
+        // Tang s? lu?ng l×n d? d? nh?n qu×
         const needed = suggestion.required_quantity - suggestion.current_quantity;
         cartItem.quantity += needed;
         
         renderCart();
         updateTotal();
         
-        // Ph�n t�ch l?i d? t? d?ng th�m qu�
+        // Ph×n t×ch l?i d? t? d?ng th×m qu×
         setTimeout(() => analyzeCartForCombo(), 300);
     }
 }
@@ -3982,10 +4000,10 @@ async function removeIneligibleGifts(validGifts) {
 }
 
 /**
- * X? l� khi thay d?i s? lu?ng trong gi?
+ * X? l× khi thay d?i s? lu?ng trong gi?
  */
 async function onCartItemQuantityChange() {
-    // Ph�n t�ch l?i gi? h�ng
+    // Ph×n t×ch l?i gi? h×ng
     await analyzeCartForCombo();
 }
 
@@ -3995,10 +4013,10 @@ window.addEventListener('load', async () => {
         const response = await fetch('/ai/health');
         const data = await response.json();
         if (data.status === 'ok') {
-            console.log('[AI Combo] ? Service ready');
+            console.log('[AI Combo] Service ready');
         }
     } catch (error) {
-        console.log('[AI Combo] ?? Service offline (combo features disabled)');
+        console.log('[AI Combo] Service offline (combo features disabled)');
     }
 });
 
