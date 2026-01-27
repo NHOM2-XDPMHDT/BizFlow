@@ -114,6 +114,7 @@ services:
       AUTH_SERVICE_URL: http://authentication-service:8086
       PROMOTION_SERVICE_URL: http://promotion-service:8082
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -142,6 +143,7 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       INVENTORY_SERVICE_URL: http://inventory-service:8084
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -168,6 +170,7 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       CATALOG_SERVICE_URL: http://catalog-service:8083
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -195,6 +198,7 @@ services:
       RABBITMQ_PORT: 5672
       SALES_SERVICE_URL: http://sales-service:8081
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -227,6 +231,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -259,6 +264,7 @@ services:
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       AUTH_SERVICE_URL: http://authentication-service:8086
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
@@ -345,6 +351,7 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
       mysql:
         condition: service_healthy
