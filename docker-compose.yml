@@ -33,7 +33,7 @@ services:
       - "6379:6379"
     networks:
       - bizflow-net
-    mem_limit: 256m
+    mem_limit: 128m
 
   # =========================
   # 3. RABBITMQ (Message Queue)
@@ -85,6 +85,7 @@ services:
     ports:
       - "8081:8081"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
@@ -101,7 +102,7 @@ services:
       - rabbitmq
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 6. CATALOG SERVICE (SPRING BOOT)
@@ -115,6 +116,7 @@ services:
     ports:
       - "8083:8083"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       INVENTORY_SERVICE_URL: http://inventory-service:8084
@@ -123,7 +125,7 @@ services:
       - inventory-service
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 7. INVENTORY SERVICE (SPRING BOOT)
@@ -137,6 +139,7 @@ services:
     ports:
       - "8084:8084"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       CATALOG_SERVICE_URL: http://catalog-service:8083
@@ -158,6 +161,7 @@ services:
     ports:
       - "8085:8085"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
@@ -185,6 +189,7 @@ services:
     ports:
       - "8086:8086"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
@@ -210,6 +215,7 @@ services:
     ports:
       - "8087:8087"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       SALES_SERVICE_URL: http://sales-service:8081
@@ -226,7 +232,7 @@ services:
       - authentication-service
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
 
   # =========================
   # 11. AI SERVICE (PYTHON FASTAPI)
@@ -241,7 +247,7 @@ services:
       - "5000:5000"
     networks:
       - bizflow-net
-    mem_limit: 256m
+    mem_limit: 128m
   # =========================
   # 12. FRONTEND WEB (NGINX)
   # =========================
@@ -292,6 +298,7 @@ services:
     ports:
       - "8082:8082"
     environment:
+      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
@@ -334,4 +341,3 @@ volumes:
 networks:
   bizflow-net:
     driver: bridge
-
