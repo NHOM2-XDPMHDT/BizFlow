@@ -14,13 +14,16 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/product-images")
 public class ProductImageController {
 
-    private static final Path IMAGE_DIR = Paths.get("FE", "assets", "img", "img_sanpham");
-    private static final Path IMAGE_INDEX = Paths.get("FE", "assets", "data", "product-image-files.json");
+    private static final Path ASSETS_ROOT = Paths.get(
+            Optional.ofNullable(System.getenv("BIZFLOW_ASSETS_DIR")).orElse("FE/assets"));
+    private static final Path IMAGE_DIR = ASSETS_ROOT.resolve(Paths.get("img", "img_sanpham"));
+    private static final Path IMAGE_INDEX = ASSETS_ROOT.resolve(Paths.get("data", "product-image-files.json"));
     private static final String WEB_PREFIX = "/assets/img/img_sanpham/";
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -21,6 +21,13 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   # =========================
   # 2. REDIS CACHE
@@ -61,17 +68,28 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - sales-service
-      - catalog-service
-      - inventory-service
-      - customer-service
-      - authentication-service
-      - report-service
-      - promotion-service
-      - ai-service
+      mysql:
+        condition: service_healthy
+      sales-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+      authentication-service:
+        condition: service_started
+      report-service:
+        condition: service_started
+      promotion-service:
+        condition: service_started
+      ai-service:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 512m
+    cpus: 1.0
 
   # =========================
   # 5. SALES SERVICE (SPRING BOOT)
@@ -85,7 +103,6 @@ services:
     ports:
       - "8081:8081"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
@@ -96,13 +113,19 @@ services:
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       AUTH_SERVICE_URL: http://authentication-service:8086
       PROMOTION_SERVICE_URL: http://promotion-service:8082
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - redis
-      - rabbitmq
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 6. CATALOG SERVICE (SPRING BOOT)
@@ -116,16 +139,20 @@ services:
     ports:
       - "8083:8083"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       INVENTORY_SERVICE_URL: http://inventory-service:8084
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - inventory-service
+      mysql:
+        condition: service_healthy
+      inventory-service:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 7. INVENTORY SERVICE (SPRING BOOT)
@@ -139,15 +166,18 @@ services:
     ports:
       - "8084:8084"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       CATALOG_SERVICE_URL: http://catalog-service:8083
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 8. CUSTOMER SERVICE (SPRING BOOT)
@@ -161,21 +191,27 @@ services:
     ports:
       - "8085:8085"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       SALES_SERVICE_URL: http://sales-service:8081
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - redis
-      - rabbitmq
-      - sales-service
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      sales-service:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 9. AUTHENTICATION SERVICE (SPRING BOOT)
@@ -189,19 +225,24 @@ services:
     ports:
       - "8086:8086"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - redis
-      - rabbitmq
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 10. REPORT SERVICE (SPRING BOOT)
@@ -215,7 +256,6 @@ services:
     ports:
       - "8087:8087"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       SALES_SERVICE_URL: http://sales-service:8081
@@ -223,16 +263,25 @@ services:
       INVENTORY_SERVICE_URL: http://inventory-service:8084
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       AUTH_SERVICE_URL: http://authentication-service:8086
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - sales-service
-      - catalog-service
-      - inventory-service
-      - customer-service
-      - authentication-service
+      mysql:
+        condition: service_healthy
+      sales-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+      authentication-service:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 256m
+    cpus: 1.0
 
   # =========================
   # 11. AI SERVICE (PYTHON FASTAPI)
@@ -298,16 +347,20 @@ services:
     ports:
       - "8082:8082"
     environment:
-      JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false
+      SPRING_MAIN_LAZY_INITIALIZATION: true
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 512m
+    cpus: 1.0
   # =========================
   # 15. NIFI (DATA ORCHESTRATION)
   # =========================
@@ -341,3 +394,4 @@ volumes:
 networks:
   bizflow-net:
     driver: bridge
+

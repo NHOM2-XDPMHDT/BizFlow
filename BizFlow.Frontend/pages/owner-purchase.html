@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nh?p H�ng & Gi� V?n - BizFlow</title>
+    <title>Nhập Hàng & Giá Vốn - BizFlow</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         :root {
@@ -298,7 +298,7 @@
             margin: 8px 0 22px;
         }
         body.in-drawer.ui-refresh h1::before {
-            content: "??";
+            content: "📦";
             font-size: 24px;
         }
         body.in-drawer.ui-refresh .tabs {
@@ -385,35 +385,35 @@
 </head>
 <body>
     <div class="container">
-<h1>?? Nh?p H�ng & Qu?n L� Gi� V?n</h1>
+<h1>Nhập Hàng & Quản Lý Giá Vốn</h1>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('purchase')">Nh?p H�ng M?i</button>
-            <button class="tab-btn" onclick="showTab('history')">L?ch S? Nh?p H�ng</button>
-            <button class="tab-btn" onclick="showTab('costs')">Gi� V?n Hi?n T?i</button>
+            <button class="tab-btn active" onclick="showTab('purchase')">Nhập Hàng Mới</button>
+            <button class="tab-btn" onclick="showTab('history')">Lịch Số Nhập Hàng</button>
+            <button class="tab-btn" onclick="showTab('costs')">Giá Vốn Hiện Tải</button>
         </div>
 
-        <!-- Tab: Nh?p h�ng m?i -->
+        <!-- Tab: Nhập hàng mới -->
         <div id="tab-purchase" class="tab-content active">
             <div class="card">
-                <h2>? Nh?p H�ng M?i</h2>
+                <h2>Nhập Hàng Mới</h2>
                 <form id="purchaseForm" onsubmit="submitPurchase(event)">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>S?n ph?m *</label>
+                            <label>Sản phẩm *</label>
                             <div class="select-search" id="purchaseSearchWrapper">
                                 <div class="combo-field">
-                                    <input type="text" id="purchaseProductSearch" placeholder="G� m� ho?c t�n s?n ph?m..." autocomplete="off" oninput="filterPurchaseOptions()" onfocus="openPurchaseSuggestions()" onkeydown="handlePurchaseKey(event)">
-                                    <div id="purchaseSuggestions" class="combo-list" role="listbox" aria-label="G?i � s?n ph?m"></div>
+                                    <input type="text" id="purchaseProductSearch" placeholder="Gõ mã hoặc tên sản phẩm..." autocomplete="off" oninput="filterPurchaseOptions()" onfocus="openPurchaseSuggestions()" onkeydown="handlePurchaseKey(event)">
+                                    <div id="purchaseSuggestions" class="combo-list" role="listbox" aria-label="Gợi ý sản phẩm"></div>
                                     <select id="purchaseProduct" class="sr-only" required onchange="updateCostPreview()">
-                                        <option value="">-- Ch?n s?n ph?m --</option>
+                                        <option value="">-- Chọn sản phẩm --</option>
                                     </select>
                                 </div>
-                                <div class="field-hint">B?m v�o d? m? danh s�ch, g� d? l?c nhanh.</div>
+                                <div class="field-hint">Bấm vào để mở danh sách, gõ để lọc nhanh.</div>
                             </div>
                         </div>
                         <div class="form-group" id="purchaseCostGroup">
-                            <label>Gi� v?n m?i (VN�) *</label>
+                            <label>Giá vốn mới (VNĐ) *</label>
                             <input type="text" id="purchaseCostPrice" inputmode="numeric" required oninput="handleCurrencyInput('purchaseCostPrice')">
                         </div>
                     </div>
@@ -421,178 +421,178 @@
                         <label class="checkbox-pill" for="isNewProduct">
                             <input type="checkbox" id="isNewProduct" onchange="toggleNewProduct(this.checked)">
                             <span class="checkbox-box" aria-hidden="true"></span>
-                            <span class="checkbox-text">S?n ph?m m?i (chua c� trong c?a h�ng)</span>
+                            <span class="checkbox-text">Sản phẩm mới (chua có trong cửa hàng)</span>
                         </label>
                     </div>
                     <div class="form-group">
-                        <label>S? lu?ng nh?p *</label>
+                        <label>Số lượng nhập *</label>
                         <input type="number" id="purchaseQuantity" required min="1" value="1" oninput="updateCostPreview()">
                     </div>
                     <div id="newProductFields" style="display:none;">
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>T�n s?n ph?m *</label>
-                                <input type="text" id="newProductName" placeholder="VD: S?a tuoi Vinamilk 1L">
+                                <label>Tên sản phẩm *</label>
+                                <input type="text" id="newProductName" placeholder="VD: Sửa tuoi Vinamilk 1L">
                             </div>
                             <div class="form-group">
-                                <label>M� s?n ph?m (SKU) *</label>
+                                <label>Mã sản phẩm (SKU) *</label>
                                 <input type="text" id="newProductCode" placeholder="VD: VM-1L">
                             </div>
                             <div class="form-group">
-                                <label>Gi� b�n *</label>
+                                <label>Giá bán *</label>
                                 <input type="text" id="newProductPrice" inputmode="numeric" placeholder="VD: 25000" oninput="handleCurrencyInput('newProductPrice')">
                             </div>
                             <div class="form-group">
-                                <label>Gi� v?n nh?p *</label>
+                                <label>Giá vốn nhập *</label>
                                 <input type="text" id="newProductCostPrice" inputmode="numeric" placeholder="VD: 15000" oninput="handleCurrencyInput('newProductCostPrice','purchaseCostPrice')">
                             </div>
                             <div class="form-group">
-                                <label>�on v?</label>
-                                <input type="text" id="newProductUnit" placeholder="VD: chai, h?p, g�i">
+                                <label>Đơn vị</label>
+                                <input type="text" id="newProductUnit" placeholder="VD: chai, hợp, gói">
                             </div>
                             <div class="form-group">
-                                <label>M� v?ch</label>
+                                <label>Mã vạch</label>
                                 <input type="text" id="newProductBarcode" placeholder="VD: 893...">
                             </div>
                             <div class="form-group">
-                                <label>Danh m?c</label>
+                                <label>Danh mục</label>
                                 <select id="newProductCategory">
-                                    <option value="">-- Ch?n danh m?c --</option>
-                                    <option value="1">1 - Nu?c Gi?i Kh�t</option>
-                                    <option value="2">2 - �? An V?t</option>
-                                    <option value="3">3 - H�a M? Ph?m</option>
-                                    <option value="4">4 - Gia V? & Nu?c Ch?m</option>
-                                    <option value="5">5 - S?n Ph?m Cham S�c Nh� C?a</option>
-                                    <option value="6">6 - B�nh K?o</option>
-                                    <option value="7">7 - Bia & Ru?u</option>
-                                    <option value="8">8 - M�, Ph?, Ch�o G�i</option>
-                                    <option value="9">9 - �? H?p & Th?c Ph?m ��ng H?p</option>
-                                    <option value="10">10 - Thu?c L� & Di�m</option>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <option value="1">1 - Nước Giải Khát</option>
+                                    <option value="2">2 - Đồ Ăn Vặt</option>
+                                    <option value="3">3 - Hóa Mở Phẩm</option>
+                                    <option value="4">4 - Gia Vị & Nước Chấm</option>
+                                    <option value="5">5 - Sản Phẩm Chăm Sóc Nhà Cửa</option>
+                                    <option value="6">6 - Bánh Kẹo</option>
+                                    <option value="7">7 - Bia & Rượu</option>
+                                    <option value="8">8 - Mì, Phở, Cháo Gói</option>
+                                    <option value="9">9 - Đồ Hộp & Thực Phẩm Đóng Hộp</option>
+                                    <option value="10">10 - Thuộc Lá & Diêm</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>?nh s?n ph?m *</label>
+                                <label>ảnh sản phẩm *</label>
                                 <input type="file" id="newProductImage" accept=".jpg,.jpeg,.png,.webp">
                             </div>
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label>M� t?</label>
-                                <textarea id="newProductDescription" rows="2" placeholder="M� t? ng?n v? s?n ph?m"></textarea>
+                                <label>Mô tả</label>
+                                <textarea id="newProductDescription" rows="2" placeholder="Mô tả ngắn về sản phẩm"></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Ghi ch�</label>
-                        <textarea id="purchaseNote" rows="2" placeholder="VD: Nh?p t? NCC ABC, ng�y 15/01/2026..."></textarea>
+                        <label>Ghi chú</label>
+                        <textarea id="purchaseNote" rows="2" placeholder="VD: Nhập từ NCC ABC, ngày 15/01/2026..."></textarea>
                     </div>
 
                     <div class="cost-preview" id="costPreview" style="display:none;">
                         <div class="row">
-                            <span class="label">Gi� v?n cu:</span>
+                            <span class="label">Giá vốn cu:</span>
                             <span class="value" id="oldCostPrice">--</span>
                         </div>
                         <div class="row">
-                            <span class="label">Gi� v?n m?i:</span>
+                            <span class="label">Giá vốn mới:</span>
                             <span class="value price" id="newCostPrice">--</span>
                         </div>
                         <div class="row">
-                            <span class="label">T?n kho hi?n t?i:</span>
+                            <span class="label">Tồn kho hiện tải:</span>
                             <span class="value" id="currentStock">--</span>
                         </div>
                         <div class="row">
-                            <span class="label">S? lu?ng nh?p:</span>
+                            <span class="label">Số lượng nhập:</span>
                             <span class="value quantity" id="previewQuantity">--</span>
                         </div>
                         <div class="row">
-                            <span class="label">T?n kho sau nh?p:</span>
+                            <span class="label">Tồn kho sau nhập:</span>
                             <span class="value" style="color:var(--success)" id="newStock">--</span>
                         </div>
                         <div class="row total-row">
-                            <span class="label">T?ng ti?n nh?p:</span>
+                            <span class="label">Tổng tiền nhập:</span>
                             <span class="value total" id="totalCost">--</span>
                         </div>
                     </div>
 
                     <div style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-success">? X�c nh?n nh?p h�ng</button>
+                        <button type="submit" class="btn btn-success">Xác nhận nhập hàng</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Tab: L?ch s? nh?p h�ng -->
+        <!-- Tab: Lịch số nhập hàng -->
         <div id="tab-history" class="tab-content">
             <div class="card">
-                <h2>?? L?ch S? Nh?p H�ng</h2>
+                <h2>Lịch Sử Nhập Hàng</h2>
                 
                 <div class="filter-bar">
                     <div class="form-group">
-                        <label>T? ng�y</label>
+                        <label>Từ ngày</label>
                         <input type="date" id="historyStartDate">
                     </div>
                     <div class="form-group">
-                        <label>�?n ng�y</label>
+                        <label>Đến ngày</label>
                         <input type="date" id="historyEndDate">
                     </div>
                     <div class="form-group">
-                        <label>S?n ph?m</label>
+                        <label>Sản phẩm</label>
                         <select id="historyProduct">
-                            <option value="">-- T?t c? --</option>
+                            <option value="">-- Tất cả --</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="loadHistory()">?? L?c</button>
+                    <button class="btn btn-primary" onclick="loadHistory()">Lọc</button>
                 </div>
 
                 <div class="summary-cards" id="historySummary">
                     <div class="summary-card">
                         <div class="value" id="totalPurchases">0</div>
-                        <div class="label">L?n nh?p</div>
+                        <div class="label">Lần nhập</div>
                     </div>
                     <div class="summary-card">
                         <div class="value" id="totalQuantityIn">0</div>
-                        <div class="label">T?ng SL nh?p</div>
+                        <div class="label">Tổng SL nhập</div>
                     </div>
                     <div class="summary-card">
                         <div class="value" id="totalCostSpent">0d</div>
-                        <div class="label">T?ng ti?n nh?p</div>
+                        <div class="label">Tổng tiền nhập</div>
                     </div>
                 </div>
 
                 <table>
                     <thead>
                         <tr>
-                            <th>Th?i gian</th>
-                            <th>S?n ph?m</th>
-                            <th>Gi� v?n</th>
-                            <th>S? lu?ng</th>
-                            <th>T?ng ti?n</th>
-                            <th>Ghi ch�</th>
+                            <th>Thời gian</th>
+                            <th>Sản phẩm</th>
+                            <th>Giá vốn</th>
+                            <th>Số lượng</th>
+                            <th>Tổng tiền</th>
+                            <th>Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody id="historyTable">
-                        <tr><td colspan="6" style="text-align:center;color:var(--muted)">�ang t?i...</td></tr>
+                        <tr><td colspan="6" style="text-align:center;color:var(--muted)">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Tab: Gi� v?n hi?n t?i -->
+        <!-- Tab: Giá vốn hiện tải -->
         <div id="tab-costs" class="tab-content">
             <div class="card">
-                <h2>?? Gi� V?n Hi?n T?i C?a S?n Ph?m</h2>
+                <h2>Giá Vốn Hiện Tại Của Sản Phẩm</h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>M� SP</th>
-                            <th>T�n s?n ph?m</th>
-                            <th>Gi� b�n</th>
-                            <th>Gi� v?n</th>
-                            <th>L?i nhu?n</th>
-                            <th>T? l? LN</th>
-                            <th>C?p nh?t l?n cu?i</th>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Giá vốn</th>
+                            <th>Lỗi nhuận</th>
+                            <th>Tỷ lệ LN</th>
+                            <th>Cập nhật lần cuối</th>
                         </tr>
                     </thead>
                     <tbody id="costsTable">
-                        <tr><td colspan="7" style="text-align:center;color:var(--muted)">�ang t?i...</td></tr>
+                        <tr><td colspan="7" style="text-align:center;color:var(--muted)">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -668,13 +668,13 @@
         function populateProductSelects(hasError) {
             const purchaseSelect = document.getElementById('purchaseProduct');
             const historySelect = document.getElementById('historyProduct');
-            const fallback = hasError ? '<option value="">-- Kh�ng t?i du?c s?n ph?m --</option>' : '<option value="">-- Ch?n s?n ph?m --</option>';
+            const fallback = hasError ? '<option value="">-- Không tải được sản phẩm --</option>' : '<option value="">-- Chọn sản phẩm --</option>';
             const options = (allProducts || []).map(p =>
-                `<option value="${p.id}" data-cost="${p.costPrice || 0}">${p.code || p.id} - ${p.name || 'S?n ph?m'}</option>`
+                `<option value="${p.id}" data-cost="${p.costPrice || 0}">${p.code || p.id} - ${p.name || 'Sản phẩm'}</option>`
             ).join('');
 
             purchaseSelect.innerHTML = fallback + options;
-            historySelect.innerHTML = (hasError ? '<option value="">-- Kh�ng t?i du?c s?n ph?m --</option>' : '<option value="">-- T?t c? --</option>') + options;
+            historySelect.innerHTML = (hasError ? '<option value="">-- Không tải được sản phẩm --</option>' : '<option value="">-- Tất cả --</option>') + options;
         }
 
         function isNewProductMode() {
@@ -832,12 +832,12 @@
             const list = document.getElementById('purchaseSuggestions');
             if (!list) return;
             if (!items.length) {
-                list.innerHTML = '<div class="combo-empty">Kh�ng t�m th?y s?n ph?m</div>';
+                list.innerHTML = '<div class="combo-empty">Không tìm thấy sản phẩm</div>';
                 list.classList.add('show');
                 return;
             }
             list.innerHTML = items.map((p, index) => {
-                const label = `${p.code || p.id} - ${p.name || 'S?n ph?m'}`;
+                const label = `${p.code || p.id} - ${p.name || 'Sản phẩm'}`;
                 return `<button type="button" class="combo-item" data-id="${p.id}" data-index="${index}">${label}</button>`;
             }).join('');
             list.classList.add('show');
@@ -958,7 +958,7 @@
             });
 
             if (!res.ok) {
-                let message = 'Kh�ng th? t?i ?nh s?n ph?m';
+                let message = 'Không thể tải ảnh sản phẩm';
                 try {
                     const data = await res.json();
                     if (data && data.error) message = data.error;
@@ -1022,7 +1022,7 @@
             }
 
             if (!costPrice || !quantity) {
-                alert('Vui l�ng nh?p d?y d? th�ng tin');
+                alert('Vui lòng nhập đầy đủ thông tin');
                 return;
             }
 
@@ -1041,11 +1041,11 @@
                     const imageFile = imageInput && imageInput.files ? imageInput.files[0] : null;
 
                     if (!name || !code || !Number.isFinite(price) || price <= 0) {
-                        alert('Vui l�ng nh?p d?y d? th�ng tin s?n ph?m m?i');
+                        alert('Vui lòng nhập đầy đủ thông tin sản phẩm mới');
                         return;
                     }
                     if (!imageFile) {
-                        alert('Vui l�ng ch?n ?nh s?n ph?m');
+                        alert('Vui lòng chọn ảnh sản phẩm');
                         return;
                     }
 
@@ -1072,12 +1072,12 @@
 
                     if (!res.ok) {
                         const error = await res.json();
-                        throw new Error(error.error || 'Kh�ng th? nh?p h�ng s?n ph?m m?i');
+                        throw new Error(error.error || 'Không thể nhập hàng sản phẩm mới');
                     }
                 } else {
                     const productId = document.getElementById('purchaseProduct').value;
                     if (!productId) {
-                        alert('Vui l�ng ch?n s?n ph?m');
+                        alert('Vui lòng chọn sản phẩm');
                         return;
                     }
                     const res = await fetch(`${API_BASE}/product-costs/purchase`, {
@@ -1088,11 +1088,11 @@
 
                     if (!res.ok) {
                         const error = await res.json();
-                        throw new Error(error.error || 'Kh�ng th? nh?p h�ng');
+                        throw new Error(error.error || 'Không thể nhập hàng');
                     }
                 }
 
-                alert('�� nh?p h�ng th�nh c�ng! Gi� v?n d� du?c c?p nh?t.');
+                alert('Đã nhập hàng thành công! Giá vốn đã được cập nhật.');
                 document.getElementById('purchaseForm').reset();
                 const newToggle = document.getElementById('isNewProduct');
                 if (newToggle) {
@@ -1103,7 +1103,7 @@
                 loadProducts();
             } catch (e) {
                 console.error('Error submitting purchase:', e);
-                alert('L?i: ' + (e.message || 'L?i k?t n?i server'));
+                alert('Lỗi: ' + (e.message || 'Lỗi kết nội server'));
             }
         }
 
@@ -1141,7 +1141,7 @@
             const tbody = document.getElementById('historyTable');
             
             if (!history || history.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Kh�ng c� d? li?u</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Không có dữ liệu</td></tr>';
                 updateHistorySummary(0, 0, 0);
                 return;
             }
@@ -1192,7 +1192,7 @@
             const tbody = document.getElementById('costsTable');
             
             if (!products || products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">Kh�ng c� d? li?u</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">Không có dữ liệu</td></tr>';
                 return;
             }
 
@@ -1206,7 +1206,7 @@
                         <td><strong>${p.code || ''}</strong></td>
                         <td>${p.name || ''}</td>
                         <td>${formatCurrency(p.price)}</td>
-                        <td class="price">${p.costPrice ? formatCurrency(p.costPrice) : '<span style="color:var(--warning)">Chua c�</span>'}</td>
+                        <td class="price">${p.costPrice ? formatCurrency(p.costPrice) : '<span style="color:var(--warning)">Chưa có</span>'}</td>
                         <td style="color:${profitColor};font-weight:600">${formatCurrency(profit)}</td>
                         <td style="color:${profitColor}">${profitPercent}%</td>
                         <td style="color:var(--muted)">--</td>
