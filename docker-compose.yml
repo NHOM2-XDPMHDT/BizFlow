@@ -118,12 +118,15 @@ services:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       INVENTORY_SERVICE_URL: http://inventory-service:8084
+      BIZFLOW_ASSETS_DIR: /shared/assets
     depends_on:
       - mysql
       - inventory-service
     networks:
       - bizflow-net
     mem_limit: 512m
+    volumes:
+      - ./BizFlow.Frontend/assets:/shared/assets
 
   # =========================
   # 7. INVENTORY SERVICE (SPRING BOOT)

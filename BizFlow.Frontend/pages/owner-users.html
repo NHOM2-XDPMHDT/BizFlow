@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - Qu?n l˝ nh‚n viÍn</title>
+    <title>BizFlow - Qu·∫£n l√Ω nh√¢n vi√™n</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -408,93 +408,93 @@
                 </div>
             </div>
             <nav class="nav">
-                <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                <a class="nav-item active" href="owner-dashboard.html">
+                    <span class="icon">üè†</span><span>T·ªïng quan</span>
                 </a>
                 <a class="nav-item" href="owner-reports.html">
-                    <span class="icon">??</span><span>B·o c·o doanh thu</span>
+                    <span class="icon">üìä</span><span>B√°o c√°o doanh thu</span>
                 </a>
                 <a class="nav-item" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">üõçÔ∏è</span><span>S·∫£n ph·∫©m</span>
                 </a>
                 <a class="nav-item" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">üìÅ</span><span>Danh m·ª•c</span>
                 </a>
                 <a class="nav-item" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l˝ kho</span>
+                    <span class="icon">üì¶</span><span>Qu·∫£n l√Ω kho</span>
                 </a>
-                <a class="nav-item" href="#" data-purchase-href="owner-purchase.html" data-purchase-link="true">
-                    <span class="icon">??</span><span>Nh?p h‡ng & Gi· v?n</span>
+                <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
+                    <span class="icon">üöö</span><span>Nh·∫≠p h√†ng & Gi√° v·ªën</span>
                 </a>
-                <a class="nav-item active" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l˝ nh‚n viÍn</span>
+                <a class="nav-item" href="owner-users.html">
+                    <span class="icon">üë§</span><span>Qu·∫£n l√Ω nh√¢n vi√™n</span>
                 </a>
                 <a class="nav-item" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m„i</span>
+                    <span class="icon">üéØ</span><span>Khuy·∫øn m√£i</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">‚öôÔ∏è</span><span>Thi·∫øt l·∫≠p</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">?? Qu?n l˝ nh‚n viÍn</h1>
-                <button class="btn btn-primary" onclick="openAddModal()">+ ThÍm nh‚n viÍn</button>
+                <h1 class="page-title">Qu·∫£n l√Ω nh√¢n vi√™n</h1>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Th√™m nh√¢n vi√™n</button>
             </div>
 
             <!-- Stats Overview -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="totalUsers">--</div>
-                    <div class="stat-label">T?ng nh‚n viÍn</div>
+                    <div class="stat-label">T·ªïng nh√¢n vi√™n</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value success" id="activeUsers">--</div>
-                    <div class="stat-label">–ang ho?t d?ng</div>
+                    <div class="stat-label">ƒêang ho·∫°t ƒë·ªông</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value danger" id="inactiveUsers">--</div>
-                    <div class="stat-label">–„ vÙ hi?u</div>
+                    <div class="stat-label">ƒê√£ v√¥ hi·ªáu</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="managerCount">--</div>
-                    <div class="stat-label">Qu?n l˝</div>
+                    <div class="stat-label">Qu·∫£n l√Ω</div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title">Danh s·ch nh‚n viÍn</div>
+                <div class="card-title">Danh s√°ch nh√¢n vi√™n</div>
                 <div class="toolbar">
                     <div class="search-box">
-                        <span>??</span>
-                        <input type="text" id="searchInput" placeholder="TÏm ki?m nh‚n viÍn..." onkeyup="searchUsers()">
+                        <span>S·ª≠a</span>
+                        <input type="text" id="searchInput" placeholder="T√¨m ki·∫øm nh√¢n vi√™n..." onkeyup="searchUsers()">
                     </div>
                     <select id="roleFilter" onchange="filterUsers()">
-                        <option value="">T?t c? vai trÚ</option>
-                        <option value="MANAGER">Qu?n l˝</option>
-                        <option value="EMPLOYEE">Nh‚n viÍn</option>
+                        <option value="">T·∫•t c·∫£ vai tr√≤</option>
+                        <option value="MANAGER">Qu·∫£n l√Ω</option>
+                        <option value="EMPLOYEE">Nh√¢n vi√™n</option>
                     </select>
                     <select id="statusFilter" onchange="filterUsers()">
-                        <option value="">T?t c? tr?ng th·i</option>
-                        <option value="active">Ho?t d?ng</option>
-                        <option value="inactive">VÙ hi?u</option>
+                        <option value="">T·∫•t c·∫£ tr·∫°ng th√°i</option>
+                        <option value="active">Ho·∫°t ƒë·ªông</option>
+                        <option value="inactive">V√¥ hi·ªáu</option>
                     </select>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Nh‚n viÍn</th>
-                            <th>TÍn dang nh?p</th>
-                            <th>Vai trÚ</th>
-                            <th>Tr?ng th·i</th>
-                            <th>B?t/T?t</th>
-                            <th>Thao t·c</th>
+                            <th>Nh√¢n vi√™n</th>
+                            <th>T√™n dang nh·∫≠p</th>
+                            <th>Vai tr√≤</th>
+                            <th>Tr·∫°ng th√°i</th>
+                            <th>B·∫≠t/T·∫Øt</th>
+                            <th>Thao t√°c</th>
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <tr><td colspan="6" class="loading">–ang t?i...</td></tr>
+                        <tr><td colspan="6" class="loading">ƒêang t·∫£i...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -505,18 +505,18 @@
     <div class="modal" id="userModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">ThÍm nh‚n viÍn m?i</h3>
+                <h3 class="modal-title" id="modalTitle">Th√™m nh√¢n vi√™n m·ªõi</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form id="userForm" onsubmit="saveUser(event)">
                 <input type="hidden" id="userId">
                 <div class="form-group">
-                    <label>H? tÍn *</label>
+                    <label>H·ªç t√™n *</label>
                     <input type="text" id="userFullName" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>TÍn dang nh?p *</label>
+                        <label>T√™n dang nh·∫≠p *</label>
                         <input type="text" id="userUsername" required>
                     </div>
                     <div class="form-group">
@@ -526,25 +526,25 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>M?t kh?u <span id="passwordHint">(d? tr?ng n?u khÙng d?i)</span></label>
+                        <label>M·∫≠t kh·∫©u <span id="passwordHint">(ƒë·ªÉ tr·ªëng n·∫øu kh√¥ng ƒë·ªïi)</span></label>
                         <input type="password" id="userPassword">
                     </div>
                     <div class="form-group">
-                        <label>Vai trÚ *</label>
+                        <label>Vai tr√≤ *</label>
                         <select id="userRole" required>
-                            <option value="EMPLOYEE">Nh‚n viÍn</option>
-                            <option value="MANAGER">Qu?n l˝</option>
+                            <option value="EMPLOYEE">Nh√¢n vi√™n</option>
+                            <option value="MANAGER">Qu·∫£n l√Ω</option>
                             <option value="ADMIN">Admin</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>S? di?n tho?i</label>
+                    <label>S·ªë ƒëi·ªán tho·∫°i</label>
                     <input type="tel" id="userPhone">
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal()">H?y</button>
-                    <button type="submit" class="btn btn-primary">Luu</button>
+                    <button type="button" class="btn" onclick="closeModal()">H·ªßy</button>
+                    <button type="submit" class="btn btn-primary">L∆∞u</button>
                 </div>
             </form>
         </div>
@@ -552,8 +552,8 @@
 
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="–Ûng">◊</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h‡ng & Gi· v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="ƒê√≥ng">√ó</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nh·∫≠p h√†ng & Gi√° v·ªën"></iframe>
     </aside>
 
     <script>
@@ -575,7 +575,7 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    // L?c b? OWNER v‡ ADMIN vÏ khÙng do Owner qu?n l˝
+                    // L·ªçc b·ªè OWNER v√† ADMIN v√¨ kh√¥ng do Owner qu·∫£n l√Ω
                     allUsers = data.filter(u => u.role !== 'OWNER' && u.role !== 'ADMIN');
                     calculateStats();
                     renderUsers(allUsers);
@@ -594,10 +594,10 @@
 
         function getRoleBadge(role) {
             const badges = {
-                'OWNER': '<span class="badge badge-owner">?? Owner</span>',
-                'ADMIN': '<span class="badge badge-admin">? Admin</span>',
-                'MANAGER': '<span class="badge badge-manager">?? Qu?n l˝</span>',
-                'EMPLOYEE': '<span class="badge badge-employee">?? Nh‚n viÍn</span>'
+                'OWNER': '<span class="badge badge-owner">Owner</span>',
+                'ADMIN': '<span class="badge badge-admin">Admin</span>',
+                'MANAGER': '<span class="badge badge-manager">Qu·∫£n l√Ω</span>',
+                'EMPLOYEE': '<span class="badge badge-employee">Nh√¢n vi√™n</span>'
             };
             return badges[role] || badges['EMPLOYEE'];
         }
@@ -614,7 +614,7 @@
         function renderUsers(users) {
             const tbody = document.getElementById('usersTableBody');
             if (!users.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">KhÙng cÛ nh‚n viÍn n‡o</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">Kh√¥ng c√≥ nh√¢n vi√™n n√†o</td></tr>';
                 return;
             }
 
@@ -635,7 +635,7 @@
                         <td>${getRoleBadge(user.role)}</td>
                         <td>
                             <span class="badge ${isEnabled ? 'badge-active' : 'badge-inactive'}">
-                                ${isEnabled ? '? Ho?t d?ng' : '?? VÙ hi?u'}
+                                ${isEnabled ? 'Ho·∫°t ƒë·ªông' : 'V√¥ hi·ªáu'}
                             </span>
                         </td>
                         <td>
@@ -645,8 +645,8 @@
                             </label>
                         </td>
                         <td class="actions">
-                            <button class="btn btn-sm btn-primary" onclick="editUser(${user.id})">??</button>
-                            ${user.role !== 'OWNER' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">???</button>` : ''}
+                            <button class="btn btn-sm btn-primary" onclick="editUser(${user.id})">S·ª≠a</button>
+                            ${user.role !== 'OWNER' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">X√≥a</button>` : ''}
                         </td>
                     </tr>
                 `;
@@ -690,18 +690,18 @@
                     loadUsers();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('L·ªói: ' + error);
                     loadUsers(); // Reload to reset toggle state
                 }
             } catch (e) {
                 console.error('Error toggling user:', e);
-                alert('L?i khi thay d?i tr?ng th·i');
+                alert('L·ªói khi thay ƒë·ªïi tr·∫°ng th√°i');
                 loadUsers();
             }
         }
 
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'ThÍm nh‚n viÍn m?i';
+            document.getElementById('modalTitle').textContent = 'Th√™m nh√¢n vi√™n m·ªõi';
             document.getElementById('userForm').reset();
             document.getElementById('userId').value = '';
             document.getElementById('userUsername').disabled = false;
@@ -714,7 +714,7 @@
             const user = allUsers.find(u => u.id === id);
             if (!user) return;
 
-            document.getElementById('modalTitle').textContent = 'Ch?nh s?a nh‚n viÍn';
+            document.getElementById('modalTitle').textContent = 'Ch·ªçnh s·ª≠a nh√¢n vi√™n';
             document.getElementById('userId').value = user.id;
             document.getElementById('userFullName').value = user.fullName || '';
             document.getElementById('userUsername').value = user.username || '';
@@ -761,21 +761,21 @@
                 });
 
                 if (res.ok) {
-                    alert(id ? 'C?p nh?t th‡nh cÙng!' : 'ThÍm nh‚n viÍn th‡nh cÙng!');
+                    alert(id ? 'C·∫≠p nh·∫≠t th√†nh c√¥ng!' : 'Th√™m nh√¢n vi√™n th√†nh c√¥ng!');
                     closeModal();
                     loadUsers();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('L·ªói: ' + error);
                 }
             } catch (e) {
                 console.error('Error saving user:', e);
-                alert('L?i khi luu nh‚n viÍn');
+                alert('L·ªói khi luu nh√¢n vi√™n');
             }
         }
 
         async function deleteUser(id) {
-            if (!confirm('B?n cÛ ch?c mu?n xÛa nh‚n viÍn n‡y?')) return;
+            if (!confirm('B·∫°n c√≥ ch·∫Øc mu·ªën x√≥a nh√¢n vi√™n n√†y?')) return;
 
             try {
                 const res = await fetch(`${API_BASE}/users/${id}`, {
@@ -784,11 +784,11 @@
                 });
 
                 if (res.ok) {
-                    alert('–„ xÛa nh‚n viÍn');
+                    alert('ƒê√£ x√≥a nh√¢n vi√™n');
                     loadUsers();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('L·ªói: ' + error);
                 }
             } catch (e) {
                 console.error('Error deleting user:', e);

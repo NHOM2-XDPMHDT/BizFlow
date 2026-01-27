@@ -601,7 +601,7 @@
             if (!confirm(`Bạn có chắc muốn ${statusText} danh mục này?`)) return;
 
             try {
-                // L?y th�ng tin danh m?c hi?n t?i
+                // Lấy thông tin danh mục hiện tại
                 const getRes = await fetch(`${API_BASE}/categories/${id}`, {
                     headers: getAuthHeaders()
                 });
