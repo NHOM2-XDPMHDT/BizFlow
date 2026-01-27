@@ -1670,7 +1670,7 @@ function getTierByPoints(points) {
     if (points >= 9000) return 'VANG';
     if (points >= 3000) return 'BAC';
     if (points >= 1000) return 'DONG';
-    return '';
+    return 'DONG'; // Default tier for members with < 1000 points
 }
 
 function getEffectiveTier(customer) {
