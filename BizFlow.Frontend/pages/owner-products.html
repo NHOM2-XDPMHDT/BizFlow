@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - Qu?n l� s?n ph?m</title>
+    <title>BizFlow - Quản lý sản phẩm</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -344,69 +344,69 @@
             </div>
             <nav class="nav">
                 <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                    <span class="icon">📊</span><span>Tổng quan</span>
                 </a>
                 <a class="nav-item" href="owner-reports.html">
-                    <span class="icon">??</span><span>B�o c�o doanh thu</span>
+                    <span class="icon">📈</span><span>Báo cáo doanh thu</span>
                 </a>
                 <a class="nav-item active" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">📦</span><span>Sản phẩm</span>
                 </a>
                 <a class="nav-item" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">🏷️</span><span>Danh mục</span>
                 </a>
                 <a class="nav-item" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l� kho</span>
+                    <span class="icon">📦</span><span>Quản lý kho</span>
                 </a>
                 <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
-                    <span class="icon">??</span><span>Nh?p h�ng & Gi� v?n</span>
+                    <span class="icon">🛒</span><span>Nhập hàng & Giá vốn</span>
                 </a>
                 <a class="nav-item" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l� nh�n vi�n</span>
+                    <span class="icon">👥</span><span>Quản lý nhân viên</span>
                 </a>
                 <a class="nav-item" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m�i</span>
+                    <span class="icon">🎁</span><span>Khuyến mãi</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">⚙️</span><span>Thiết lập</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">??? Qu?n l� s?n ph?m</h1>
-                <button class="btn btn-primary" onclick="openAddModal()">+ Th�m s?n ph?m</button>
+                <h1 class="page-title">📦 Quản lý sản phẩm</h1>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Thêm sản phẩm</button>
             </div>
 
             <div class="toolbar">
                 <div class="search-box">
-                    <span>??</span>
-                    <input type="text" id="searchInput" placeholder="T�m ki?m s?n ph?m..." onkeyup="searchProducts()">
+                    <span>🔍</span>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." onkeyup="searchProducts()">
                 </div>
                 <select id="categoryFilter" onchange="loadProducts()">
-                    <option value="">T?t c? danh m?c</option>
+                    <option value="">Tất cả danh mục</option>
                 </select>
             </div>
 
             <div class="card">
-                <div class="card-title">Danh s�ch s?n ph?m (Bao g?m gi� v?n - ch? Owner xem du?c)</div>
+                <div class="card-title">Danh sách sản phẩm (Bao gồm giá vốn - chỉ Owner xem được)</div>
                 <table>
                     <thead>
                         <tr>
-                            <th>M� SP</th>
-                            <th>T�n s?n ph?m</th>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
                             <th>Barcode</th>
-                            <th>Gi� v?n</th>
-                            <th>Gi� b�n</th>
-                            <th>L?i nhu?n</th>
-                            <th>T?n kho</th>
-                            <th>Tr?ng th�i</th>
-                            <th>Thao t�c</th>
+                            <th>Giá vốn</th>
+                            <th>Giá bán</th>
+                            <th>Lợi nhuận</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="9" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="9" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -417,18 +417,18 @@
     <div class="modal" id="productModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Th�m s?n ph?m m?i</h3>
+                <h3 class="modal-title" id="modalTitle">Thêm sản phẩm mới</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form id="productForm" onsubmit="saveProduct(event)">
                 <input type="hidden" id="productId">
                 <div class="form-group">
-                    <label>T�n s?n ph?m *</label>
+                    <label>Tên sản phẩm *</label>
                     <input type="text" id="productName" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>M� s?n ph?m</label>
+                        <label>Mã sản phẩm</label>
                         <input type="text" id="productCode">
                     </div>
                     <div class="form-group">
@@ -438,33 +438,33 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Gi� v?n *</label>
+                        <label>Giá vốn *</label>
                         <input type="number" id="productCostPrice" required min="0">
                     </div>
                     <div class="form-group">
-                        <label>Gi� b�n *</label>
+                        <label>Giá bán *</label>
                         <input type="number" id="productPrice" required min="0">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Danh m?c</label>
+                        <label>Danh mục</label>
                         <select id="productCategory">
-                            <option value="">Ch?n danh m?c</option>
+                            <option value="">Chọn danh mục</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>�on v?</label>
-                        <input type="text" id="productUnit" placeholder="VD: c�i, h?p, kg">
+                        <label>Đơn vị</label>
+                        <input type="text" id="productUnit" placeholder="VD: cái, hộp, kg">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>M� t?</label>
+                    <label>Mô tả</label>
                     <textarea id="productDescription" rows="3"></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal()">H?y</button>
-                    <button type="submit" class="btn btn-primary">Luu s?n ph?m</button>
+                    <button type="button" class="btn" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
                 </div>
             </form>
         </div>
@@ -540,7 +540,7 @@
         function renderProducts(products) {
             const tbody = document.getElementById('productsTableBody');
             if (!products.length) {
-                tbody.innerHTML = '<tr><td colspan="9" class="loading">Kh�ng c� s?n ph?m</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">Không có sản phẩm</td></tr>';
                 return;
             }
 
@@ -561,12 +561,12 @@
                         <td>${p.stock || 0}</td>
                         <td>
                             <button class="btn btn-sm ${p.status === 'active' ? 'btn-success' : 'btn-danger'}" onclick="toggleProductStatus(${p.id}, '${p.status}')">
-                                ${p.status === 'active' ? '? �ang b�n' : '?? Ng?ng b�n'}
+                                ${p.status === 'active' ? '✅ Đang bán' : '❌ Ngừng bán'}
                             </button>
                         </td>
                         <td class="actions">
-                            <button class="btn btn-sm btn-primary" onclick="editProduct(${p.id})">??</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">???</button>
+                            <button class="btn btn-sm btn-primary" onclick="editProduct(${p.id})">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">🗑️</button>
                         </td>
                     </tr>
                 `;
@@ -574,7 +574,7 @@
         }
 
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Th�m s?n ph?m m?i';
+            document.getElementById('modalTitle').textContent = 'Thêm sản phẩm mới';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
             document.getElementById('productModal').classList.add('active');
@@ -584,7 +584,7 @@
             const product = allProducts.find(p => p.id === id);
             if (!product) return;
 
-            document.getElementById('modalTitle').textContent = 'Ch?nh s?a s?n ph?m';
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa sản phẩm';
             document.getElementById('productId').value = product.id;
             document.getElementById('productName').value = product.name || '';
             document.getElementById('productCode').value = product.code || '';
@@ -630,21 +630,21 @@
                 });
 
                 if (res.ok) {
-                    alert(id ? 'C?p nh?t th�nh c�ng!' : 'Th�m s?n ph?m th�nh c�ng!');
+                    alert(id ? 'Cập nhật thành công!' : 'Thêm sản phẩm thành công!');
                     closeModal();
                     loadProducts();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error saving product:', e);
-                alert('L?i khi luu s?n ph?m');
+                alert('Lỗi khi lưu sản phẩm');
             }
         }
 
         async function deleteProduct(id) {
-            if (!confirm('B?n c� ch?c mu?n x�a s?n ph?m n�y?')) return;
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
 
             try {
                 const res = await fetch(`${API_BASE}/products/${id}`, {
@@ -653,10 +653,10 @@
                 });
 
                 if (res.ok) {
-                    alert('�� x�a s?n ph?m (soft delete)');
+                    alert('Đã xóa sản phẩm (soft delete)');
                     loadProducts();
                 } else {
-                    alert('L?i khi x�a s?n ph?m');
+                    alert('Lỗi khi xóa sản phẩm');
                 }
             } catch (e) {
                 console.error('Error deleting product:', e);
@@ -665,9 +665,9 @@
 
         async function toggleProductStatus(id, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            const statusText = newStatus === 'active' ? '�ang b�n' : 'Ng?ng b�n';
+            const statusText = newStatus === 'active' ? 'Đang bán' : 'Ngừng bán';
             
-            if (!confirm(`Chuy?n tr?ng th�i s?n ph?m th�nh "${statusText}"?`)) return;
+            if (!confirm(`Chuyển trạng thái sản phẩm thành "${statusText}"?`)) return;
 
             try {
                 const product = allProducts.find(p => p.id === id);
@@ -682,7 +682,7 @@
                 if (res.ok) {
                     loadProducts();
                 } else {
-                    alert('L?i khi thay d?i tr?ng th�i');
+                    alert('Lỗi khi thay đổi trạng thái');
                 }
             } catch (e) {
                 console.error('Error toggling status:', e);
@@ -699,8 +699,8 @@
         
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="��ng">�</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h�ng & Gi� v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="Đóng">✕</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nhập hàng & Giá vốn"></iframe>
     </aside>
     <script>
         (function () {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - Qu?n l� danh m?c</title>
+    <title>BizFlow - Quản lý danh mục</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -321,64 +321,64 @@
             </div>
             <nav class="nav">
                 <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                    <span class="icon">📊</span><span>Tổng quan</span>
                 </a>
                 <a class="nav-item" href="owner-reports.html">
-                    <span class="icon">??</span><span>B�o c�o doanh thu</span>
+                    <span class="icon">📈</span><span>Báo cáo doanh thu</span>
                 </a>
                 <a class="nav-item" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">📦</span><span>Sản phẩm</span>
                 </a>
                 <a class="nav-item active" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">🏷️</span><span>Danh mục</span>
                 </a>
                 <a class="nav-item" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l� kho</span>
+                    <span class="icon">📦</span><span>Quản lý kho</span>
                 </a>
                 <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
-                    <span class="icon">??</span><span>Nh?p h�ng & Gi� v?n</span>
+                    <span class="icon">🛒</span><span>Nhập hàng & Giá vốn</span>
                 </a>
                 <a class="nav-item" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l� nh�n vi�n</span>
+                    <span class="icon">👥</span><span>Quản lý nhân viên</span>
                 </a>
                 <a class="nav-item" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m�i</span>
+                    <span class="icon">🎁</span><span>Khuyến mãi</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">⚙️</span><span>Thiết lập</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">?? Qu?n l� danh m?c</h1>
-                <button class="btn btn-primary" onclick="openAddModal()">+ Th�m danh m?c</button>
+                <h1 class="page-title">🏷️ Quản lý danh mục</h1>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Thêm danh mục</button>
             </div>
 
             <div class="card">
-                <div class="card-title">Danh s�ch danh m?c</div>
+                <div class="card-title">Danh sách danh mục</div>
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>T�n danh m?c</th>
-                            <th>M� t?</th>
-                            <th>Danh m?c cha</th>
-                            <th>S? s?n ph?m</th>
-                            <th>Tr?ng th�i</th>
-                            <th>Thao t�c</th>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Danh mục cha</th>
+                            <th>Số sản phẩm</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="categoriesTableBody">
-                        <tr><td colspan="7" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="7" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Root Categories with Tree View -->
             <div class="card">
-                <div class="card-title">?? C?u tr�c danh m?c</div>
+                <div class="card-title">🌳 Cấu trúc danh mục</div>
                 <div id="categoryTree"></div>
             </div>
         </div>
@@ -388,28 +388,28 @@
     <div class="modal" id="categoryModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Th�m danh m?c m?i</h3>
+                <h3 class="modal-title" id="modalTitle">Thêm danh mục mới</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form id="categoryForm" onsubmit="saveCategory(event)">
                 <input type="hidden" id="categoryId">
                 <div class="form-group">
-                    <label>T�n danh m?c *</label>
+                    <label>Tên danh mục *</label>
                     <input type="text" id="categoryName" required>
                 </div>
                 <div class="form-group">
-                    <label>Danh m?c cha</label>
+                    <label>Danh mục cha</label>
                     <select id="parentCategory">
-                        <option value="">-- Kh�ng c� (Danh m?c g?c) --</option>
+                        <option value="">-- Không có (Danh mục gốc) --</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>M� t?</label>
+                    <label>Mô tả</label>
                     <textarea id="categoryDescription" rows="3"></textarea>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal()">H?y</button>
-                    <button type="submit" class="btn btn-primary">Luu danh m?c</button>
+                    <button type="button" class="btn" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu danh mục</button>
                 </div>
             </form>
         </div>
@@ -446,7 +446,7 @@
         function renderCategories(categories) {
             const tbody = document.getElementById('categoriesTableBody');
             if (!categories.length) {
-                tbody.innerHTML = '<tr><td colspan="7" class="loading">Chua c� danh m?c n�o</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">Chưa có danh mục nào</td></tr>';
                 return;
             }
 
@@ -461,12 +461,12 @@
                         <td>${cat.productCount || 0}</td>
                         <td>
                             <button class="btn btn-sm ${cat.status === 'ACTIVE' ? 'btn-success' : 'btn-danger'}" onclick="toggleCategoryStatus(${cat.id}, '${cat.status}')">
-                                ${cat.status === 'ACTIVE' ? '??? Hi?n' : '?? ?n'}
+                                ${cat.status === 'ACTIVE' ? '✅ Hiện' : '❌ Ẩn'}
                             </button>
                         </td>
                         <td class="actions">
-                            <button class="btn btn-sm btn-primary" onclick="editCategory(${cat.id})">??</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteCategory(${cat.id})">???</button>
+                            <button class="btn btn-sm btn-primary" onclick="editCategory(${cat.id})">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteCategory(${cat.id})">🗑️</button>
                         </td>
                     </tr>
                 `;
@@ -475,7 +475,7 @@
 
         function populateParentSelect() {
             const select = document.getElementById('parentCategory');
-            select.innerHTML = '<option value="">-- Kh�ng c� (Danh m?c g?c) --</option>';
+            select.innerHTML = '<option value="">-- Không có (Danh mục gốc) --</option>';
             allCategories.forEach(cat => {
                 select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
             });
@@ -504,11 +504,11 @@
             let html = `
                 <div class="category-item">
                     <div>
-                        <span class="category-name">?? ${category.name}</span>
-                        <span class="category-count">(${category.productCount || 0} s?n ph?m)</span>
+                        <span class="category-name">📁 ${category.name}</span>
+                        <span class="category-count">(${category.productCount || 0} sản phẩm)</span>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-sm btn-primary" onclick="editCategory(${category.id})">??</button>
+                        <button class="btn btn-sm btn-primary" onclick="editCategory(${category.id})">✏️</button>
                     </div>
                 </div>
             `;
@@ -536,7 +536,7 @@
         }
 
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Th�m danh m?c m?i';
+            document.getElementById('modalTitle').textContent = 'Thêm danh mục mới';
             document.getElementById('categoryForm').reset();
             document.getElementById('categoryId').value = '';
             document.getElementById('categoryModal').classList.add('active');
@@ -546,7 +546,7 @@
             const category = allCategories.find(c => c.id === id);
             if (!category) return;
 
-            document.getElementById('modalTitle').textContent = 'Ch?nh s?a danh m?c';
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa danh mục';
             document.getElementById('categoryId').value = category.id;
             document.getElementById('categoryName').value = category.name || '';
             document.getElementById('parentCategory').value = category.parentId || '';
@@ -581,40 +581,40 @@
                 });
 
                 if (res.ok) {
-                    alert(id ? 'C?p nh?t th�nh c�ng!' : 'Th�m danh m?c th�nh c�ng!');
+                    alert(id ? 'Cập nhật thành công!' : 'Thêm danh mục thành công!');
                     closeModal();
                     loadCategories();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error saving category:', e);
-                alert('L?i khi luu danh m?c');
+                alert('Lỗi khi lưu danh mục');
             }
         }
 
         async function toggleCategoryStatus(id, currentStatus) {
             const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-            const statusText = newStatus === 'ACTIVE' ? 'hi?n' : '?n';
+            const statusText = newStatus === 'ACTIVE' ? 'hiện' : 'ẩn';
             
-            if (!confirm(`B?n c� ch?c mu?n ${statusText} danh m?c n�y?`)) return;
+            if (!confirm(`Bạn có chắc muốn ${statusText} danh mục này?`)) return;
 
             try {
-                // L?y th�ng tin danh m?c hi?n t?i
+                // L?y th�ng tin danh m?c hi?n t?i
                 const getRes = await fetch(`${API_BASE}/categories/${id}`, {
                     headers: getAuthHeaders()
                 });
                 
                 if (!getRes.ok) {
-                    alert('Kh�ng th? l?y th�ng tin danh m?c');
+                    alert('Không thể lấy thông tin danh mục');
                     return;
                 }
                 
                 const category = await getRes.json();
                 category.status = newStatus;
                 
-                // C?p nh?t danh m?c v?i tr?ng th�i m?i
+                // Cập nhật danh mục với trạng thái mới
                 const res = await fetch(`${API_BASE}/categories/${id}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
@@ -622,20 +622,20 @@
                 });
 
                 if (res.ok) {
-                    alert(`�� ${statusText} danh m?c th�nh c�ng!`);
+                    alert(`Đã ${statusText} danh mục thành công!`);
                     loadCategories();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error toggling category status:', e);
-                alert('L?i khi thay d?i tr?ng th�i');
+                alert('Lỗi khi thay đổi trạng thái');
             }
         }
 
         async function deleteCategory(id) {
-            if (!confirm('B?n c� ch?c mu?n x�a danh m?c n�y?')) return;
+            if (!confirm('Bạn có chắc muốn xóa danh mục này?')) return;
 
             try {
                 const res = await fetch(`${API_BASE}/categories/${id}`, {
@@ -644,11 +644,11 @@
                 });
 
                 if (res.ok) {
-                    alert('�� x�a danh m?c');
+                    alert('Đã xóa danh mục');
                     loadCategories();
                 } else {
                     const error = await res.text();
-                    alert('L?i: ' + error);
+                    alert('Lỗi: ' + error);
                 }
             } catch (e) {
                 console.error('Error deleting category:', e);
@@ -662,8 +662,8 @@
         
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="��ng">�</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h�ng & Gi� v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="Đóng">✕</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nhập hàng & Giá vốn"></iframe>
     </aside>
     <script>
         (function () {

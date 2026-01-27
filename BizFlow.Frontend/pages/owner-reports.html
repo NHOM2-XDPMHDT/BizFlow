@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow - B�o c�o doanh thu</title>
+    <title>BizFlow - Báo cáo doanh thu</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -317,43 +317,43 @@
             </div>
             <nav class="nav">
                 <a class="nav-item" href="owner-dashboard.html">
-                    <span class="icon">??</span><span>T?ng quan</span>
+                    <span class="icon">📊</span><span>Tổng quan</span>
                 </a>
                 <a class="nav-item active" href="owner-reports.html">
-                    <span class="icon">??</span><span>B�o c�o doanh thu</span>
+                    <span class="icon">📈</span><span>Báo cáo doanh thu</span>
                 </a>
                 <a class="nav-item" href="owner-products.html">
-                    <span class="icon">???</span><span>S?n ph?m</span>
+                    <span class="icon">📦</span><span>Sản phẩm</span>
                 </a>
                 <a class="nav-item" href="owner-categories.html">
-                    <span class="icon">??</span><span>Danh m?c</span>
+                    <span class="icon">🏷️</span><span>Danh mục</span>
                 </a>
                 <a class="nav-item" href="owner-inventory.html">
-                    <span class="icon">??</span><span>Qu?n l� kho</span>
+                    <span class="icon">📦</span><span>Quản lý kho</span>
                 </a>
                 <a class="nav-item" href="javascript:void(0)" data-purchase-href="owner-purchase.html" data-purchase-link="true" onclick="return window.openPurchaseDrawer ? window.openPurchaseDrawer(event) : false;">
-                    <span class="icon">??</span><span>Nh?p h�ng & Gi� v?n</span>
+                    <span class="icon">🛒</span><span>Nhập hàng & Giá vốn</span>
                 </a>
                 <a class="nav-item" href="owner-users.html">
-                    <span class="icon">??</span><span>Qu?n l� nh�n vi�n</span>
+                    <span class="icon">👥</span><span>Quản lý nhân viên</span>
                 </a>
                 <a class="nav-item" href="owner-promotions.html">
-                    <span class="icon">??</span><span>Khuy?n m�i</span>
+                    <span class="icon">🎁</span><span>Khuyến mãi</span>
                 </a>
                 <a class="nav-item" href="display-settings.html">
-                    <span class="icon">??</span><span>Thi?t l?p</span>
+                    <span class="icon">⚙️</span><span>Thiết lập</span>
                 </a>
             </nav>
         </aside>
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">?? B�o c�o Doanh thu & L?i nhu?n</h1>
+                <h1 class="page-title">📊 Báo cáo Doanh thu & Lợi nhuận</h1>
                 <div class="date-range">
                     <input type="date" id="startDate">
-                    <span>d?n</span>
+                    <span>đến</span>
                     <input type="date" id="endDate">
-                    <button class="btn btn-primary" onclick="loadCustomReport()">Xem b�o c�o</button>
+                    <button class="btn btn-primary" onclick="loadCustomReport()">Xem báo cáo</button>
                 </div>
             </div>
 
@@ -361,87 +361,87 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="todayRevenue">--</div>
-                    <div class="stat-label">Doanh thu h�m nay</div>
-                    <div class="stat-change positive" id="todayChange">? 0%</div>
+                    <div class="stat-label">Doanh thu hôm nay</div>
+                    <div class="stat-change positive" id="todayChange">↑ 0%</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="weeklyRevenue">--</div>
-                    <div class="stat-label">Doanh thu tu?n n�y</div>
-                    <div class="stat-change positive" id="weeklyChange">? 0%</div>
+                    <div class="stat-label">Doanh thu tuần này</div>
+                    <div class="stat-change positive" id="weeklyChange">↑ 0%</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="monthlyRevenue">--</div>
-                    <div class="stat-label">Doanh thu th�ng n�y</div>
-                    <div class="stat-change positive" id="monthlyChange">? 0%</div>
+                    <div class="stat-label">Doanh thu tháng này</div>
+                    <div class="stat-change positive" id="monthlyChange">↑ 0%</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="profitMargin">--%</div>
-                    <div class="stat-label">Bi�n l?i nhu?n</div>
-                    <div class="stat-change positive" id="marginChange">? 0%</div>
+                    <div class="stat-label">Biên lợi nhuận</div>
+                    <div class="stat-change positive" id="marginChange">↑ 0%</div>
                 </div>
             </div>
 
             <!-- Tab Navigation -->
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="showTab('revenue')">?? Doanh thu</button>
-                <button class="tab-btn" onclick="showTab('topProducts')">?? Top s?n ph?m</button>
-                <button class="tab-btn" onclick="showTab('lowStock')">?? C?nh b�o t?n kho</button>
+                <button class="tab-btn active" onclick="showTab('revenue')">💰 Doanh thu</button>
+                <button class="tab-btn" onclick="showTab('topProducts')">🏆 Top sản phẩm</button>
+                <button class="tab-btn" onclick="showTab('lowStock')">⚠️ Cảnh báo tồn kho</button>
             </div>
 
             <!-- Revenue Tab -->
             <div id="revenueTab" class="card">
-                <div class="card-title">?? Chi ti?t doanh thu theo ng�y</div>
+                <div class="card-title">📅 Chi tiết doanh thu theo ngày</div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Ng�y</th>
+                            <th>Ngày</th>
                             <th>Doanh thu</th>
-                            <th>Chi ph�</th>
-                            <th>L?i nhu?n</th>
-                            <th>Bi�n l?i nhu?n</th>
+                            <th>Chi phí</th>
+                            <th>Lợi nhuận</th>
+                            <th>Biên lợi nhuận</th>
                         </tr>
                     </thead>
                     <tbody id="revenueTableBody">
-                        <tr><td colspan="5" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Top Products Tab -->
             <div id="topProductsTab" class="card" style="display:none;">
-                <div class="card-title">?? Top s?n ph?m b�n ch?y</div>
+                <div class="card-title">🏆 Top sản phẩm bán chạy</div>
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>S?n ph?m</th>
-                            <th>S? lu?ng b�n</th>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng bán</th>
                             <th>Doanh thu</th>
-                            <th>L?i nhu?n</th>
+                            <th>Lợi nhuận</th>
                         </tr>
                     </thead>
                     <tbody id="topProductsTableBody">
-                        <tr><td colspan="5" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Low Stock Tab -->
             <div id="lowStockTab" class="card" style="display:none;">
-                <div class="card-title">?? C?nh b�o t?n kho th?p</div>
+                <div class="card-title">⚠️ Cảnh báo tồn kho thấp</div>
                 <div id="lowStockSummary" style="margin-bottom: 16px;"></div>
                 <table>
                     <thead>
                         <tr>
-                            <th>S?n ph?m</th>
-                            <th>M� s?n ph?m</th>
-                            <th>T?n kho hi?n t?i</th>
-                            <th>Ngu?ng c?nh b�o</th>
-                            <th>Tr?ng th�i</th>
+                            <th>Sản phẩm</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tồn kho hiện tại</th>
+                            <th>Ngưỡng cảnh báo</th>
+                            <th>Trạng thái</th>
                         </tr>
                     </thead>
                     <tbody id="lowStockTableBody">
-                        <tr><td colspan="5" class="loading">�ang t?i...</td></tr>
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -469,7 +469,7 @@
         function formatStatChange(change) {
             const val = parseFloat(change) || 0;
             const isPositive = val >= 0;
-            const icon = isPositive ? '?' : '?';
+            const icon = isPositive ? '↑' : '↓';
             const className = isPositive ? 'positive' : 'negative';
             return `<div class="stat-change ${className}">${icon} ${Math.abs(val).toFixed(1)}%</div>`;
         }
@@ -512,7 +512,7 @@
                     const margin = parseFloat(data.monthlyMargin) || 0;
                     document.getElementById('profitMargin').textContent = margin.toFixed(1) + '%';
                     const marginChange = parseFloat(data.marginChange) || 0;
-                    const marginIcon = marginChange >= 0 ? '?' : '?';
+                    const marginIcon = marginChange >= 0 ? '↑' : '↓';
                     document.getElementById('marginChange').innerHTML = `${marginIcon} ${Math.abs(marginChange).toFixed(1)}%`;
                     document.getElementById('marginChange').className = `stat-change ${marginChange >= 0 ? 'positive' : 'negative'}`;
                 }
@@ -573,7 +573,7 @@
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             if (!startDate || !endDate) {
-                alert('Vui l�ng ch?n kho?ng th?i gian');
+                alert('Vui lòng chọn khoảng thời gian');
                 return;
             }
             try {
@@ -592,7 +592,7 @@
         function renderRevenueTable(items) {
             const tbody = document.getElementById('revenueTableBody');
             if (!items.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="loading">Kh�ng c� d? li?u</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">Không có dữ liệu</td></tr>';
                 return;
             }
             tbody.innerHTML = items.map(item => {
@@ -619,7 +619,7 @@
                     const data = await res.json();
                     const tbody = document.getElementById('topProductsTableBody');
                     if (!data.length) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="loading">Kh�ng c� d? li?u</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="loading">Không có dữ liệu</td></tr>';
                         return;
                     }
                     tbody.innerHTML = data.map((item, idx) => {
@@ -652,9 +652,9 @@
                 if (summaryRes.ok) {
                     const summary = await summaryRes.json();
                     document.getElementById('lowStockSummary').innerHTML = `
-                        <span class="alert-badge critical">?? Nghi�m tr?ng: ${summary.critical || 0}</span>
-                        <span class="alert-badge warning">?? C?nh b�o: ${summary.warning || 0}</span>
-                        <span class="alert-badge normal">?? B�nh thu?ng: ${summary.normal || 0}</span>
+                        <span class="alert-badge critical">🔴 Nghiêm trọng: ${summary.critical || 0}</span>
+                        <span class="alert-badge warning">⚠️ Cảnh báo: ${summary.warning || 0}</span>
+                        <span class="alert-badge normal">✅ Bình thường: ${summary.normal || 0}</span>
                     `;
                 }
 
@@ -666,7 +666,7 @@
                     const data = await res.json();
                     const tbody = document.getElementById('lowStockTableBody');
                     if (!data.length) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="loading">Kh�ng c� s?n ph?m t?n kho th?p ??</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="loading">Không có sản phẩm tồn kho thấp 🎉</td></tr>';
                         return;
                     }
                     tbody.innerHTML = data.map(item => `
@@ -677,7 +677,7 @@
                             <td>${item.threshold}</td>
                             <td>
                                 <span class="alert-badge ${item.alertLevel === 'CRITICAL' ? 'critical' : 'warning'}">
-                                    ${item.alertLevel === 'CRITICAL' ? '?? Nghi�m tr?ng' : '?? C?nh b�o'}
+                                    ${item.alertLevel === 'CRITICAL' ? '🔴 Nghiêm trọng' : '⚠️ Cảnh báo'}
                                 </span>
                             </td>
                         </tr>
@@ -705,8 +705,8 @@
         
     <div id="purchaseBackdrop" class="purchase-backdrop"></div>
     <aside id="purchaseDrawer" class="purchase-drawer" aria-hidden="true">
-        <button id="purchaseClose" class="purchase-close" type="button" aria-label="��ng">�</button>
-        <iframe id="purchaseFrame" class="purchase-frame" title="Nh?p h�ng & Gi� v?n"></iframe>
+        <button id="purchaseClose" class="purchase-close" type="button" aria-label="Đóng">✕</button>
+        <iframe id="purchaseFrame" class="purchase-frame" title="Nhập hàng & Giá vốn"></iframe>
     </aside>
     <script>
         (function () {
