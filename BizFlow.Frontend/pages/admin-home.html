@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizFlow - Admin Trang chủ</title>
+    <link rel="stylesheet" href="../assets/css/admin-base.css">
+</head>
+<body data-admin-page="home">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">BF</div>
+                <div>
+                    <div class="brand-title">BizFlow</div>
+                    <div class="brand-subtitle">Admin Control</div>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Tổng quan</div>
+                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
+                <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
+                <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
+                <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
+                <a class="nav-item" data-page="orders" href="admin-orders.html"><span class="icon" data-icon="O"></span><span>Đơn hàng</span></a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Hệ thống</div>
+                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
+                <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
+                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
+                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div>Trạng thái hệ thống: Online</div>
+                <div>Cập nhật: <span id="sidebarTime">--:--</span></div>
+            </div>
+        </aside>
+
+        <div class="content">
+            <header class="topbar">
+                <div class="top-left">
+                    <div class="page-title">Trang chủ</div>
+                    <div class="search">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Tìm nhanh chức năng hoặc báo cáo..." />
+                    </div>
+                </div>
+                <div class="top-right">
+                    <span class="pill">ADMIN</span>
+                    <div class="user-chip">
+                        <div class="avatar" id="userAvatar">AD</div>
+                        <div>
+                            <div id="userGreeting">Admin</div>
+                            <small>Quản trị viên</small>
+                        </div>
+                        <button class="icon-btn" title="Đăng xuất" onclick="adminLayout.logout()">⎋</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main">
+                <section class="cards">
+                    <div class="card">
+                        <div class="card-title">Trang chủ - Admin</div>
+                        <div class="card-subtitle">Điểm khởi đầu cho toàn bộ hệ thống BizFlow.</div>
+                        <p>BizFlow tập trung quản lý người dùng, sản phẩm, đơn hàng và báo cáo trong một ngăn xếp duy nhất, giúp quản trị viên nắm rõ dữ liệu vận hành.</p>
+                        <div class="actions">
+                            <button class="action-btn primary" type="button" onclick="location.href='admin-dashboard.html'">Mở Dashboard</button>
+                            <button class="action-btn secondary" type="button" onclick="location.href='admin-users.html'">Quản lý người dùng</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Các microservice trọng yếu</div>
+                        <div class="card-subtitle">Kết nối xuyên suốt giữa các nghiệp vụ</div>
+                        <ul class="info-list">
+                            <li>Người dùng: xác thực, tạo tài khoản và phân quyền.</li>
+                            <li>Sản phẩm & tồn kho: danh mục, kho chi nhánh và cảnh báo mức tồn.</li>
+                            <li>Đơn hàng: theo dõi trạng thái thanh toán và vận chuyển.</li>
+                            <li>Báo cáo: xuất CSV/PDF doanh thu, tồn kho và đơn hàng.</li>
+                        </ul>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="card-title">Lộ trình tiếp theo</div>
+                    <div class="card-subtitle">Những cải tiến được lên kế hoạch cho admin</div>
+                    <ul class="info-list">
+                        <li>Triển khai Refresh Token, chức năng quên mật khẩu và đăng ký mới.</li>
+                        <li>Hoàn thiện RBAC, xác thực email và bảo mật hai lớp (2FA).</li>
+                        <li>Theo dõi audit log và tích hợp hệ thống thông báo tức thời.</li>
+                    </ul>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin-layout.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            adminLayout.enforceAuth();
+            adminLayout.renderHeader();
+            adminLayout.setActiveNav();
+        });
+    </script>
+</body>
+</html>
