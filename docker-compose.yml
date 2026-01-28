@@ -57,6 +57,43 @@ services:
     mem_limit: 128m
 
   # =========================
+  # 3.5 KAFKA MESSAGE BROKER
+  # =========================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: bizflow-zookeeper
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: bizflow-kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+
+  # =========================
   # 4. API GATEWAY (SPRING CLOUD GATEWAY)
   # =========================
   gateway:
@@ -70,6 +107,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      kafka:
+        condition: service_started
       sales-service:
         condition: service_started
       catalog-service:
@@ -85,6 +124,16 @@ services:
       promotion-service:
         condition: service_started
       ai-service:
+        condition: service_started
+      admin-user-service:
+        condition: service_started
+      admin-home-service:
+        condition: service_started
+      admin-order-service:
+        condition: service_started
+      admin-product-service:
+        condition: service_started
+      admin-report-service:
         condition: service_started
     networks:
       - bizflow-net
@@ -245,7 +294,132 @@ services:
     cpus: 1.0
 
   # =========================
-  # 10. REPORT SERVICE (SPRING BOOT)
+  # 10. ADMIN USER SERVICE
+  # =========================
+  admin-user-service:
+    build:
+      context: ./BizFlow.AdminUserService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-user-service
+    restart: always
+    ports:
+      - "8201:8201"
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom
+      SPRING_MAIN_LAZY_INITIALIZATION: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+    cpus: 0.5
+
+  # =========================
+  # 10.1. ADMIN HOME SERVICE
+  # =========================
+  admin-home-service:
+    build:
+      context: ./BizFlow.AdminHomeService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-home-service
+    restart: always
+    ports:
+      - "8202:8202"
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom
+      SPRING_MAIN_LAZY_INITIALIZATION: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+    cpus: 0.5
+
+  # =========================
+  # 10.2. ADMIN ORDER SERVICE
+  # =========================
+  admin-order-service:
+    build:
+      context: ./BizFlow.AdminOrderService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-order-service
+    restart: always
+    ports:
+      - "8203:8203"
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom
+      SPRING_MAIN_LAZY_INITIALIZATION: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+    cpus: 0.5
+
+  # =========================
+  # 10.3. ADMIN PRODUCT SERVICE
+  # =========================
+  admin-product-service:
+    build:
+      context: ./BizFlow.AdminProductService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-product-service
+    restart: always
+    ports:
+      - "8204:8204"
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom
+      SPRING_MAIN_LAZY_INITIALIZATION: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+    cpus: 0.5
+
+  # =========================
+  # 10.4. ADMIN REPORT SERVICE
+  # =========================
+  admin-report-service:
+    build:
+      context: ./BizFlow.AdminReportService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-report-service
+    restart: always
+    ports:
+      - "8205:8205"
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom
+      SPRING_MAIN_LAZY_INITIALIZATION: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+    cpus: 0.5
+
+  # =========================
+  # 11. REPORT SERVICE (SPRING BOOT)
   # =========================
   report-service:
     build:

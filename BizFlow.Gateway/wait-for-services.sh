@@ -1,7 +1,7 @@
 #!/bin/sh
 # Wait script for Gateway to ensure backend services are ready
 
-echo "â³ Checking backend services..."
+echo "Checking backend services..."
 
 # Wait for MySQL only (fastest check)
 until nc -z mysql 3306 2>/dev/null; do
@@ -9,5 +9,5 @@ until nc -z mysql 3306 2>/dev/null; do
   sleep 2
 done
 
-echo "âœ… MySQL ready, starting Gateway..."
+echo "MySQL ready, starting Gateway..."
 exec java -jar /app/app.jar
