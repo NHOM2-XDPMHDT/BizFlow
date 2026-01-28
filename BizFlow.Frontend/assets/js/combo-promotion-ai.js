@@ -207,9 +207,10 @@ const ComboPromotionAI = {
      * Format promotions từ backend response
      * 
      * @param {Array} promotions - Khuyến mãi từ backend
+     * @param {Array} productList - Danh sách sản phẩm (optional, để lookup tên)
      * @returns {Array} - Promotions theo format AI
      */
-    formatPromotions(promotions) {
+    formatPromotions(promotions, productList = []) {
         return promotions.map(promo => ({
             id: promo.id,
             code: promo.code,
@@ -217,15 +218,41 @@ const ComboPromotionAI = {
             discount_type: promo.discountType,
             discount_value: promo.discountValue,
             active: promo.active,
-            bundle_items: (promo.bundleItems || []).map(bundle => ({
-                bundle_id: bundle.id,
-                main_product_id: bundle.mainProductId,
-                main_product_name: bundle.mainProductName || 'Unknown',
-                gift_product_id: bundle.giftProductId,
-                gift_product_name: bundle.giftProductName || 'Unknown',
-                main_quantity: bundle.mainQuantity,
-                gift_quantity: bundle.giftQuantity
-            }))
+            bundle_items: (promo.bundleItems || []).map(bundle => {
+                // Tra cứu tên sản phẩm nếu chưa có
+                let mainProductName = bundle.mainProductName;
+                let giftProductName = bundle.giftProductName;
+                
+                if ((!mainProductName || mainProductName === 'Unknown') && productList.length > 0) {
+                    const mainProduct = productList.find(p => 
+                        Number(p.id) === Number(bundle.mainProductId) || 
+                        Number(p.productId) === Number(bundle.mainProductId)
+                    );
+                    if (mainProduct) {
+                        mainProductName = mainProduct.name || mainProduct.productName || mainProduct.product_name;
+                    }
+                }
+                
+                if ((!giftProductName || giftProductName === 'Unknown') && productList.length > 0) {
+                    const giftProduct = productList.find(p => 
+                        Number(p.id) === Number(bundle.giftProductId) || 
+                        Number(p.productId) === Number(bundle.giftProductId)
+                    );
+                    if (giftProduct) {
+                        giftProductName = giftProduct.name || giftProduct.productName || giftProduct.product_name;
+                    }
+                }
+                
+                return {
+                    bundle_id: bundle.id,
+                    main_product_id: bundle.mainProductId,
+                    main_product_name: mainProductName || `Sản phẩm #${bundle.mainProductId}`,
+                    gift_product_id: bundle.giftProductId,
+                    gift_product_name: giftProductName || `Sản phẩm #${bundle.giftProductId}`,
+                    main_quantity: bundle.mainQuantity,
+                    gift_quantity: bundle.giftQuantity
+                };
+            })
         }));
     }
 };

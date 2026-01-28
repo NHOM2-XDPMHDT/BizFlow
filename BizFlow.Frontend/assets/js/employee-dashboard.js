@@ -3768,8 +3768,8 @@ async function analyzeCartForCombo() {
             return;
         }
         
-        // Format promotions cho AI
-        const formattedPromotions = ComboPromotionAI.formatPromotions(allPromotions);
+        // Format promotions cho AI (truyền products để lookup tên)
+        const formattedPromotions = ComboPromotionAI.formatPromotions(allPromotions, products);
         
         console.log('[analyzeCartForCombo] Analyzing:', {
             cartItems: cartItems.length,
