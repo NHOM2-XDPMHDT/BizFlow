@@ -11,4 +11,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=builder /app/target/bizflow-gateway-*.jar app.jar
 EXPOSE 8000
-ENTRYPOINT ["./wait-for-services.sh"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
