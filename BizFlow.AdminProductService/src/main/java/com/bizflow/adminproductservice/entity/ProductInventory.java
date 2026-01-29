@@ -12,18 +12,22 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "product_inventory")
+@Table(name = "products")
 public class ProductInventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
     private String sku;
 
-    @Column(nullable = false)
+    @Column(name = "product_name", nullable = false)
     private String name;
+
+    @Column(name = "category_id")
+    private Long categoryId;
 
     private String category;
 
@@ -32,10 +36,20 @@ public class ProductInventory {
     private Integer stock = 0;
 
     private Double price = 0.0;
+    
+    @Column(name = "cost_price")
+    private Double costPrice;
+    
+    private String barcode;
+    
+    private String unit;
+    
+    private String status;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @SuppressWarnings("unused")
     @PrePersist
     void prePersist() {
         if (updatedAt == null) {
@@ -43,6 +57,7 @@ public class ProductInventory {
         }
     }
 
+    @SuppressWarnings("unused")
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
@@ -110,5 +125,45 @@ public class ProductInventory {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Double getCostPrice() {
+        return costPrice;
+    }
+
+    public void setCostPrice(Double costPrice) {
+        this.costPrice = costPrice;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

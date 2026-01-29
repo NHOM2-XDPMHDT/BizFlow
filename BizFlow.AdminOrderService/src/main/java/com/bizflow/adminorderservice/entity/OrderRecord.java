@@ -11,7 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "order_records")
+@Table(name = "orders")
 public class OrderRecord {
 
     @Id
@@ -33,6 +33,7 @@ public class OrderRecord {
     @Column(name = "created_at")
     private Instant createdAt;
 
+    @SuppressWarnings("unused")
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

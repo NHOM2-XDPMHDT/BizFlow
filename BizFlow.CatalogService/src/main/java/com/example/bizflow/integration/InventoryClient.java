@@ -35,7 +35,7 @@ public class InventoryClient {
             );
             StockItem[] body = response.getBody();
             return body == null ? Collections.emptyList() : Arrays.asList(body);
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return Collections.emptyList();
         }
     }
@@ -56,7 +56,7 @@ public class InventoryClient {
                     request,
                     Void.class
             );
-        } catch (Exception ignored) {
+        } catch (org.springframework.web.client.RestClientException ignored) {
         }
     }
 
@@ -88,11 +88,52 @@ public class InventoryClient {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class ReceiptRequest {
         public Long productId;
         public Integer quantity;
         public BigDecimal unitPrice;
         public String note;
         public Long userId;
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Long productId) {
+            this.productId = productId;
+        }
+
+        public Integer getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(Integer quantity) {
+            this.quantity = quantity;
+        }
+
+        public BigDecimal getUnitPrice() {
+            return unitPrice;
+        }
+
+        public void setUnitPrice(BigDecimal unitPrice) {
+            this.unitPrice = unitPrice;
+        }
+
+        public String getNote() {
+            return note;
+        }
+
+        public void setNote(String note) {
+            this.note = note;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
     }
 }

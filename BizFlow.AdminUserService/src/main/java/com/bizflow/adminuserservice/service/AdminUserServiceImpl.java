@@ -189,4 +189,24 @@ public class AdminUserServiceImpl implements AdminUserService {
         Branch branch = user.getBranch();
         return branch != null && Objects.equals(branchId, branch.getId());
     }
+    
+    public AdminUserDto authenticate(String username, String password) {
+        AdminUser user = adminUserRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        
+        if (!user.getEnabled()) {
+            throw new RuntimeException("Account is disabled");
+        }
+        
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+        
+        return toDto(user);
+    }
+    
+    @Override
+    public long countUsers() {
+        return adminUserRepository.count();
+    }
 }
