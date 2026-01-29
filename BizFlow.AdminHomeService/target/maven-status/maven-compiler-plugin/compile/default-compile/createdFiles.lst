@@ -1,8 +1,6 @@
+com\bizflow\adminhomeservice\dto\HomeMetricDto.class
 com\bizflow\adminhomeservice\AdminHomeServiceApplication.class
-com\bizflow\adminhomeservice\service\AdminHomeService.class
+com\bizflow\adminhomeservice\repository\HomeMetricRepository.class
 com\bizflow\adminhomeservice\entity\HomeMetric.class
 com\bizflow\adminhomeservice\config\RestTemplateConfig.class
-com\bizflow\adminhomeservice\dto\HomeMetricDto.class
-com\bizflow\adminhomeservice\repository\HomeMetricRepository.class
-com\bizflow\adminhomeservice\service\AdminHomeServiceImpl.class
 com\bizflow\adminhomeservice\controller\DashboardController.class

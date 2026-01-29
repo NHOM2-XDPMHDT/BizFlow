@@ -30,7 +30,7 @@ spring:
           predicates:
             - Path=/api/customers/**
         - id: admin-home-service
-          uri: "http://admin-home-service:8202/"
+          uri: "http://localhost:8200/"
           predicates:
             - Path=/api/dashboard/**
         - id: report-service
