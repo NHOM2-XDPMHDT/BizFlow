@@ -20,4 +20,8 @@ public interface AdminUserService {
     AdminUserDto updateAdminUserStatus(Long id, AdminUserStatusUpdateRequest request);
 
     AdminUserDto createBranchStaff(Long branchId, BranchStaffCreationRequest request);
+    
+    AdminUserDto authenticate(String username, String password);
+    
+    long countUsers();
 }

@@ -28,15 +28,18 @@ public class InventoryClient {
             return 0;
         }
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(
+            ResponseEntity<Map<String, Object>> response = restTemplate.getForEntity(
                     baseUrl + "/api/inventory/stock/" + productId,
-                    Map.class
+                    (Class<Map<String, Object>>) (Class<?>) Map.class
             );
-            Object stock = response.getBody() == null ? null : response.getBody().get("stock");
-            if (stock instanceof Number) {
-                return ((Number) stock).intValue();
+            Map<String, Object> body = response.getBody();
+            if (body != null) {
+                Object stock = body.get("stock");
+                if (stock instanceof Number stockNumber) {
+                    return stockNumber.intValue();
+                }
             }
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return 0;
         }
         return 0;
@@ -57,7 +60,7 @@ public class InventoryClient {
                     Void.class
             );
             return true;
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return false;
         }
     }
@@ -74,7 +77,7 @@ public class InventoryClient {
             );
             StockItem[] body = response.getBody();
             return body == null ? Collections.emptyList() : java.util.Arrays.asList(body);
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return Collections.emptyList();
         }
     }

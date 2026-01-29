@@ -187,9 +187,11 @@ public class PromotionServiceImpl implements PromotionService {
                 .orElseThrow(() -> new RuntimeException("Promotion not found"));
         PromotionDTO snapshot = toDTO(promotion);
 
-        promotionRepository.delete(promotion);
-        evictPromotionByCode(promotion.getCode());
-        evictActivePromotionByCode(promotion.getCode());
+        if (promotion != null) {
+            promotionRepository.delete(promotion);
+            evictPromotionByCode(promotion.getCode());
+            evictActivePromotionByCode(promotion.getCode());
+        }
         emitNifiSignalAfterCommit("PROMOTION_DELETED", snapshot);
     }
 
@@ -302,7 +304,8 @@ public class PromotionServiceImpl implements PromotionService {
         promotion.setDiscountValue(dto.getDiscountValue());
         promotion.setStartDate(dto.getStartDate());
         promotion.setEndDate(dto.getEndDate());
-        promotion.setActive(dto.getActive() != null ? dto.getActive() : true);
+        Boolean active = dto.getActive();
+        promotion.setActive(active != null ? active : true);
 
         if (dto.getTargets() != null) {
             if (promotion.getTargets() == null) {
@@ -328,7 +331,8 @@ public class PromotionServiceImpl implements PromotionService {
                 Long giftProductId = bdto.getGiftProductId() != null ? bdto.getGiftProductId() : bdto.getProductId();
                 Integer giftQty = bdto.getGiftQuantity() != null ? bdto.getGiftQuantity() : bdto.getQuantity();
                 String giftDiscountType = bdto.getGiftDiscountType() != null ? bdto.getGiftDiscountType() : "FREE";
-                Double giftDiscountValue = bdto.getGiftDiscountValue() != null ? bdto.getGiftDiscountValue() : 0.0;
+                Double giftDiscountValueObj = bdto.getGiftDiscountValue();
+                Double giftDiscountValue = giftDiscountValueObj != null ? giftDiscountValueObj : 0.0;
                 String status = bdto.getStatus() != null ? bdto.getStatus() : "ACTIVE";
 
                 item.setProductId(mainProductId);
@@ -580,10 +584,15 @@ public class PromotionServiceImpl implements PromotionService {
         if (cache == null) {
             return;
         }
+        String codeKey = dto.getCode();
         if (isActiveNow(dto, LocalDateTime.now())) {
-            cache.put(dto.getCode(), dto);
+            if (codeKey != null) {
+                cache.put(codeKey, dto);
+            }
         } else {
-            cache.evict(dto.getCode());
+            if (codeKey != null) {
+                cache.evict(codeKey);
+            }
         }
     }
 
@@ -743,8 +752,11 @@ public class PromotionServiceImpl implements PromotionService {
         payload.put("timestamp", LocalDateTime.now());
 
         try {
-            restTemplate.postForEntity(nifiSignalUrl, payload, Void.class);
-        } catch (Exception ex) {
+            String url = nifiSignalUrl;
+            if (url != null) {
+                restTemplate.postForEntity(url, payload, Void.class);
+            }
+        } catch (org.springframework.web.client.RestClientException ex) {
             log.warn("Failed to send NiFi signal to {}", nifiSignalUrl, ex);
         }
     }

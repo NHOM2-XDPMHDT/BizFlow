@@ -58,7 +58,8 @@ public class ProductCostService {
         if (newCostPrice == null) {
             throw new IllegalArgumentException("Cost price is required");
         }
-        Integer quantity = request.getQuantity() != null ? request.getQuantity() : 0;
+        Integer qtyValue = request.getQuantity();
+        Integer quantity = qtyValue != null ? qtyValue : 0;
         String note = request.getNote();
 
         ProductCost productCost = productCostRepository.findByProductId(productId)

@@ -15,7 +15,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "admin_users")
+@Table(name = "users")
 public class AdminUser {
 
     @Id
@@ -55,6 +55,7 @@ public class AdminUser {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @SuppressWarnings("unused")
     @PrePersist
     void prePersist() {
         Instant now = Instant.now();
@@ -64,6 +65,7 @@ public class AdminUser {
         updatedAt = now;
     }
 
+    @SuppressWarnings("unused")
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();

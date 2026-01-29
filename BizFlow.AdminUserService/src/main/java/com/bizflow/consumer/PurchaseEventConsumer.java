@@ -57,7 +57,7 @@ public class PurchaseEventConsumer {
                     try {
                         String itemsJson = objectMapper.writeValueAsString(event.getOrderItems());
                         history.setOrderItemsJson(itemsJson);
-                    } catch (Exception e) {
+                    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
                         logger.warn("Failed to serialize order items: {}", e.getMessage());
                     }
                 }
@@ -70,7 +70,7 @@ public class PurchaseEventConsumer {
             } else {
                 logger.warn("Skipping event - missing orderId or customerId: {}", event);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             logger.error("Error processing purchase event: {}", e.getMessage(), e);
         }
     }

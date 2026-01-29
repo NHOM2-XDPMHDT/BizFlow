@@ -34,7 +34,7 @@ public class CustomerClient {
                     CustomerSnapshot.class
             );
             return response.getBody();
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return null;
         }
     }
@@ -50,7 +50,7 @@ public class CustomerClient {
                     "reference", reference
             );
             restTemplate.postForEntity(baseUrl + "/internal/customers/points/add", payload, Void.class);
-        } catch (Exception ignored) {
+        } catch (org.springframework.web.client.RestClientException ignored) {
         }
     }
 
@@ -63,16 +63,19 @@ public class CustomerClient {
                     "customerId", customerId,
                     "points", points
             );
-            ResponseEntity<Map> response = restTemplate.postForEntity(
+            ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(
                     baseUrl + "/internal/customers/points/redeem",
                     payload,
-                    Map.class
+                    (Class<Map<String, Object>>) (Class<?>) Map.class
             );
-            Object redeemed = response.getBody() == null ? null : response.getBody().get("redeemed");
-            if (redeemed instanceof Number) {
-                return ((Number) redeemed).intValue();
+            Map<String, Object> body = response.getBody();
+            if (body != null) {
+                Object redeemed = body.get("redeemed");
+                if (redeemed instanceof Number redeemedNumber) {
+                    return redeemedNumber.intValue();
+                }
             }
-        } catch (Exception ignored) {
+        } catch (org.springframework.web.client.RestClientException ignored) {
         }
         return 0;
     }
@@ -88,7 +91,7 @@ public class CustomerClient {
             );
             Long[] body = response.getBody();
             return body == null ? Collections.emptyList() : java.util.Arrays.asList(body);
-        } catch (Exception ex) {
+        } catch (org.springframework.web.client.RestClientException ex) {
             return Collections.emptyList();
         }
     }

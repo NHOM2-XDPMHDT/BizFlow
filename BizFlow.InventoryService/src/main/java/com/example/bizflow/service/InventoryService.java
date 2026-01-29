@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -50,7 +49,8 @@ public class InventoryService {
             created.setStock(0);
             return created;
         });
-        int current = stockRow.getStock() == null ? 0 : stockRow.getStock();
+        Integer stockValue = stockRow.getStock();
+        int current = stockValue != null ? stockValue : 0;
         int updated = current + quantity;
         stockRow.setStock(updated);
         stockRow.setUpdatedBy(userId);
@@ -86,7 +86,8 @@ public class InventoryService {
             if (item == null || item.getProductId() == null) {
                 continue;
             }
-            int qty = item.getQuantity() == null ? 0 : item.getQuantity();
+            Integer qtyValue = item.getQuantity();
+            int qty = qtyValue != null ? qtyValue : 0;
             if (qty <= 0) {
                 continue;
             }
@@ -98,7 +99,8 @@ public class InventoryService {
                         created.setStock(0);
                         return created;
                     });
-            int current = stockRow.getStock() == null ? 0 : stockRow.getStock();
+            Integer currentValue = stockRow.getStock();
+            int current = currentValue != null ? currentValue : 0;
             if (current < qty) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
@@ -144,7 +146,8 @@ public class InventoryService {
             return created;
         });
 
-        int currentStock = stockRow.getStock() == null ? 0 : stockRow.getStock();
+        Integer currentStockValue = stockRow.getStock();
+        int currentStock = currentStockValue != null ? currentStockValue : 0;
         int difference = newQuantity - currentStock;
 
         if (difference == 0) {
@@ -182,7 +185,8 @@ public class InventoryService {
         InventoryStock stockRow = inventoryStockRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stock record not found"));
 
-        int currentStock = stockRow.getStock() == null ? 0 : stockRow.getStock();
+        Integer currentStockValue = stockRow.getStock();
+        int currentStock = currentStockValue != null ? currentStockValue : 0;
         if (currentStock < quantity) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Insufficient stock. Current: " + currentStock + ", Requested: " + quantity);

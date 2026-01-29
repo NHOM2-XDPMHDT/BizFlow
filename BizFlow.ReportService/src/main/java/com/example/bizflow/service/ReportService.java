@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,7 +93,8 @@ public class ReportService {
                 dayRevenue = dayRevenue.add(safeAmount(order.getTotalAmount()));
                 if (order.getItems() != null) {
                     for (SalesClient.OrderItemSnapshot item : order.getItems()) {
-                        int qty = item.getQuantity() == null ? 0 : item.getQuantity();
+                        Integer qtyValue = item.getQuantity();
+                        int qty = qtyValue != null ? qtyValue : 0;
                         totalItemsSold += qty;
                         BigDecimal costPrice = getCostPrice(item.getProductId());
                         dayCost = dayCost.add(costPrice.multiply(BigDecimal.valueOf(qty)));
@@ -369,7 +368,8 @@ public class ReportService {
                     continue;
                 }
                 ProductSalesData data = productSales.getOrDefault(item.getProductId(), new ProductSalesData());
-                int qty = item.getQuantity() == null ? 0 : item.getQuantity();
+                Integer qtyValue = item.getQuantity();
+                int qty = qtyValue != null ? qtyValue : 0;
                 BigDecimal itemRevenue = safeAmount(item.getPrice()).multiply(BigDecimal.valueOf(qty));
                 data.quantitySold += qty;
                 data.totalRevenue = data.totalRevenue.add(itemRevenue);
@@ -418,7 +418,8 @@ public class ReportService {
         List<InventoryClient.StockSummary> stocks = inventoryClient.getAllStocks();
         List<LowStockAlertDTO> result = new ArrayList<>();
         for (InventoryClient.StockSummary stock : stocks) {
-            int current = stock.getStock() == null ? 0 : stock.getStock();
+            Integer currentValue = stock.getStock();
+            int current = currentValue != null ? currentValue : 0;
             if (current > limit) {
                 continue;
             }
@@ -474,7 +475,8 @@ public class ReportService {
                 continue;
             }
             for (SalesClient.OrderItemSnapshot item : order.getItems()) {
-                total += item.getQuantity() == null ? 0 : item.getQuantity();
+                Integer qtyValue = item.getQuantity();
+                total += qtyValue != null ? qtyValue : 0;
             }
         }
         return total;
