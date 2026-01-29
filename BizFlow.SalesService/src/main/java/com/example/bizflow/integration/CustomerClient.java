@@ -2,6 +2,9 @@ package com.example.bizflow.integration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -63,10 +66,14 @@ public class CustomerClient {
                     "customerId", customerId,
                     "points", points
             );
-            ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(
+            ParameterizedTypeReference<Map<String, Object>> typeRef = 
+                new ParameterizedTypeReference<Map<String, Object>>() {};
+            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(payload);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     baseUrl + "/internal/customers/points/redeem",
-                    payload,
-                    (Class<Map<String, Object>>) (Class<?>) Map.class
+                    HttpMethod.POST,
+                    requestEntity,
+                    typeRef
             );
             Map<String, Object> body = response.getBody();
             if (body != null) {

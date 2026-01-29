@@ -91,4 +91,27 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
+
+    // Admin dashboard methods
+    public long getUsersCount() {
+        return userRepository.count();
+    }
+
+    public long getStaffCount() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.EMPLOYEE)
+                .count();
+    }
+
+    public List<User> getRecentUsers(int limit) {
+        List<User> allUsers = userRepository.findAll();
+        allUsers.sort((a, b) -> {
+            if (b.getCreatedAt() == null)
+                return -1;
+            if (a.getCreatedAt() == null)
+                return 1;
+            return b.getCreatedAt().compareTo(a.getCreatedAt());
+        });
+        return allUsers.stream().limit(limit).toList();
+    }
 }

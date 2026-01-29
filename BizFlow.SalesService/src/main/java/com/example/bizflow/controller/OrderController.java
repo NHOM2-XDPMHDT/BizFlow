@@ -176,7 +176,8 @@ public class OrderController {
         if (paid && !productIds.isEmpty()) {
             for (InventoryClient.StockItem stockItem : inventoryClient.getStocks(new ArrayList<>(productIds))) {
                 if (stockItem != null && stockItem.getProductId() != null) {
-                    stockByProduct.put(stockItem.getProductId(), stockItem.getStock() == null ? 0 : stockItem.getStock());
+                    Integer stock = stockItem.getStock();
+                    stockByProduct.put(stockItem.getProductId(), stock != null ? stock : 0);
                 }
             }
         }
@@ -243,8 +244,8 @@ public class OrderController {
             items.add(item);
         }
 
-        BigDecimal memberDiscount = BigDecimal.ZERO;
         int pointsUsed = 0;
+        BigDecimal memberDiscount = BigDecimal.ZERO;
         if (paid && customer != null && Boolean.TRUE.equals(request.getUsePoints())) {
             DiscountResult result = resolveMemberDiscount(customer, total);
             memberDiscount = result.discount;

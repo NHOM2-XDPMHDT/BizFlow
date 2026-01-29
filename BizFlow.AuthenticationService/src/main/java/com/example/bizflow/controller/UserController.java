@@ -48,7 +48,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
-    public ResponseEntity<?> updateUser(@PathVariable @NonNull Long id, @RequestBody @NonNull CreateUserRequest request) {
+    public ResponseEntity<?> updateUser(@PathVariable @NonNull Long id,
+            @RequestBody @NonNull CreateUserRequest request) {
         try {
             User user = userService.updateUser(id, request);
             return ResponseEntity.ok(user);
@@ -96,5 +97,21 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable @NonNull Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    // Admin dashboard endpoints - no auth required for reading stats
+    @GetMapping("/count")
+    public ResponseEntity<Long> getUsersCount() {
+        return ResponseEntity.ok(userService.getUsersCount());
+    }
+
+    @GetMapping("/staff-count")
+    public ResponseEntity<Long> getStaffCount() {
+        return ResponseEntity.ok(userService.getStaffCount());
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<User>> getRecentUsers(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(userService.getRecentUsers(limit));
     }
 }

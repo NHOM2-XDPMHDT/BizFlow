@@ -9,7 +9,7 @@ function showLoginError(message){
 
 function redirectByRole(role){
   switch(role){
-    case 'ADMIN': window.location.href='/pages/admin-dashboard.html'; break;
+    case 'ADMIN': window.location.href='/pages/admin-home.html'; break;
     case 'OWNER': window.location.href='/pages/owner-dashboard.html'; break;
     case 'MANAGER': window.location.href='/pages/dashboard.html'; break;
     case 'EMPLOYEE': window.location.href='/pages/employee-dashboard.html'; break;

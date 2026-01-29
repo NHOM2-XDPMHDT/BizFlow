@@ -3,9 +3,8 @@ package com.bizflow.adminproductservice.controller;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,8 +17,11 @@ import com.bizflow.adminproductservice.dto.ProductOverviewDto;
 import com.bizflow.adminproductservice.request.ProductStatusUpdateRequest;
 import com.bizflow.adminproductservice.service.AdminProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/admin/products")
+@CrossOrigin(origins = "*")
 public class ProductAdminController {
 
     private final AdminProductService adminProductService;
@@ -31,6 +33,11 @@ public class ProductAdminController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of("status", "ok", "service", "admin-product-service"));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getProductsCount() {
+        return ResponseEntity.ok((long) adminProductService.listProducts(null, null).size());
     }
 
     @GetMapping

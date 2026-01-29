@@ -42,7 +42,8 @@ public class BranchController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBranch(@PathVariable @NonNull Long id, @RequestBody @NonNull CreateBranchRequest request) {
+    public ResponseEntity<?> updateBranch(@PathVariable @NonNull Long id,
+            @RequestBody @NonNull CreateBranchRequest request) {
         try {
             Branch branch = branchService.updateBranch(id, request);
             return ResponseEntity.ok(branch);
@@ -55,5 +56,11 @@ public class BranchController {
     public ResponseEntity<?> deleteBranch(@PathVariable @NonNull Long id) {
         branchService.deleteBranch(id);
         return ResponseEntity.ok("Branch deleted successfully");
+    }
+
+    // Admin dashboard endpoint - no auth required
+    @GetMapping("/count")
+    public ResponseEntity<Long> getBranchesCount() {
+        return ResponseEntity.ok(branchService.getBranchesCount());
     }
 }
