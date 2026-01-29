@@ -1,6 +1,7 @@
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\BizflowApplication.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\config\CorsConfig.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\config\SecurityConfig.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\controller\AdminDashboardController.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\controller\AuthController.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\controller\BranchController.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AuthenticationService\src\main\java\com\example\bizflow\controller\UserController.java

@@ -190,6 +190,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         return branch != null && Objects.equals(branchId, branch.getId());
     }
     
+    @Override
     public AdminUserDto authenticate(String username, String password) {
         AdminUser user = adminUserRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));

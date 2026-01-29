@@ -1,39 +1,61 @@
 package com.bizflow.adminproductservice.entity;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "products", schema = "bizflow_catalog_db")
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
-
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "price", nullable = false)
-    private BigDecimal price;
 
     @Column(name = "category_id")
     private Long categoryId;
 
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
+    @Column(name = "sku", unique = true, nullable = false)
+    private String code;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "barcode")
+    private String barcode;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "product_name", nullable = false)
+    private String name;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "code", nullable = false)
+    private String legacyCode;
+
+    @Column(name = "name", nullable = false)
+    private String legacyName;
+
+    @Column(name = "price", nullable = false, precision = 15, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "cost_price", precision = 12, scale = 2)
+    private BigDecimal costPrice;
+
+    @Column(name = "unit")
+    private String unit;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "stock")
+    private Integer stock;
+
+    // Default constructor
+    public Product() {
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -44,6 +66,30 @@ public class Product {
         this.id = id;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
     public String getName() {
         return name;
     }
@@ -52,12 +98,20 @@ public class Product {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getLegacyCode() {
+        return legacyCode;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setLegacyCode(String legacyCode) {
+        this.legacyCode = legacyCode;
+    }
+
+    public String getLegacyName() {
+        return legacyName;
+    }
+
+    public void setLegacyName(String legacyName) {
+        this.legacyName = legacyName;
     }
 
     public BigDecimal getPrice() {
@@ -68,43 +122,43 @@ public class Product {
         this.price = price;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public BigDecimal getCostPrice() {
+        return costPrice;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
     }
 
-    public Integer getStockQuantity() {
-        return stockQuantity;
+    public String getUnit() {
+        return unit;
     }
 
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getDescription() {
+        return description;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getStatus() {
+        return status;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public Integer getStock() {
+        return stock;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

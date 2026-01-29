@@ -219,11 +219,10 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         const apiEndpoints = {
-            usersCount: '/api/users/count',
-            staffCount: '/api/users/staff-count',
-            branchesCount: '/api/branches/count',
-            recentUsers: '/api/users/recent?limit=10',
-            branches: '/api/branches',
+            completeDashboard: '/api/admin/dashboard/complete',
+            summary: '/api/admin/dashboard/summary',
+            recentUsers: '/api/admin/dashboard/recent-users',
+            branches: '/api/admin/dashboard/branches',
             createUser: '/api/users'
         };
 
@@ -244,26 +243,13 @@
 
         async function loadAdminSummary() {
             try {
-                // Fetch real data from database via API
-                const [usersCount, staffCount, branchesCount] = await Promise.all([
-                    fetch(apiEndpoints.usersCount).then(r => r.json()),
-                    fetch(apiEndpoints.staffCount).then(r => r.json()),
-                    fetch(apiEndpoints.branchesCount).then(r => r.json())
-                ]);
+                // Fetch summary from backend - all logic in backend now
+                const response = await fetch(apiEndpoints.summary);
+                if (!response.ok) throw new Error('Failed to fetch summary');
                 
-                // For product count, we'll add later from CatalogService
-                const productsCount = 155; // Temporary - from phpMyAdmin count
-                
-                const data = {
-                    totalUsers: usersCount,
-                    totalEmployees: staffCount,
-                    totalBranches: branchesCount,
-                    activeBranches: branchesCount,
-                    totalProducts: productsCount,
-                    totalCustomers: 0
-                };
-                
+                const data = await response.json();
                 summaryData = data;
+                
                 document.getElementById('totalUsers').textContent = formatNumber(data.totalUsers);
                 document.getElementById('activeEmployees').textContent = formatNumber(data.totalEmployees);
                 document.getElementById('totalBranches').textContent = formatNumber(data.totalBranches);
@@ -284,8 +270,8 @@
         async function loadRecentUsers() {
             const body = document.getElementById('recentUsersBody');
             try {
-                // Fetch real users from database via API
-                const response = await fetch(apiEndpoints.recentUsers);
+                // Fetch users from backend - data already formatted
+                const response = await fetch(apiEndpoints.recentUsers + '?limit=10');
                 if (!response.ok) throw new Error('Failed to fetch users');
                 
                 const users = await response.json();
@@ -306,7 +292,8 @@
             }
             users.forEach(user => {
                 const row = document.createElement('tr');
-                const roleText = getRoleDisplayName(user.role);
+                // Backend already provides roleDisplay - no need for local mapping
+                const roleText = user.roleDisplay || user.role;
                 row.innerHTML = `
                     <td>${escapeHtml(user.username || '-')}</td>
                     <td>${escapeHtml(user.fullName || '-')}</td>
@@ -317,56 +304,21 @@
             });
         }
 
-        function getRoleDisplayName(role) {
-            const roleMap = {
-                'ADMIN': 'Quản trị viên',
-                'OWNER': 'Chủ cửa hàng',
-                'STAFF': 'Nhân viên',
-                'MANAGER': 'Quản lý',
-                'EMPLOYEE': 'Nhân viên'
-            };
-            return roleMap[role] || role;
-        }
-
         async function loadBranches() {
             const body = document.getElementById('branchTableBody');
             try {
-                // Try API first, fall back to mock data
-                let branches;
-                try {
-                    const response = await fetch(apiEndpoints.branches);
-                    if (!response.ok) throw new Error('API not available');
-                    branches = await response.json();
-                } catch (error) {
-                    // EXACT 2 branches from phpMyAdmin bizflow_auth_db.branches table
-                    console.log('Using exact branches from database screenshot');
-                    branches = [
-                        { 
-                            id: 1,
-                            name: 'TÂN CHÁNH HIỆP', 
-                            ownerName: 'GTVT',
-                            active: true,
-                            address: 'TÂN CHÁNH HIỆP',
-                            phone: '0981764731',
-                            email: 'glvt@gmail.com'
-                        },
-                        { 
-                            id: 2,
-                            name: 'Tân Bình',
-                            ownerName: 'Tân Bình', 
-                            active: true,
-                            address: '123 Street',
-                            phone: '0981764731',
-                            email: 'sadanhthue01@gmail.com'
-                        }
-                    ];
-                }
+                // Fetch branches from backend - data already formatted
+                const response = await fetch(apiEndpoints.branches);
+                if (!response.ok) throw new Error('Failed to fetch branches');
+                
+                const branches = await response.json();
                 
                 body.innerHTML = '';
                 if (!branches.length) {
                     body.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu chi nhánh.</td></tr>';
                     return;
                 }
+                
                 branches.forEach(branch => {
                     const statusText = branch.active ? 'Đang hoạt động' : 'Tạm ngưng';
                     const row = document.createElement('tr');
@@ -379,6 +331,7 @@
                     body.appendChild(row);
                 });
             } catch (error) {
+                console.error('Failed to load branches:', error);
                 body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu chi nhánh.</td></tr>';
             }
         }

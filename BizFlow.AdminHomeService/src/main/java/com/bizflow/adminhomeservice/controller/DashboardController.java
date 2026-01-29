@@ -26,9 +26,6 @@ public class DashboardController {
     @Value("${services.admin-product.url:http://admin-product-service:8204}")
     private String adminProductServiceUrl;
 
-    @Value("${services.admin-order.url:http://admin-order-service:8203}")
-    private String adminOrderServiceUrl;
-
     public DashboardController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }

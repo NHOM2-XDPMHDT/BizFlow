@@ -12,7 +12,7 @@ spring:
         - id: auth-service
           uri: "http://authentication-service:8086/"
           predicates:
-            - Path=/api/auth/**,/api/users/**,/api/branches/**
+            - Path=/api/auth/**,/api/users/**,/api/branches/**,/api/admin/dashboard/**
         - id: sales-service
           uri: "http://sales-service:8081/"
           predicates:
