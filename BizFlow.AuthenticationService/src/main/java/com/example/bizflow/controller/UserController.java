@@ -97,4 +97,20 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
+
+    // Admin dashboard endpoints - no auth required for reading stats
+    @GetMapping("/count")
+    public ResponseEntity<Long> getUsersCount() {
+        return ResponseEntity.ok(userService.getUsersCount());
+    }
+
+    @GetMapping("/staff-count")
+    public ResponseEntity<Long> getStaffCount() {
+        return ResponseEntity.ok(userService.getStaffCount());
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<User>> getRecentUsers(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(userService.getRecentUsers(limit));
+    }
 }

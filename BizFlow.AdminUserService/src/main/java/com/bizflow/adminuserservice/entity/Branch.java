@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "branches")
+@Table(name = "branches", schema = "bizflow_auth_db")
 public class Branch {
 
     @Id

@@ -219,9 +219,11 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         const apiEndpoints = {
-            adminSummary: '/api/dashboard/admin-summary',
-            recentUsers: '/api/dashboard/recent-users',
-            branches: '/api/dashboard/branches',
+            usersCount: '/api/users/count',
+            staffCount: '/api/users/staff-count',
+            branchesCount: '/api/branches/count',
+            recentUsers: '/api/users/recent?limit=10',
+            branches: '/api/branches',
             createUser: '/api/users'
         };
 
@@ -242,24 +244,24 @@
 
         async function loadAdminSummary() {
             try {
-                // Try API first, fall back to mock data if fails
-                let data;
-                try {
-                    const response = await fetch(apiEndpoints.adminSummary);
-                    if (!response.ok) throw new Error('API not available');
-                    data = await response.json();
-                } catch (error) {
-                    // EXACT data from phpMyAdmin screenshots - bizflow_auth_db
-                    console.log('Using exact database data from bizflow_auth_db');
-                    data = {
-                        totalUsers: currentUsers.length || 6,
-                        totalEmployees: (currentUsers.filter(u => u.role !== 'ADMIN').length) || 5,
-                        totalBranches: 2,
-                        activeBranches: 2,
-                        totalProducts: 155,
-                        totalCustomers: 0
-                    };
-                }
+                // Fetch real data from database via API
+                const [usersCount, staffCount, branchesCount] = await Promise.all([
+                    fetch(apiEndpoints.usersCount).then(r => r.json()),
+                    fetch(apiEndpoints.staffCount).then(r => r.json()),
+                    fetch(apiEndpoints.branchesCount).then(r => r.json())
+                ]);
+                
+                // For product count, we'll add later from CatalogService
+                const productsCount = 155; // Temporary - from phpMyAdmin count
+                
+                const data = {
+                    totalUsers: usersCount,
+                    totalEmployees: staffCount,
+                    totalBranches: branchesCount,
+                    activeBranches: branchesCount,
+                    totalProducts: productsCount,
+                    totalCustomers: 0
+                };
                 
                 summaryData = data;
                 document.getElementById('totalUsers').textContent = formatNumber(data.totalUsers);
@@ -269,6 +271,7 @@
                 document.getElementById('totalProducts').textContent = formatNumber(data.totalProducts);
                 document.getElementById('totalCustomers').textContent = formatNumber(data.totalCustomers);
             } catch (error) {
+                console.error('Failed to load admin summary:', error);
                 setTextContent('totalUsers', '--');
                 setTextContent('activeEmployees', '--');
                 setTextContent('totalBranches', '--');
@@ -281,48 +284,16 @@
         async function loadRecentUsers() {
             const body = document.getElementById('recentUsersBody');
             try {
-                // Try API first, fall back to mock data
-                let users;
-                try {
-                    const response = await fetch(apiEndpoints.recentUsers);
-                    if (!response.ok) throw new Error('API not available');
-                    users = await response.json();
-                } catch (error) {
-                    // Load from localStorage first (for newly created users)
-                    const newUsers = JSON.parse(localStorage.getItem('bizflow_new_users') || '[]');
-                    
-                    // EXACT 6 users from phpMyAdmin bizflow_auth_db.users table
-                    console.log('Using exact users from database screenshot');
-                    const baseUsers = [
-                        { username: 'tanbinh', fullName: 'Tấn Bình', role: 'STAFF', email: 'tanbinh@gmail.com', createdAt: '2026-01-21 22:25:46' },
-                        { username: 'tuli', fullName: 'Trần Long Tú', role: 'STAFF', email: 'Tuli@gmail.com', createdAt: '2026-01-03 21:57:14' },
-                        { username: 'nhanvien1', fullName: 'Phạm Huy Đức Viễn', role: 'STAFF', email: 'nhanvien1@gmail.com', createdAt: '2025-12-24 16:44:38' },
-                        { username: 'test', fullName: 'Test User', role: 'STAFF', email: 'test@bizflow.com', createdAt: '2025-12-21 10:47:36' },
-                        { username: 'owner', fullName: 'Store Owner', role: 'OWNER', email: 'owner@bizflow.com', createdAt: '2025-12-21 10:47:36' },
-                        { username: 'admin', fullName: 'Administrator', role: 'ADMIN', email: 'admin@bizflow.com', createdAt: '2025-12-21 10:47:36' }
-                    ];
-                    
-                    // Merge new users with base users, remove duplicates
-                    const allUsers = [...newUsers, ...baseUsers];
-                    const uniqueUsers = allUsers.filter((user, index, self) => 
-                        index === self.findIndex(u => u.username === user.username)
-                    );
-                    
-                    // Sort by creation date (newest first)
-                    users = uniqueUsers.sort((a, b) => 
-                        new Date(b.createdAt) - new Date(a.createdAt)
-                    );
-                    
-                    currentUsers = users;
-                }
+                // Fetch real users from database via API
+                const response = await fetch(apiEndpoints.recentUsers);
+                if (!response.ok) throw new Error('Failed to fetch users');
                 
-                // Store users globally for future updates
-                if (users.length > 0) {
-                    currentUsers = users;
-                }
+                const users = await response.json();
+                currentUsers = users;
                 
                 renderUsersList(users, body);
             } catch (error) {
+                console.error('Failed to load recent users:', error);
                 body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu người dùng.</td></tr>';
             }
         }
@@ -449,19 +420,11 @@
                         createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     };
                     
-                    // Add to beginning of list (most recent)
-                    currentUsers.unshift(newUser);
-                    
-                    // Save new users to localStorage (only custom created ones)
-                    const newUsers = JSON.parse(localStorage.getItem('bizflow_new_users') || '[]');
-                    newUsers.unshift(newUser);
-                    localStorage.setItem('bizflow_new_users', JSON.stringify(newUsers));
-                    
                     status.textContent = 'Tạo tài khoản thành công.';
                     status.classList.add('status-success');
                     form.reset();
                     
-                    // Reload data to show new user
+                    // Reload data from database to show new user
                     await loadAdminSummary();
                     await loadRecentUsers();
                 } catch (error) {

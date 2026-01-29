@@ -66,4 +66,9 @@ public class BranchService {
     public void deleteBranch(@NonNull Long id) {
         branchRepository.deleteById(id);
     }
+
+    // Admin dashboard method
+    public long getBranchesCount() {
+        return branchRepository.count();
+    }
 }

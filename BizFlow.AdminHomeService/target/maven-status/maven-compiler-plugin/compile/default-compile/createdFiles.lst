@@ -1,4 +1,5 @@
 com\bizflow\adminhomeservice\dto\HomeMetricDto.class
+com\bizflow\adminhomeservice\controller\DirectDashboardController.class
 com\bizflow\adminhomeservice\AdminHomeServiceApplication.class
 com\bizflow\adminhomeservice\repository\HomeMetricRepository.class
 com\bizflow\adminhomeservice\entity\HomeMetric.class

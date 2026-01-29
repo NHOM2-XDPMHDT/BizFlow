@@ -4,7 +4,7 @@ spring:
   application:
     name: admin-user-service
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:3306/bizflow_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/bizflow_auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:123456}

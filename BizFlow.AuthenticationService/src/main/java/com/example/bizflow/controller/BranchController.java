@@ -56,4 +56,10 @@ public class BranchController {
         branchService.deleteBranch(id);
         return ResponseEntity.ok("Branch deleted successfully");
     }
+
+    // Admin dashboard endpoint - no auth required
+    @GetMapping("/count")
+    public ResponseEntity<Long> getBranchesCount() {
+        return ResponseEntity.ok(branchService.getBranchesCount());
+    }
 }
