@@ -29,10 +29,14 @@ spring:
           uri: "http://customer-service:8085/"
           predicates:
             - Path=/api/customers/**
+        - id: admin-home-service
+          uri: "http://admin-home-service:8202/"
+          predicates:
+            - Path=/api/dashboard/**
         - id: report-service
           uri: "http://report-service:8087/"
           predicates:
-            - Path=/api/reports/**,/api/dashboard/**
+            - Path=/api/reports/**
         - id: ai-service
           uri: "http://ai-service:5000/"
           predicates:
