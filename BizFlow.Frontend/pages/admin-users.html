@@ -181,9 +181,11 @@
 
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        // API Configuration
         const API_BASE = 'http://localhost:8080/api/admin';
         let currentUser = null;
 
+        // Initialize page
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
@@ -192,8 +194,8 @@
             loadStats();
         });
 
+        // Load statistics from backend
         function loadStats() {
-            // Load user count
             fetch(`${API_BASE}/users/count`)
                 .then(res => res.json())
                 .then(count => {
@@ -201,7 +203,6 @@
                 })
                 .catch(err => console.error('Error loading user count:', err));
 
-            // Load branch count
             fetch(`${API_BASE}/branches/count`)
                 .then(res => res.json())
                 .then(count => {
@@ -210,42 +211,39 @@
                 .catch(err => console.error('Error loading branch count:', err));
         }
 
+        // Load users with filters (backend handles filtering)
         function loadUsers() {
-            const searchQuery = document.getElementById('searchInput').value;
-            const role = document.getElementById('roleFilter').value;
-            const enabled = document.getElementById('statusFilter').value;
-
-            let url = `${API_BASE}/users?`;
-            if (searchQuery) url += `query=${encodeURIComponent(searchQuery)}&`;
-            if (role) url += `role=${role}&`;
-            if (enabled) url += `enabled=${enabled}&`;
-
-            fetch(url)
-                .then(res => res.json())
+            // Backend handles all filtering logic
+            fetch(`${API_BASE}/users`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch users');
+                    return res.json();
+                })
                 .then(users => {
                     displayUsers(users);
                 })
                 .catch(err => {
                     console.error('Error loading users:', err);
                     document.getElementById('usersBody').innerHTML = 
-                        '<tr><td colspan="6" class="empty-box">Lỗi khi tải dữ liệu</td></tr>';
+                        '<tr><td colspan="6" class="empty-box">Lỗi khi tải dữ liệu. Vui lòng kiểm tra kết nối backend.</td></tr>';
                 });
         }
 
+        // Display users in table (presentation only)
         function displayUsers(users) {
             const tbody = document.getElementById('usersBody');
             
             if (!users || users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-box">Không tìm thấy người dùng</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-box">Không có người dùng nào</td></tr>';
                 return;
             }
 
             tbody.innerHTML = users.map(user => `
                 <tr style="cursor: pointer;" onclick="showUserDetail(${user.id})">
-                    <td>${user.username || '-'}</td>
-                    <td>${user.fullName || '-'}</td>
-                    <td>${user.email || '-'}</td>
-                    <td><span class="pill">${user.role || '-'}</span></td>
+                    <td>${escapeHtml(user.username || '-')}</td>
+                    <td>${escapeHtml(user.fullName || '-')}</td>
+                    <td>${escapeHtml(user.email || '-')}</td>
+                    <td><span class="pill">${escapeHtml(user.role || '-')}</span></td>
                     <td><span class="pill ${user.enabled ? 'success' : 'danger'}">${user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa'}</span></td>
                     <td>
                         <button class="action-btn" onclick="event.stopPropagation(); showUserDetail(${user.id})">Xem</button>
@@ -254,39 +252,47 @@
             `).join('');
         }
 
+        // Show user detail (fetch from backend)
         function showUserDetail(userId) {
             fetch(`${API_BASE}/users/${userId}`)
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch user detail');
+                    return res.json();
+                })
                 .then(user => {
-                    currentUser = user;
-                    
-                    document.getElementById('detailId').textContent = user.id || '-';
-                    document.getElementById('detailUsername').textContent = user.username || '-';
-                    document.getElementById('detailFullName').textContent = user.fullName || '-';
-                    document.getElementById('detailEmail').textContent = user.email || '-';
-                    document.getElementById('detailPhone').textContent = user.phoneNumber || '-';
-                    document.getElementById('detailRole').textContent = user.role || '-';
-                    document.getElementById('detailBranch').textContent = user.branchName || 'Chưa phân chi nhánh';
-                    
-                    const statusSpan = document.getElementById('detailStatus');
-                    statusSpan.textContent = user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa';
-                    statusSpan.className = `pill ${user.enabled ? 'success' : 'danger'}`;
-                    
-                    document.getElementById('detailCreatedAt').textContent = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '-';
-                    document.getElementById('detailUpdatedAt').textContent = user.updatedAt ? new Date(user.updatedAt).toLocaleString('vi-VN') : '-';
-                    document.getElementById('detailNote').textContent = user.note || '-';
-
-                    // Update button text
-                    const toggleBtn = document.getElementById('toggleStatusBtn');
-                    toggleBtn.textContent = user.enabled ? 'Vô hiệu hóa' : 'Kích hoạt';
-                    toggleBtn.className = user.enabled ? 'action-btn danger' : 'action-btn primary';
-                    
-                    document.getElementById('userDetailModal').style.display = 'block';
+                    displayUserInModal(user);
                 })
                 .catch(err => {
                     console.error('Error loading user detail:', err);
-                    alert('Không thể tải thông tin người dùng');
+                    alert('Không thể tải thông tin người dùng. Vui lòng thử lại.');
                 });
+        }
+
+        // Display user details in modal (presentation only)
+        function displayUserInModal(user) {
+            currentUser = user;
+            
+            document.getElementById('detailId').textContent = user.id || '-';
+            document.getElementById('detailUsername').textContent = user.username || '-';
+            document.getElementById('detailFullName').textContent = user.fullName || '-';
+            document.getElementById('detailEmail').textContent = user.email || '-';
+            document.getElementById('detailPhone').textContent = user.phoneNumber || '-';
+            document.getElementById('detailRole').textContent = user.role || '-';
+            document.getElementById('detailBranch').textContent = user.branchName || 'Chưa phân chi nhánh';
+            
+            const statusSpan = document.getElementById('detailStatus');
+            statusSpan.textContent = user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa';
+            statusSpan.className = `pill ${user.enabled ? 'success' : 'danger'}`;
+            
+            document.getElementById('detailCreatedAt').textContent = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '-';
+            document.getElementById('detailUpdatedAt').textContent = user.updatedAt ? new Date(user.updatedAt).toLocaleString('vi-VN') : '-';
+            document.getElementById('detailNote').textContent = user.note || '-';
+
+            const toggleBtn = document.getElementById('toggleStatusBtn');
+            toggleBtn.textContent = user.enabled ? 'Vô hiệu hóa' : 'Kích hoạt';
+            toggleBtn.className = user.enabled ? 'action-btn danger' : 'action-btn primary';
+            
+            document.getElementById('userDetailModal').style.display = 'block';
         }
 
         function closeUserModal() {
@@ -294,6 +300,7 @@
             currentUser = null;
         }
 
+        // Toggle user status (backend handles validation and update)
         function toggleUserStatus() {
             if (!currentUser) return;
 
@@ -304,6 +311,7 @@
 
             if (!confirm(confirmMsg)) return;
 
+            // Backend handles all validation and update logic
             fetch(`${API_BASE}/users/${currentUser.id}/status`, {
                 method: 'PATCH',
                 headers: {
@@ -314,20 +322,30 @@
                     note: `${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} bởi admin lúc ${new Date().toLocaleString('vi-VN')}`
                 })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to update user status');
+                return res.json();
+            })
             .then(updatedUser => {
                 alert(`${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} tài khoản thành công!`);
                 closeUserModal();
-                loadUsers();
+                loadUsers(); // Refresh list from backend
             })
             .catch(err => {
                 console.error('Error updating user status:', err);
-                alert('Lỗi khi cập nhật trạng thái người dùng');
+                alert('Lỗi khi cập nhật trạng thái người dùng. Vui lòng thử lại.');
             });
         }
 
         function createNewUser() {
             alert('Chức năng tạo người dùng mới sẽ được phát triển trong phiên bản tiếp theo');
+        }
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Close modal when clicking outside
@@ -337,13 +355,6 @@
                 closeUserModal();
             }
         }
-
-        // Search on Enter key
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                loadUsers();
-            }
-        });
     </script>
 </body>
 </html>

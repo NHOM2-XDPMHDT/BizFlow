@@ -1,5 +1,4 @@
 com\bizflow\adminuserservice\exception\AdminUserAlreadyExistsException.class
-com\bizflow\adminuserservice\entity\User.class
 com\bizflow\adminuserservice\exception\BranchInactiveException.class
 com\bizflow\adminuserservice\config\SecurityConfig$1.class
 com\bizflow\adminuserservice\service\AdminUserService.class
@@ -7,7 +6,6 @@ com\bizflow\config\KafkaConsumerConfig.class
 com\bizflow\adminuserservice\service\AdminUserServiceImpl.class
 com\bizflow\event\PurchaseEvent.class
 com\bizflow\adminuserservice\controller\DirectDBController.class
-com\bizflow\adminuserservice\controller\UserAdminController.class
 com\bizflow\adminuserservice\entity\AdminUser.class
 com\bizflow\entity\CustomerPurchaseHistory.class
 com\bizflow\consumer\PurchaseEventConsumer.class
@@ -19,7 +17,6 @@ com\bizflow\adminuserservice\repository\BranchRepository.class
 com\bizflow\adminuserservice\repository\AdminUserRepository.class
 com\bizflow\service\CustomerPurchaseHistoryService.class
 com\bizflow\adminuserservice\config\SecurityConfig.class
-com\bizflow\adminuserservice\repository\UserRepository.class
 com\bizflow\adminuserservice\request\BranchStaffCreationRequest.class
 com\bizflow\adminuserservice\request\AdminUserCreationRequest.class
 com\bizflow\adminuserservice\dto\AdminUserDto.class
