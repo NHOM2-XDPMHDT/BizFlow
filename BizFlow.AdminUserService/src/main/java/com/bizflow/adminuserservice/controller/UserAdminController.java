@@ -1,16 +1,29 @@
 package com.bizflow.adminuserservice.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bizflow.adminuserservice.dto.AdminUserDto;
 import com.bizflow.adminuserservice.entity.AdminUser;
 import com.bizflow.adminuserservice.entity.Branch;
 import com.bizflow.adminuserservice.repository.AdminUserRepository;
 import com.bizflow.adminuserservice.repository.BranchRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import com.bizflow.adminuserservice.request.AdminUserStatusUpdateRequest;
+import com.bizflow.adminuserservice.service.AdminUserService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -19,10 +32,12 @@ public class UserAdminController {
 
     private final AdminUserRepository userRepository;
     private final BranchRepository branchRepository;
+    private final AdminUserService adminUserService;
 
-    public UserAdminController(AdminUserRepository userRepository, BranchRepository branchRepository) {
+    public UserAdminController(AdminUserRepository userRepository, BranchRepository branchRepository, AdminUserService adminUserService) {
         this.userRepository = userRepository;
         this.branchRepository = branchRepository;
+        this.adminUserService = adminUserService;
     }
 
     @GetMapping("/health")
@@ -110,5 +125,32 @@ public class UserAdminController {
         // For now, return 0 as customers might be in different service
         // You can update this when customer service is integrated
         return ResponseEntity.ok(0L);
+    }
+
+    // New endpoints for user management
+    @GetMapping("/users")
+    public ResponseEntity<List<AdminUserDto>> getAllUsers(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean enabled,
+            @RequestParam(required = false) Long branchId
+    ) {
+        List<AdminUserDto> users = adminUserService.searchAdminUsers(query, role, enabled, branchId);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<AdminUserDto> getUserById(@PathVariable Long id) {
+        AdminUserDto user = adminUserService.getAdminUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping("/users/{id}/status")
+    public ResponseEntity<AdminUserDto> updateUserStatus(
+            @PathVariable Long id,
+            @RequestBody AdminUserStatusUpdateRequest request
+    ) {
+        AdminUserDto updatedUser = adminUserService.updateAdminUserStatus(id, request);
+        return ResponseEntity.ok(updatedUser);
     }
 }

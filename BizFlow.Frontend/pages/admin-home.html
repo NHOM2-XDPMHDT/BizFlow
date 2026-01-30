@@ -46,9 +46,10 @@
             <header class="topbar">
                 <div class="top-left">
                     <div class="page-title">Quản trị hệ thống</div>
-                    <div class="search">
+                    <div class="search" style="position: relative;">
                         <span>🔍</span>
-                        <input type="text" placeholder="Tìm nhanh người dùng, chi nhánh, cấu hình..." />
+                        <input id="globalSearchInput" type="text" placeholder="Tìm nhanh người dùng, chi nhánh, cấu hình..." autocomplete="off" />
+                        <div id="searchResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto; z-index: 1000; margin-top: 4px;"></div>
                     </div>
                 </div>
                 <div class="top-right">
@@ -216,8 +217,71 @@
         </div>
     </div>
 
+    <!-- User Detail Modal -->
+    <div id="userDetailModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000;">
+        <div class="modal-content" style="position: relative; background: white; margin: 5% auto; padding: 2rem; border-radius: 8px; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <span class="close" onclick="closeUserModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</span>
+            <h2 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; font-weight: 600;">Chi tiết người dùng</h2>
+            
+            <div id="userDetailContent">
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>ID:</strong>
+                        <span id="detailId">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Username:</strong>
+                        <span id="detailUsername">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Họ tên:</strong>
+                        <span id="detailFullName">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Email:</strong>
+                        <span id="detailEmail">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Số điện thoại:</strong>
+                        <span id="detailPhone">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Vai trò:</strong>
+                        <span id="detailRole">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Chi nhánh:</strong>
+                        <span id="detailBranch">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Trạng thái:</strong>
+                        <span id="detailStatus">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Ngày tạo:</strong>
+                        <span id="detailCreatedAt">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Cập nhật lần cuối:</strong>
+                        <span id="detailUpdatedAt">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Ghi chú:</strong>
+                        <span id="detailNote">-</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="action-btn" onclick="closeUserModal()">Đóng</button>
+                    <button id="toggleStatusBtn" class="action-btn primary" onclick="toggleUserStatus()">Kích hoạt/Vô hiệu hóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        const API_BASE = 'http://localhost:8080/api/admin';
         const apiEndpoints = {
             completeDashboard: '/api/admin/dashboard/complete',
             summary: '/api/admin/dashboard/summary',
@@ -230,6 +294,11 @@
         let currentUsers = [];
         let summaryData = {};
 
+        let currentUser = null;
+        let allUsersCache = [];
+        let searchTimeout = null;
+        let isApiAvailable = true;
+
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
@@ -239,7 +308,284 @@
             loadBranches();
             wireCreateUserForm();
             wirePasswordToggle('adminPassword', 'toggleAdminPassword');
+            initializeGlobalSearch();
         });
+
+        function initializeGlobalSearch() {
+            const searchInput = document.getElementById('globalSearchInput');
+            const searchResults = document.getElementById('searchResults');
+
+            if (!searchInput || !searchResults) {
+                console.error('Search elements not found');
+                return;
+            }
+
+            // Load all users for search
+            fetch(`${API_BASE}/users`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Failed to fetch users');
+                    }
+                    return res.json();
+                })
+                .then(users => {
+                    allUsersCache = users;
+                    isApiAvailable = true;
+                    console.log('Loaded users for search:', users.length);
+                })
+                .catch(err => {
+                    console.error('Error loading users for search:', err);
+                    isApiAvailable = false;
+                    // Fallback: use current users from recent users list
+                    if (currentUsers && currentUsers.length > 0) {
+                        allUsersCache = currentUsers;
+                        console.log('Using fallback data:', allUsersCache.length, 'users');
+                    }
+                });
+
+            // Search on input
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+
+                if (query.length < 1) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                // Debounce search
+                searchTimeout = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Show focus on search input
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length > 0) {
+                    performSearch(this.value.trim());
+                }
+            });
+        }
+
+        function performSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            const normalizedQuery = query.toLowerCase();
+
+            console.log('Searching for:', query, 'in', allUsersCache.length, 'users');
+
+            // Check if cache is loaded
+            if (!allUsersCache || allUsersCache.length === 0) {
+                // Try to use fallback data first
+                if (currentUsers && currentUsers.length > 0) {
+                    allUsersCache = currentUsers;
+                    console.log('Using fallback recent users:', allUsersCache.length);
+                } else {
+                    searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Đang tải dữ liệu...</div>';
+                    searchResults.style.display = 'block';
+                    
+                    // Retry loading users if API might be available
+                    if (isApiAvailable) {
+                        fetch(`${API_BASE}/users`)
+                            .then(res => {
+                                if (!res.ok) throw new Error('API not available');
+                                return res.json();
+                            })
+                            .then(users => {
+                                allUsersCache = users;
+                                isApiAvailable = true;
+                                console.log('Reloaded users:', users.length);
+                                performSearch(query); // Retry search
+                            })
+                            .catch(err => {
+                                console.error('Error reloading users:', err);
+                                isApiAvailable = false;
+                                searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: #dc2626;">Không thể kết nối đến server. Vui lòng đảm bảo backend đang chạy.</div>';
+                            });
+                    } else {
+                        searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: #dc2626;">Backend chưa sẵn sàng. Vui lòng khởi động server.</div>';
+                        searchResults.style.display = 'block';
+                    }
+                    return;
+                }
+            }
+
+            const filteredUsers = allUsersCache.filter(user => {
+                return (user.username && user.username.toLowerCase().includes(normalizedQuery)) ||
+                       (user.fullName && user.fullName.toLowerCase().includes(normalizedQuery)) ||
+                       (user.email && user.email.toLowerCase().includes(normalizedQuery)) ||
+                       (user.phoneNumber && user.phoneNumber.includes(normalizedQuery));
+            });
+
+            console.log('Found', filteredUsers.length, 'users');
+
+            if (filteredUsers.length === 0) {
+                searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Không tìm thấy kết quả</div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+
+            searchResults.innerHTML = filteredUsers.slice(0, 10).map(user => `
+                <div class="search-result-item" onclick="showUserDetailFromSearch(${user.id})" style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${escapeHtml(user.fullName || user.username)}</div>
+                    <div style="font-size: 0.875rem; color: #666;">
+                        <span>${escapeHtml(user.username)}</span> • 
+                        <span>${escapeHtml(user.email || '-')}</span> • 
+                        <span class="pill" style="font-size: 0.75rem;">${escapeHtml(user.role)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            if (filteredUsers.length > 10) {
+                searchResults.innerHTML += `<div style="padding: 0.75rem 1rem; text-align: center; color: #666; font-size: 0.875rem;">Còn ${filteredUsers.length - 10} kết quả khác...</div>`;
+            }
+
+            searchResults.style.display = 'block';
+        }
+
+        function showUserDetailFromSearch(userId) {
+            // Hide search results
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('globalSearchInput').value = '';
+            
+            // Show user detail modal
+            showUserDetail(userId);
+        }
+
+        function showUserDetail(userId) {
+            // Try to find user in cache first
+            const cachedUser = allUsersCache.find(u => u.id === userId);
+            if (cachedUser && !isApiAvailable) {
+                displayUserDetail(cachedUser);
+                return;
+            }
+
+            fetch(`${API_BASE}/users/${userId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch user detail');
+                    return res.json();
+                })
+                .then(user => {
+                    displayUserDetail(user);
+                })
+                .catch(err => {
+                    console.error('Error loading user detail:', err);
+                    // Try to use cached data
+                    if (cachedUser) {
+                        alert('Không thể kết nối server, hiển thị dữ liệu đã lưu');
+                        displayUserDetail(cachedUser);
+                    } else {
+                        alert('Không thể tải thông tin người dùng. Vui lòng đảm bảo backend đang chạy.');
+                    }
+                });
+        }
+
+        function displayUserDetail(user) {
+            currentUser = user;
+            
+            document.getElementById('detailId').textContent = user.id || '-';
+            document.getElementById('detailUsername').textContent = user.username || '-';
+            document.getElementById('detailFullName').textContent = user.fullName || '-';
+            document.getElementById('detailEmail').textContent = user.email || '-';
+            document.getElementById('detailPhone').textContent = user.phoneNumber || '-';
+            document.getElementById('detailRole').textContent = user.role || '-';
+            document.getElementById('detailBranch').textContent = user.branchName || 'Chưa phân chi nhánh';
+            
+            const statusSpan = document.getElementById('detailStatus');
+            statusSpan.textContent = user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa';
+            statusSpan.className = `pill ${user.enabled ? 'success' : 'danger'}`;
+            
+            document.getElementById('detailCreatedAt').textContent = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '-';
+            document.getElementById('detailUpdatedAt').textContent = user.updatedAt ? new Date(user.updatedAt).toLocaleString('vi-VN') : '-';
+            document.getElementById('detailNote').textContent = user.note || '-';
+
+            // Update button text
+            const toggleBtn = document.getElementById('toggleStatusBtn');
+            toggleBtn.textContent = user.enabled ? 'Vô hiệu hóa' : 'Kích hoạt';
+            toggleBtn.className = user.enabled ? 'action-btn danger' : 'action-btn primary';
+            
+            // Disable toggle button if API not available
+            toggleBtn.disabled = !isApiAvailable;
+            if (!isApiAvailable) {
+                toggleBtn.title = 'Không thể thay đổi trạng thái khi offline';
+                toggleBtn.style.opacity = '0.5';
+                toggleBtn.style.cursor = 'not-allowed';
+            } else {
+                toggleBtn.disabled = false;
+                toggleBtn.title = '';
+                toggleBtn.style.opacity = '1';
+                toggleBtn.style.cursor = 'pointer';
+            }
+            
+            document.getElementById('userDetailModal').style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userDetailModal').style.display = 'none';
+            currentUser = null;
+        }
+
+        function toggleUserStatus() {
+            if (!currentUser) return;
+            
+            if (!isApiAvailable) {
+                alert('Không thể thay đổi trạng thái khi backend không khả dụng');
+                return;
+            }
+
+            const newStatus = !currentUser.enabled;
+            const confirmMsg = newStatus 
+                ? `Bạn có chắc muốn kích hoạt tài khoản "${currentUser.username}"?`
+                : `Bạn có chắc muốn vô hiệu hóa tài khoản "${currentUser.username}"?`;
+
+            if (!confirm(confirmMsg)) return;
+
+            fetch(`${API_BASE}/users/${currentUser.id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    enabled: newStatus,
+                    note: `${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} bởi admin lúc ${new Date().toLocaleString('vi-VN')}`
+                })
+            })
+            .then(res => res.json())
+            .then(updatedUser => {
+                alert(`${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} tài khoản thành công!`);
+                closeUserModal();
+                loadRecentUsers();
+                // Refresh cache
+                fetch(`${API_BASE}/users`)
+                    .then(res => res.json())
+                    .then(users => {
+                        allUsersCache = users;
+                    })
+                    .catch(err => console.error('Error refreshing cache:', err));
+            })
+            .catch(err => {
+                console.error('Error updating user status:', err);
+                alert('Lỗi khi cập nhật trạng thái người dùng');
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('userDetailModal');
+            if (event.target === modal) {
+                closeUserModal();
+            }
+        }
 
         async function loadAdminSummary() {
             try {

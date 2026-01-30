@@ -64,17 +64,43 @@
 
             <main class="main">
                 <section class="card">
-                    <div class="card-title">Danh sách người dùng hệ thống</div>
-                    <div class="card-subtitle">Dữ liệu được đồng bộ từ microservice Người dùng.</div>
+                    <div class="card-title">Tổng quan người dùng</div>
+                    <div class="card-subtitle">Số liệu sẽ được lấy từ hệ thống</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <div style="padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="font-size: 0.875rem; color: #666;">Tổng tài khoản</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem;" id="totalAccounts">8</div>
+                        </div>
+                        <div style="padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="font-size: 0.875rem; color: #666;">Tổng chi nhánh</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem;" id="totalBranches">2</div>
+                        </div>
+                        <div style="padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="font-size: 0.875rem; color: #666;">Tổng sản phẩm</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem;" id="totalProducts">155</div>
+                        </div>
+                        <div style="padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="font-size: 0.875rem; color: #666;">Thao tác nhanh</div>
+                            <div style="margin-top: 0.5rem;">
+                                <button class="action-btn" style="width: 100%; padding: 0.5rem;" onclick="createNewUser()">Tạo tài khoản</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">Danh mục dữ liệu</div>
+                    <div class="card-subtitle">Quản lý điểm bán</div>
                     <div class="actions">
                         <button class="action-btn" type="button" onclick="location.href='admin-home.html'">Quay lại</button>
-                        <button class="action-btn primary" type="button">Tạo mới</button>
+                        <button class="action-btn primary" type="button" onclick="createNewUser()">Tạo mới</button>
                     </div>
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Username</th>
                                 <th>Họ tên</th>
+                                <th>Email</th>
                                 <th>Vai trò</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
@@ -82,7 +108,7 @@
                         </thead>
                         <tbody id="usersBody">
                             <tr>
-                                <td colspan="5" class="empty-box">Chưa có dữ liệu — kết nối tới microservice Người dùng để hiển thị.</td>
+                                <td colspan="6" class="empty-box">Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -91,12 +117,232 @@
         </div>
     </div>
 
+    <!-- User Detail Modal -->
+    <div id="userDetailModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div class="modal-content" style="position: relative; background: white; margin: 5% auto; padding: 2rem; border-radius: 8px; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <span class="close" onclick="closeUserModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</span>
+            <h2 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; font-weight: 600;">Chi tiết người dùng</h2>
+            
+            <div id="userDetailContent">
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>ID:</strong>
+                        <span id="detailId">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Username:</strong>
+                        <span id="detailUsername">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Họ tên:</strong>
+                        <span id="detailFullName">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Email:</strong>
+                        <span id="detailEmail">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Số điện thoại:</strong>
+                        <span id="detailPhone">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Vai trò:</strong>
+                        <span id="detailRole">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Chi nhánh:</strong>
+                        <span id="detailBranch">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Trạng thái:</strong>
+                        <span id="detailStatus">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Ngày tạo:</strong>
+                        <span id="detailCreatedAt">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Cập nhật lần cuối:</strong>
+                        <span id="detailUpdatedAt">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Ghi chú:</strong>
+                        <span id="detailNote">-</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="action-btn" onclick="closeUserModal()">Đóng</button>
+                    <button id="toggleStatusBtn" class="action-btn primary" onclick="toggleUserStatus()">Kích hoạt/Vô hiệu hóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        const API_BASE = 'http://localhost:8080/api/admin';
+        let currentUser = null;
+
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
+            loadUsers();
+            loadStats();
+        });
+
+        function loadStats() {
+            // Load user count
+            fetch(`${API_BASE}/users/count`)
+                .then(res => res.json())
+                .then(count => {
+                    document.getElementById('totalAccounts').textContent = count;
+                })
+                .catch(err => console.error('Error loading user count:', err));
+
+            // Load branch count
+            fetch(`${API_BASE}/branches/count`)
+                .then(res => res.json())
+                .then(count => {
+                    document.getElementById('totalBranches').textContent = count;
+                })
+                .catch(err => console.error('Error loading branch count:', err));
+        }
+
+        function loadUsers() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const role = document.getElementById('roleFilter').value;
+            const enabled = document.getElementById('statusFilter').value;
+
+            let url = `${API_BASE}/users?`;
+            if (searchQuery) url += `query=${encodeURIComponent(searchQuery)}&`;
+            if (role) url += `role=${role}&`;
+            if (enabled) url += `enabled=${enabled}&`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(users => {
+                    displayUsers(users);
+                })
+                .catch(err => {
+                    console.error('Error loading users:', err);
+                    document.getElementById('usersBody').innerHTML = 
+                        '<tr><td colspan="6" class="empty-box">Lỗi khi tải dữ liệu</td></tr>';
+                });
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersBody');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-box">Không tìm thấy người dùng</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => `
+                <tr style="cursor: pointer;" onclick="showUserDetail(${user.id})">
+                    <td>${user.username || '-'}</td>
+                    <td>${user.fullName || '-'}</td>
+                    <td>${user.email || '-'}</td>
+                    <td><span class="pill">${user.role || '-'}</span></td>
+                    <td><span class="pill ${user.enabled ? 'success' : 'danger'}">${user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa'}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="event.stopPropagation(); showUserDetail(${user.id})">Xem</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showUserDetail(userId) {
+            fetch(`${API_BASE}/users/${userId}`)
+                .then(res => res.json())
+                .then(user => {
+                    currentUser = user;
+                    
+                    document.getElementById('detailId').textContent = user.id || '-';
+                    document.getElementById('detailUsername').textContent = user.username || '-';
+                    document.getElementById('detailFullName').textContent = user.fullName || '-';
+                    document.getElementById('detailEmail').textContent = user.email || '-';
+                    document.getElementById('detailPhone').textContent = user.phoneNumber || '-';
+                    document.getElementById('detailRole').textContent = user.role || '-';
+                    document.getElementById('detailBranch').textContent = user.branchName || 'Chưa phân chi nhánh';
+                    
+                    const statusSpan = document.getElementById('detailStatus');
+                    statusSpan.textContent = user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa';
+                    statusSpan.className = `pill ${user.enabled ? 'success' : 'danger'}`;
+                    
+                    document.getElementById('detailCreatedAt').textContent = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '-';
+                    document.getElementById('detailUpdatedAt').textContent = user.updatedAt ? new Date(user.updatedAt).toLocaleString('vi-VN') : '-';
+                    document.getElementById('detailNote').textContent = user.note || '-';
+
+                    // Update button text
+                    const toggleBtn = document.getElementById('toggleStatusBtn');
+                    toggleBtn.textContent = user.enabled ? 'Vô hiệu hóa' : 'Kích hoạt';
+                    toggleBtn.className = user.enabled ? 'action-btn danger' : 'action-btn primary';
+                    
+                    document.getElementById('userDetailModal').style.display = 'block';
+                })
+                .catch(err => {
+                    console.error('Error loading user detail:', err);
+                    alert('Không thể tải thông tin người dùng');
+                });
+        }
+
+        function closeUserModal() {
+            document.getElementById('userDetailModal').style.display = 'none';
+            currentUser = null;
+        }
+
+        function toggleUserStatus() {
+            if (!currentUser) return;
+
+            const newStatus = !currentUser.enabled;
+            const confirmMsg = newStatus 
+                ? `Bạn có chắc muốn kích hoạt tài khoản "${currentUser.username}"?`
+                : `Bạn có chắc muốn vô hiệu hóa tài khoản "${currentUser.username}"?`;
+
+            if (!confirm(confirmMsg)) return;
+
+            fetch(`${API_BASE}/users/${currentUser.id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    enabled: newStatus,
+                    note: `${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} bởi admin lúc ${new Date().toLocaleString('vi-VN')}`
+                })
+            })
+            .then(res => res.json())
+            .then(updatedUser => {
+                alert(`${newStatus ? 'Kích hoạt' : 'Vô hiệu hóa'} tài khoản thành công!`);
+                closeUserModal();
+                loadUsers();
+            })
+            .catch(err => {
+                console.error('Error updating user status:', err);
+                alert('Lỗi khi cập nhật trạng thái người dùng');
+            });
+        }
+
+        function createNewUser() {
+            alert('Chức năng tạo người dùng mới sẽ được phát triển trong phiên bản tiếp theo');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('userDetailModal');
+            if (event.target === modal) {
+                closeUserModal();
+            }
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadUsers();
+            }
         });
     </script>
 </body>
