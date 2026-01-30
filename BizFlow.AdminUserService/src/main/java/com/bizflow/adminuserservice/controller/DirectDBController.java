@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -152,5 +154,51 @@ public class DirectDBController {
     @GetMapping("/branches/count-active")
     public ResponseEntity<Long> getActiveBranchesCount() {
         return ResponseEntity.ok(branchRepository.countActive());
+    }
+
+    // PATCH /users/{id}/status - Update user status (enable/disable)
+    @PatchMapping("/users/{id}/status")
+    public ResponseEntity<?> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, Object> statusUpdate) {
+        AdminUser user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        
+        Boolean enabled = (Boolean) statusUpdate.get("enabled");
+        String note = (String) statusUpdate.get("note");
+        
+        if (enabled != null) {
+            user.setEnabled(enabled);
+        }
+        
+        if (note != null && !note.trim().isEmpty()) {
+            String timestamp = java.time.LocalDateTime.now().format(
+                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            );
+            String updatedNote = user.getNote() != null ? user.getNote() + "\n" : "";
+            updatedNote += "[" + timestamp + "] " + note;
+            user.setNote(updatedNote);
+        }
+        
+        AdminUser updatedUser = userRepository.save(user);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", updatedUser.getId());
+        response.put("username", updatedUser.getUsername());
+        response.put("email", updatedUser.getEmail());
+        response.put("fullName", updatedUser.getFullName());
+        response.put("phoneNumber", updatedUser.getPhoneNumber());
+        response.put("role", updatedUser.getRole());
+        response.put("enabled", updatedUser.getEnabled());
+        response.put("note", updatedUser.getNote());
+        response.put("createdAt", updatedUser.getCreatedAt());
+        response.put("updatedAt", updatedUser.getUpdatedAt());
+        
+        if (updatedUser.getBranch() != null) {
+            Map<String, Object> branchInfo = new HashMap<>();
+            branchInfo.put("id", updatedUser.getBranch().getId());
+            branchInfo.put("name", updatedUser.getBranch().getName());
+            response.put("branch", branchInfo);
+        }
+        
+        return ResponseEntity.ok(response);
     }
 }
