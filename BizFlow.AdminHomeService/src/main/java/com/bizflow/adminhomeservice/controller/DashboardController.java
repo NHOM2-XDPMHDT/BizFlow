@@ -39,32 +39,52 @@ public class DashboardController {
             Integer totalUsers = callService(adminUserServiceUrl + "/api/admin/users/count", Integer.class);
             summary.put("totalUsers", totalUsers != null ? totalUsers : 0);
 
-            Integer totalEmployees = callService(adminUserServiceUrl + "/api/admin/users/count-by-role?role=EMPLOYEE", Integer.class);
-            summary.put("totalEmployees", totalEmployees != null ? totalEmployees : 0);
+            // Get all users to count employees
+            List<Map<String, Object>> allUsers = callService(adminUserServiceUrl + "/api/admin/users", List.class);
+            int totalEmployees = 0;
+            if (allUsers != null) {
+                for (Map<String, Object> user : allUsers) {
+                    String role = (String) user.get("role");
+                    if ("EMPLOYEE".equals(role)) {
+                        totalEmployees++;
+                    }
+                }
+            }
+            summary.put("totalEmployees", totalEmployees);
 
-            // Get branches count
-            Integer totalBranches = callService(adminUserServiceUrl + "/api/admin/branches/count", Integer.class);
-            summary.put("totalBranches", totalBranches != null ? totalBranches : 0);
-
-            Integer activeBranches = callService(adminUserServiceUrl + "/api/admin/branches/count-active", Integer.class);
-            summary.put("activeBranches", activeBranches != null ? activeBranches : 0);
+            // Get branches - use authentication service
+            List branches = callService("http://authentication-service:8086/api/branches", List.class);
+            int totalBranches = branches != null ? branches.size() : 0;
+            int activeBranches = 0;
+            if (branches != null) {
+                for (Object branch : branches) {
+                    if (branch instanceof Map) {
+                        Boolean isActive = (Boolean) ((Map) branch).get("isActive");
+                        if (Boolean.TRUE.equals(isActive)) {
+                            activeBranches++;
+                        }
+                    }
+                }
+            }
+            summary.put("totalBranches", totalBranches);
+            summary.put("activeBranches", activeBranches);
 
             // Get products count from admin-product-service
             Integer totalProducts = callService(adminProductServiceUrl + "/api/admin/products/count", Integer.class);
             summary.put("totalProducts", totalProducts != null ? totalProducts : 0);
 
-            // Get customers count (assuming from user service)
-            Integer totalCustomers = callService(adminUserServiceUrl + "/api/admin/customers/count", Integer.class);
-            summary.put("totalCustomers", totalCustomers != null ? totalCustomers : 0);
+            // Customers - set to 0 as customer service doesn't have count endpoint
+            summary.put("totalCustomers", 0);
 
         } catch (Exception e) {
+            System.err.println("Error in getAdminSummary: " + e.getMessage());
             // Return default values if services are not available
-            summary.put("totalUsers", 6);
-            summary.put("totalEmployees", 3);
-            summary.put("totalBranches", 2);
-            summary.put("activeBranches", 2);
-            summary.put("totalProducts", 155);
-            summary.put("totalCustomers", 8);
+            summary.put("totalUsers", 0);
+            summary.put("totalEmployees", 0);
+            summary.put("totalBranches", 0);
+            summary.put("activeBranches", 0);
+            summary.put("totalProducts", 0);
+            summary.put("totalCustomers", 0);
         }
 
         return ResponseEntity.ok(summary);
@@ -87,9 +107,9 @@ public class DashboardController {
     @GetMapping("/branches")
     public ResponseEntity<List<Map<String, Object>>> getBranches() {
         try {
-            // Call admin-user-service to get branches
+            // Call authentication-service to get branches
             List<Map<String, Object>> branches = callService(
-                adminUserServiceUrl + "/api/admin/branches",
+                "http://authentication-service:8086/api/branches",
                 List.class
             );
             return ResponseEntity.ok(branches != null ? branches : Collections.emptyList());

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-@RestController
-@RequestMapping("/api/dashboard")
+// @RestController - DISABLED: Conflicts with DashboardController
+@RequestMapping("/api/dashboard-direct")
 @CrossOrigin(origins = "*")
 public class DirectDashboardController {
 

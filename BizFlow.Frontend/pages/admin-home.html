@@ -274,7 +274,7 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         // API Configuration
-        const API = 'http://localhost:8080/api/admin';
+        const API = '/api/admin';
         let currentUser = null;
         let searchTimeout = null;
         let allUsers = [];
@@ -402,30 +402,33 @@
             currentUser = null;
         }
 
-        // Load statistics - Backend provides all data
+        // Load statistics - Backend aggregates all data
         async function loadStats() {
             try {
-                const [users, branches, activeBranches] = await Promise.all([
-                    fetch(`${API}/users/count`).then(r => r.ok ? r.json() : 0),
-                    fetch(`${API}/branches/count`).then(r => r.ok ? r.json() : 0),
-                    fetch(`${API}/branches/count-active`).then(r => r.ok ? r.json() : 0)
-                ]);
+                const stats = await fetch('/api/dashboard/admin-summary').then(r => r.json());
                 
-                document.getElementById('totalUsers').textContent = users;
-                document.getElementById('activeEmployees').textContent = users;
-                document.getElementById('totalBranches').textContent = branches;
-                document.getElementById('openBranches').textContent = activeBranches;
-                document.getElementById('totalProducts').textContent = '155';
-                document.getElementById('totalCustomers').textContent = '0';
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                document.getElementById('activeEmployees').textContent = stats.totalEmployees || 0;
+                document.getElementById('totalBranches').textContent = stats.totalBranches || 0;
+                document.getElementById('openBranches').textContent = stats.activeBranches || 0;
+                document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
+                document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
             } catch (err) {
                 console.error('Stats error:', err);
+                // Set defaults on error
+                document.getElementById('totalUsers').textContent = '--';
+                document.getElementById('activeEmployees').textContent = '--';
+                document.getElementById('totalBranches').textContent = '--';
+                document.getElementById('openBranches').textContent = '--';
+                document.getElementById('totalProducts').textContent = '--';
+                document.getElementById('totalCustomers').textContent = '--';
             }
         }
 
-        // Load recent users
+        // Load recent users - Backend provides processed data
         async function loadRecentUsers() {
             try {
-                const users = await fetch(`${API}/users/recent?limit=10`).then(r => r.json());
+                const users = await fetch('/api/dashboard/recent-users').then(r => r.json());
                 const tbody = document.getElementById('recentUsersBody');
                 
                 if (!users?.length) {
@@ -446,10 +449,10 @@
             }
         }
 
-        // Load branches
+        // Load branches - Backend provides processed data
         async function loadBranches() {
             try {
-                const branches = await fetch(`${API}/branches`).then(r => r.json());
+                const branches = await fetch('/api/dashboard/branches').then(r => r.json());
                 const tbody = document.getElementById('branchTableBody');
                 
                 if (!branches?.length) {
@@ -461,7 +464,7 @@
                     <tr>
                         <td>${esc(b.name)}</td>
                         <td>${esc(b.ownerName || '-')}</td>
-                        <td>${b.active ? 'Đang hoạt động' : 'Tạm ngưng'}</td>
+                        <td>${b.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}</td>
                         <td>${esc(b.address || '-')}</td>
                     </tr>
                 `).join('');

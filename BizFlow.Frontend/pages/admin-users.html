@@ -182,7 +182,7 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         // API Configuration
-        const API_BASE = 'http://localhost:8080/api/admin';
+        const API_BASE = '/api/admin';
         let currentUser = null;
 
         // Initialize page
@@ -194,21 +194,19 @@
             loadStats();
         });
 
-        // Load statistics from backend
+        // Load statistics - Backend aggregates all counts
         function loadStats() {
-            fetch(`${API_BASE}/users/count`)
+            fetch('/api/dashboard/admin-summary')
                 .then(res => res.json())
-                .then(count => {
-                    document.getElementById('totalAccounts').textContent = count;
+                .then(stats => {
+                    document.getElementById('totalAccounts').textContent = stats.totalUsers || 0;
+                    document.getElementById('totalBranches').textContent = stats.totalBranches || 0;
                 })
-                .catch(err => console.error('Error loading user count:', err));
-
-            fetch(`${API_BASE}/branches/count`)
-                .then(res => res.json())
-                .then(count => {
-                    document.getElementById('totalBranches').textContent = count;
-                })
-                .catch(err => console.error('Error loading branch count:', err));
+                .catch(err => {
+                    console.error('Error loading stats:', err);
+                    document.getElementById('totalAccounts').textContent = '--';
+                    document.getElementById('totalBranches').textContent = '--';
+                });
         }
 
         // Load users with filters (backend handles filtering)
