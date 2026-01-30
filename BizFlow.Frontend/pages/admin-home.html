@@ -46,9 +46,10 @@
             <header class="topbar">
                 <div class="top-left">
                     <div class="page-title">Quản trị hệ thống</div>
-                    <div class="search">
+                    <div class="search" style="position: relative;">
                         <span>🔍</span>
-                        <input type="text" placeholder="Tìm nhanh người dùng, chi nhánh, cấu hình..." />
+                        <input id="globalSearchInput" type="text" placeholder="Tìm kiếm người dùng..." autocomplete="off" />
+                        <div id="searchResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto; z-index: 1000; margin-top: 4px;"></div>
                     </div>
                 </div>
                 <div class="top-right">
@@ -216,228 +217,336 @@
         </div>
     </div>
 
+    <!-- User Detail Modal -->
+    <div id="userDetailModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000;">
+        <div class="modal-content" style="position: relative; background: white; margin: 5% auto; padding: 2rem; border-radius: 8px; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <span class="close" onclick="closeUserModal()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</span>
+            <h2 style="margin: 0 0 1.5rem 0; font-size: 1.5rem; font-weight: 600;">Chi tiết người dùng</h2>
+            
+            <div id="userDetailContent">
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>ID:</strong>
+                        <span id="detailId">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Username:</strong>
+                        <span id="detailUsername">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Họ tên:</strong>
+                        <span id="detailFullName">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Email:</strong>
+                        <span id="detailEmail">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Số điện thoại:</strong>
+                        <span id="detailPhone">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Vai trò:</strong>
+                        <span id="detailRole">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Chi nhánh:</strong>
+                        <span id="detailBranch">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Trạng thái:</strong>
+                        <span id="detailStatus">-</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+                        <strong>Ngày tầo:</strong>
+                        <span id="detailCreatedAt">-</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="action-btn" onclick="closeUserModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="../assets/js/admin-layout.js"></script>
     <script>
-        const apiEndpoints = {
-            completeDashboard: '/api/admin/dashboard/complete',
-            summary: '/api/admin/dashboard/summary',
-            recentUsers: '/api/admin/dashboard/recent-users',
-            branches: '/api/admin/dashboard/branches',
-            createUser: '/api/users'
-        };
+        // API Configuration
+        const API = '/api/admin';
+        let currentUser = null;
+        let searchTimeout = null;
+        let allUsers = [];
 
-        // Global state to track users
-        let currentUsers = [];
-        let summaryData = {};
-
+        // Initialize page
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
-            loadAdminSummary();
-            loadRecentUsers();
-            loadBranches();
+            loadData();
+            initSearch();
             wireCreateUserForm();
             wirePasswordToggle('adminPassword', 'toggleAdminPassword');
         });
 
-        async function loadAdminSummary() {
+        // Load all data from backend
+        async function loadData() {
+            loadStats();
+            loadRecentUsers();
+            loadBranches();
+            loadAllUsers();
+        }
+
+        // Load all users for search
+        async function loadAllUsers() {
             try {
-                // Fetch summary from backend - all logic in backend now
-                const response = await fetch(apiEndpoints.summary);
-                if (!response.ok) throw new Error('Failed to fetch summary');
-                
-                const data = await response.json();
-                summaryData = data;
-                
-                document.getElementById('totalUsers').textContent = formatNumber(data.totalUsers);
-                document.getElementById('activeEmployees').textContent = formatNumber(data.totalEmployees);
-                document.getElementById('totalBranches').textContent = formatNumber(data.totalBranches);
-                document.getElementById('openBranches').textContent = formatNumber(data.activeBranches);
-                document.getElementById('totalProducts').textContent = formatNumber(data.totalProducts);
-                document.getElementById('totalCustomers').textContent = formatNumber(data.totalCustomers);
-            } catch (error) {
-                console.error('Failed to load admin summary:', error);
-                setTextContent('totalUsers', '--');
-                setTextContent('activeEmployees', '--');
-                setTextContent('totalBranches', '--');
-                setTextContent('openBranches', '--');
-                setTextContent('totalProducts', '--');
-                setTextContent('totalCustomers', '--');
+                allUsers = await fetch(`${API}/users`).then(r => r.json());
+            } catch (err) {
+                console.error('Error loading users:', err);
             }
         }
 
-        async function loadRecentUsers() {
-            const body = document.getElementById('recentUsersBody');
-            try {
-                // Fetch users from backend - data already formatted
-                const response = await fetch(apiEndpoints.recentUsers + '?limit=10');
-                if (!response.ok) throw new Error('Failed to fetch users');
+        // Initialize search
+        function initSearch() {
+            const input = document.getElementById('globalSearchInput');
+            const results = document.getElementById('searchResults');
+            
+            input.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
                 
-                const users = await response.json();
-                currentUsers = users;
-                
-                renderUsersList(users, body);
-            } catch (error) {
-                console.error('Failed to load recent users:', error);
-                body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu người dùng.</td></tr>';
-            }
-        }
-
-        function renderUsersList(users, body) {
-            body.innerHTML = '';
-            if (!users.length) {
-                body.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu người dùng gần đây.</td></tr>';
-                return;
-            }
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                // Backend already provides roleDisplay - no need for local mapping
-                const roleText = user.roleDisplay || user.role;
-                row.innerHTML = `
-                    <td>${escapeHtml(user.username || '-')}</td>
-                    <td>${escapeHtml(user.fullName || '-')}</td>
-                    <td>${roleText}</td>
-                    <td>${formatTimestamp(user.createdAt)}</td>
-                `;
-                body.appendChild(row);
-            });
-        }
-
-        async function loadBranches() {
-            const body = document.getElementById('branchTableBody');
-            try {
-                // Fetch branches from backend - data already formatted
-                const response = await fetch(apiEndpoints.branches);
-                if (!response.ok) throw new Error('Failed to fetch branches');
-                
-                const branches = await response.json();
-                
-                body.innerHTML = '';
-                if (!branches.length) {
-                    body.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu chi nhánh.</td></tr>';
+                if (query.length < 1) {
+                    results.style.display = 'none';
                     return;
                 }
                 
-                branches.forEach(branch => {
-                    const statusText = branch.active ? 'Đang hoạt động' : 'Tạm ngưng';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${escapeHtml(branch.name || '-')}</td>
-                        <td>${escapeHtml(branch.ownerName || '-')}</td>
-                        <td>${statusText}</td>
-                        <td>${escapeHtml(branch.address || '-')}</td>
-                    `;
-                    body.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Failed to load branches:', error);
-                body.innerHTML = '<tr><td colspan="4" class="empty-box">Không thể tải dữ liệu chi nhánh.</td></tr>';
+                searchTimeout = setTimeout(() => performSearch(query), 300);
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !results.contains(e.target)) {
+                    results.style.display = 'none';
+                }
+            });
+        }
+
+        // Perform search - filter cached users
+        function performSearch(query) {
+            const results = document.getElementById('searchResults');
+            const q = query.toLowerCase();
+            
+            const filtered = allUsers.filter(u => 
+                (u.username && u.username.toLowerCase().includes(q)) ||
+                (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+                (u.email && u.email.toLowerCase().includes(q))
+            );
+            
+            if (!filtered.length) {
+                results.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Không tìm thấy kết quả</div>';
+                results.style.display = 'block';
+                return;
+            }
+            
+            results.innerHTML = filtered.slice(0, 10).map(user => `
+                <div onclick="showUserDetail(${user.id})" style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; cursor: pointer;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${esc(user.fullName || user.username)}</div>
+                    <div style="font-size: 0.875rem; color: #666;">
+                        ${esc(user.username)} • ${esc(user.email || '-')} • <span class="pill" style="font-size: 0.75rem;">${esc(user.role)}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            if (filtered.length > 10) {
+                results.innerHTML += `<div style="padding: 0.75rem 1rem; text-align: center; color: #666; font-size: 0.875rem;">Còn ${filtered.length - 10} kết quả khác...</div>`;
+            }
+            
+            results.style.display = 'block';
+        }
+
+        // Show user detail - fetch from backend
+        async function showUserDetail(userId) {
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('globalSearchInput').value = '';
+            
+            try {
+                const user = await fetch(`${API}/users/${userId}`).then(r => r.json());
+                displayUserModal(user);
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Không thể tải thông tin người dùng');
             }
         }
 
+        // Display user in modal
+        function displayUserModal(user) {
+            currentUser = user;
+            document.getElementById('detailId').textContent = user.id || '-';
+            document.getElementById('detailUsername').textContent = user.username || '-';
+            document.getElementById('detailFullName').textContent = user.fullName || '-';
+            document.getElementById('detailEmail').textContent = user.email || '-';
+            document.getElementById('detailPhone').textContent = user.phoneNumber || '-';
+            document.getElementById('detailRole').textContent = user.role || '-';
+            document.getElementById('detailBranch').textContent = user.branchName || 'Chưa phân chi nhánh';
+            
+            const statusSpan = document.getElementById('detailStatus');
+            statusSpan.textContent = user.enabled ? 'Đã kích hoạt' : 'Đã vô hiệu hóa';
+            statusSpan.className = `pill ${user.enabled ? 'success' : 'danger'}`;
+            
+            document.getElementById('detailCreatedAt').textContent = fmt(user.createdAt);
+            document.getElementById('userDetailModal').style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userDetailModal').style.display = 'none';
+            currentUser = null;
+        }
+
+        // Load statistics - Backend aggregates all data
+        async function loadStats() {
+            try {
+                const stats = await fetch('/api/dashboard/admin-summary').then(r => r.json());
+                
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                document.getElementById('activeEmployees').textContent = stats.totalEmployees || 0;
+                document.getElementById('totalBranches').textContent = stats.totalBranches || 0;
+                document.getElementById('openBranches').textContent = stats.activeBranches || 0;
+                document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
+                document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
+            } catch (err) {
+                console.error('Stats error:', err);
+                // Set defaults on error
+                document.getElementById('totalUsers').textContent = '--';
+                document.getElementById('activeEmployees').textContent = '--';
+                document.getElementById('totalBranches').textContent = '--';
+                document.getElementById('openBranches').textContent = '--';
+                document.getElementById('totalProducts').textContent = '--';
+                document.getElementById('totalCustomers').textContent = '--';
+            }
+        }
+
+        // Load recent users - Backend provides processed data
+        async function loadRecentUsers() {
+            try {
+                const users = await fetch('/api/dashboard/recent-users').then(r => r.json());
+                const tbody = document.getElementById('recentUsersBody');
+                
+                if (!users?.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${esc(u.username)}</td>
+                        <td>${esc(u.fullName)}</td>
+                        <td>${esc(u.role)}</td>
+                        <td>${fmt(u.createdAt)}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                document.getElementById('recentUsersBody').innerHTML = '<tr><td colspan="4" class="empty-box">Lỗi tải dữ liệu</td></tr>';
+            }
+        }
+
+        // Load branches - Backend provides processed data
+        async function loadBranches() {
+            try {
+                const branches = await fetch('/api/dashboard/branches').then(r => r.json());
+                const tbody = document.getElementById('branchTableBody');
+                
+                if (!branches?.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-box">Chưa có dữ liệu</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = branches.map(b => `
+                    <tr>
+                        <td>${esc(b.name)}</td>
+                        <td>${esc(b.ownerName || '-')}</td>
+                        <td>${b.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}</td>
+                        <td>${esc(b.address || '-')}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                document.getElementById('branchTableBody').innerHTML = '<tr><td colspan="4" class="empty-box">Lỗi tải dữ liệu</td></tr>';
+            }
+        }
+
+
+
+        // Create user form
         function wireCreateUserForm() {
-            const form = document.getElementById('adminCreateUserForm');
-            const status = document.getElementById('adminUserStatus');
-            form.addEventListener('submit', async event => {
-                event.preventDefault();
+            document.getElementById('adminCreateUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('adminUserStatus');
                 status.textContent = '';
                 status.className = 'status-message';
-                const data = Object.fromEntries(new FormData(form).entries());
-                const payload = {
-                    username: (data.username || '').trim(),
-                    password: data.password || '',
-                    email: (data.email || '').trim(),
-                    fullName: (data.fullName || '').trim(),
-                    phoneNumber: (data.phoneNumber || '').trim() || null,
-                    role: data.role
+
+                const fd = new FormData(e.target);
+                const data = {
+                    username: fd.get('username').trim(),
+                    password: fd.get('password'),
+                    email: fd.get('email').trim(),
+                    fullName: fd.get('fullName').trim(),
+                    phoneNumber: fd.get('phoneNumber').trim() || null,
+                    role: fd.get('role'),
+                    enabled: true
                 };
 
                 try {
-                    const response = await fetch(apiEndpoints.createUser, {
+                    const res = await fetch('/api/users', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(data)
                     });
-                    if (!response.ok) {
-                        const message = await response.text();
-                        throw new Error(message || 'Không thể tạo tài khoản');
-                    }
-                    
-                    // Add new user to the list immediately
-                    const newUser = {
-                        username: payload.username,
-                        fullName: payload.fullName,
-                        role: payload.role,
-                        email: payload.email,
-                        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
-                    };
-                    
-                    status.textContent = 'Tạo tài khoản thành công.';
+
+                    if (!res.ok) throw new Error(await res.text() || 'Lỗi tạo tài khoản');
+
+                    status.textContent = 'Tạo tài khoản thành công';
                     status.classList.add('status-success');
-                    form.reset();
-                    
-                    // Reload data from database to show new user
-                    await loadAdminSummary();
-                    await loadRecentUsers();
-                } catch (error) {
-                    status.textContent = error.message || 'Có lỗi xảy ra.';
+                    e.target.reset();
+                    loadData();
+                } catch (err) {
+                    status.textContent = err.message;
                     status.classList.add('status-error');
                 }
             });
         }
 
-        function wirePasswordToggle(inputId, buttonId) {
+
+        // Utility functions
+        function wirePasswordToggle(inputId, btnId) {
             const input = document.getElementById(inputId);
-            const toggleBtn = document.getElementById(buttonId);
-            if (!input || !toggleBtn) {
-                return;
-            }
-            const eyeIcon = toggleBtn.querySelector('.eye-icon');
-            const eyeSlashIcon = toggleBtn.querySelector('.eye-slash-icon');
-            toggleBtn.addEventListener('click', () => {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                if (eyeIcon && eyeSlashIcon) {
-                    eyeIcon.style.display = isPassword ? 'none' : 'block';
-                    eyeSlashIcon.style.display = isPassword ? 'block' : 'none';
+            const btn = document.getElementById(btnId);
+            if (!input || !btn) return;
+
+            btn.addEventListener('click', () => {
+                const isPass = input.type === 'password';
+                input.type = isPass ? 'text' : 'password';
+                const eye = btn.querySelector('.eye-icon');
+                const slash = btn.querySelector('.eye-slash-icon');
+                if (eye && slash) {
+                    eye.style.display = isPass ? 'none' : 'block';
+                    slash.style.display = isPass ? 'block' : 'none';
                 }
             });
         }
 
-        function formatNumber(value) {
-            if (value === null || value === undefined) {
-                return '--';
-            }
-            return new Intl.NumberFormat('vi-VN').format(value);
+        function fmt(val) {
+            return val ? new Date(val).toLocaleString('vi-VN', { hour12: false }) : '-';
         }
 
-        function formatTimestamp(value) {
-            if (!value) {
-                return '--';
-            }
-            const parsed = new Date(value);
-            if (Number.isNaN(parsed.getTime())) {
-                return value;
-            }
-            return parsed.toLocaleString('vi-VN', { hour12: false });
+        function esc(txt) {
+            const div = document.createElement('div');
+            div.textContent = txt || '-';
+            return div.innerHTML;
         }
 
-        function setTextContent(id, value) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = value;
-            }
-        }
-
-        function escapeHtml(value) {
-            return String(value).replace(/[&<>"']/g, match => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }[match]));
+        // Close modal on outside click
+        window.onclick = (e) => {
+            const modal = document.getElementById('userDetailModal');
+            if (e.target === modal) closeUserModal();
         }
     </script>
 </body>

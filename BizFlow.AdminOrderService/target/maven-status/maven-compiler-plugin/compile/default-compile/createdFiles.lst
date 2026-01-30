@@ -8,6 +8,8 @@ com\bizflow\adminorderservice\repository\OrderRecordRepository.class
 com\bizflow\producer\OrderEventProducer.class
 com\bizflow\event\PurchaseEvent.class
 com\bizflow\adminorderservice\controller\OrderAdminController.class
+com\bizflow\config\SecurityConfig.class
 com\bizflow\adminorderservice\exception\OrderNotFoundException.class
+com\bizflow\config\SecurityConfig$1.class
 com\bizflow\event\PurchaseEvent$OrderItemDTO.class
 com\bizflow\adminorderservice\request\OrderStatusUpdateRequest.class

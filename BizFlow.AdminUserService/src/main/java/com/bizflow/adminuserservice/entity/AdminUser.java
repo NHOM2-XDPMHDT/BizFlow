@@ -47,9 +47,10 @@ public class AdminUser {
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
     @Column(columnDefinition = "TEXT")

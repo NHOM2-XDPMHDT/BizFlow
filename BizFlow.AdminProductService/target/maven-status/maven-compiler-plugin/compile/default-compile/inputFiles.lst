@@ -1,12 +1,13 @@
-d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\entity\ProductInventory.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\exception\ProductNotFoundException.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\config\SecurityConfig.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\request\ProductStatusUpdateRequest.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\AdminProductServiceApplication.java
-d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\entity\Product.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\dto\ProductOverviewDto.java
-d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\service\AdminProductService.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\controller\ProductAdminController.java
-d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\service\AdminProductServiceImpl.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\repository\ProductRepository.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\entity\ProductInventory.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\entity\Product.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\service\AdminProductService.java
+d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\service\AdminProductServiceImpl.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\repository\ProductInventoryRepository.java
 d:\CNTT\Nam 3\XDCNPM\Nhanh_cuoiki\BizFlow\BizFlow.AdminProductService\src\main\java\com\bizflow\adminproductservice\controller\DirectProductController.java

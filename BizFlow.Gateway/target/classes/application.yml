@@ -12,7 +12,27 @@ spring:
         - id: auth-service
           uri: "http://authentication-service:8086/"
           predicates:
-            - Path=/api/auth/**,/api/users/**,/api/branches/**,/api/admin/dashboard/**
+            - Path=/api/auth/**,/api/users/**,/api/branches/**
+        - id: admin-user-service
+          uri: "http://admin-user-service:8201/"
+          predicates:
+            - Path=/api/admin/users/**,/api/admin/customers/**
+        - id: admin-product-service
+          uri: "http://admin-product-service:8204/"
+          predicates:
+            - Path=/api/admin/products,/api/admin/products/**
+        - id: admin-order-service
+          uri: "http://admin-order-service:8203/"
+          predicates:
+            - Path=/api/admin/orders/**
+        - id: admin-report-service
+          uri: "http://admin-report-service:8205/"
+          predicates:
+            - Path=/api/admin/reports/**
+        - id: admin-home-service
+          uri: "http://admin-home-service:8200/"
+          predicates:
+            - Path=/api/admin/dashboard/**,/api/dashboard/**
         - id: sales-service
           uri: "http://sales-service:8081/"
           predicates:
@@ -29,10 +49,6 @@ spring:
           uri: "http://customer-service:8085/"
           predicates:
             - Path=/api/customers/**
-        - id: admin-home-service
-          uri: "http://localhost:8200/"
-          predicates:
-            - Path=/api/dashboard/**
         - id: report-service
           uri: "http://report-service:8087/"
           predicates:

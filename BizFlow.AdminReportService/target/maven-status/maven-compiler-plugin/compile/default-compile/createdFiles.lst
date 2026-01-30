@@ -4,5 +4,7 @@ com\bizflow\adminreportservice\AdminReportServiceApplication.class
 com\bizflow\adminreportservice\controller\ReportAdminController.class
 com\bizflow\adminreportservice\service\AdminReportService.class
 com\bizflow\adminreportservice\exception\ReportNotFoundException.class
+com\bizflow\config\SecurityConfig.class
 com\bizflow\adminreportservice\dto\ReportDto.class
 com\bizflow\adminreportservice\service\AdminReportServiceImpl.class
+com\bizflow\config\SecurityConfig$1.class
