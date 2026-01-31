@@ -273,11 +273,34 @@
 
     <script src="../assets/js/admin-layout.js"></script>
     <script>
-        // API Configuration
-        const API = '/api/admin';
+        // API Configuration - Use dashboard endpoints for direct database access
+        const API = '/api/dashboard';
         let currentUser = null;
         let searchTimeout = null;
         let allUsers = [];
+
+        async function fetchJsonWithRetry(url, attempts = 5, delayMs = 400) {
+            let lastErr;
+            for (let i = 1; i <= attempts; i++) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                        const retryable = [502, 503, 504].includes(res.status);
+                        if (!retryable || i === attempts) {
+                            throw new Error(`HTTP ${res.status} ${res.statusText}`);
+                        }
+                        await new Promise(r => setTimeout(r, delayMs));
+                        continue;
+                    }
+                    return await res.json();
+                } catch (e) {
+                    lastErr = e;
+                    if (i === attempts) break;
+                    await new Promise(r => setTimeout(r, delayMs));
+                }
+            }
+            throw lastErr || new Error('Request failed');
+        }
 
         // Initialize page
         window.addEventListener('load', () => {
@@ -301,9 +324,11 @@
         // Load all users for search
         async function loadAllUsers() {
             try {
-                allUsers = await fetch(`${API}/users`).then(r => r.json());
+                const data = await fetchJsonWithRetry(`${API}/users`);
+                allUsers = Array.isArray(data) ? data : [];
             } catch (err) {
                 console.error('Error loading users:', err);
+                allUsers = [];
             }
         }
 
@@ -405,7 +430,7 @@
         // Load statistics - Backend aggregates all data
         async function loadStats() {
             try {
-                const stats = await fetch('/api/dashboard/admin-summary').then(r => r.json());
+                const stats = await fetchJsonWithRetry('/api/dashboard/admin-summary');
                 
                 document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
                 document.getElementById('activeEmployees').textContent = stats.totalEmployees || 0;
@@ -428,7 +453,7 @@
         // Load recent users - Backend provides processed data
         async function loadRecentUsers() {
             try {
-                const users = await fetch('/api/dashboard/recent-users').then(r => r.json());
+                const users = await fetchJsonWithRetry('/api/dashboard/recent-users');
                 const tbody = document.getElementById('recentUsersBody');
                 
                 if (!users?.length) {
@@ -452,7 +477,7 @@
         // Load branches - Backend provides processed data
         async function loadBranches() {
             try {
-                const branches = await fetch('/api/dashboard/branches').then(r => r.json());
+                const branches = await fetchJsonWithRetry('/api/dashboard/branches');
                 const tbody = document.getElementById('branchTableBody');
                 
                 if (!branches?.length) {

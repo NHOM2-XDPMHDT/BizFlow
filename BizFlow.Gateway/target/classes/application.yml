@@ -21,18 +21,24 @@ spring:
           uri: "http://admin-product-service:8204/"
           predicates:
             - Path=/api/admin/products,/api/admin/products/**
+          filters:
+            - StripPrefix=1
         - id: admin-order-service
           uri: "http://admin-order-service:8203/"
           predicates:
-            - Path=/api/admin/orders/**
+            - Path=/api/admin/orders,/api/admin/orders/**
+          filters:
+            - StripPrefix=1
         - id: admin-report-service
           uri: "http://admin-report-service:8205/"
           predicates:
-            - Path=/api/admin/reports/**
+            - Path=/api/admin/reports,/api/admin/reports/**
+          filters:
+            - StripPrefix=1
         - id: admin-home-service
           uri: "http://admin-home-service:8200/"
           predicates:
-            - Path=/api/admin/dashboard/**,/api/dashboard/**
+            - Path=/api/admin/dashboard/**
         - id: sales-service
           uri: "http://sales-service:8081/"
           predicates:
@@ -52,7 +58,7 @@ spring:
         - id: report-service
           uri: "http://report-service:8087/"
           predicates:
-            - Path=/api/reports/**
+            - Path=/api/reports/**,/api/dashboard/**
         - id: ai-service
           uri: "http://ai-service:5000/"
           predicates:

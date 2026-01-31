@@ -4,11 +4,14 @@ import com.example.bizflow.dto.AdminDashboardSummary;
 import com.example.bizflow.dto.BranchSummary;
 import com.example.bizflow.dto.OwnerDashboardSummary;
 import com.example.bizflow.dto.RecentUserSummary;
+import com.example.bizflow.dto.UserDetailDto;
+import com.example.bizflow.dto.UserSearchItem;
 import com.example.bizflow.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,5 +46,17 @@ public class DashboardController {
     @GetMapping("/branches")
     public ResponseEntity<List<BranchSummary>> getBranchSummaries() {
         return ResponseEntity.ok(dashboardService.getBranchSummaries());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserSearchItem>> getUsersForSearch() {
+        return ResponseEntity.ok(dashboardService.getAllUsersForSearch());
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDetailDto> getUserDetail(@PathVariable("id") Long id) {
+        return dashboardService.getUserDetail(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

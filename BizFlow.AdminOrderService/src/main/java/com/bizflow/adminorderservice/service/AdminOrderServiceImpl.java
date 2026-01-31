@@ -4,18 +4,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bizflow.adminorderservice.dto.OrderSummaryDto;
 import com.bizflow.adminorderservice.entity.OrderRecord;
 import com.bizflow.adminorderservice.exception.OrderNotFoundException;
 import com.bizflow.adminorderservice.repository.OrderRecordRepository;
 import com.bizflow.adminorderservice.request.OrderStatusUpdateRequest;
-import com.bizflow.producer.OrderEventProducer;
 import com.bizflow.event.PurchaseEvent;
+import com.bizflow.producer.OrderEventProducer;
 
 @Service
 public class AdminOrderServiceImpl implements AdminOrderService {
@@ -24,9 +25,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final OrderRecordRepository orderRecordRepository;
     private final OrderEventProducer orderEventProducer;
 
-    public AdminOrderServiceImpl(OrderRecordRepository orderRecordRepository, OrderEventProducer orderEventProducer) {
+    public AdminOrderServiceImpl(OrderRecordRepository orderRecordRepository,
+                                ObjectProvider<OrderEventProducer> orderEventProducerProvider) {
         this.orderRecordRepository = orderRecordRepository;
-        this.orderEventProducer = orderEventProducer;
+        this.orderEventProducer = orderEventProducerProvider.getIfAvailable();
     }
 
     @Override
@@ -55,8 +57,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         record.setStatus(request.getStatus().toUpperCase(Locale.ROOT));
         OrderRecord updatedRecord = orderRecordRepository.save(record);
         
-        // Publish event to Kafka
-        try {
+        // Publish event to Kafka (optional)
+        if (orderEventProducer != null) {
+            try {
             PurchaseEvent event = new PurchaseEvent();
             event.setOrderId(updatedRecord.getId());
             // Note: customerId is extracted from invoice number pattern or order history
@@ -71,9 +74,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             
             orderEventProducer.publishPurchaseEvent(event);
             logger.info("Published purchase event for order {} with status {}", id, updatedRecord.getStatus());
-        } catch (Exception e) {
-            logger.warn("Failed to publish Kafka event for order {}", id, e);
-            // Don't fail the order status update if Kafka fails
+            } catch (Exception e) {
+                logger.warn("Failed to publish Kafka event for order {}", id, e);
+                // Don't fail the order status update if Kafka fails
+            }
         }
         
         return toDto(updatedRecord);

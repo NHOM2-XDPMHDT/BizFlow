@@ -58,8 +58,9 @@ public class AdminProductServiceImpl implements AdminProductService {
                 product.getSku(),
                 product.getProductName(),
                 categoryName,
+                product.getDescription(),  // Thêm description từ database
                 product.getActive() != null ? product.getActive() : Boolean.TRUE,
-                product.getStock() != null ? product.getStock() : 0,
+                product.getStock() != null ? product.getStock().intValue() : 0,
                 product.getPrice() != null ? product.getPrice().doubleValue() : 0.0,
                 null  // Tạm thời bỏ updatedAt
         );

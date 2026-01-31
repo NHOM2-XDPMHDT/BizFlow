@@ -128,7 +128,7 @@ public class DirectDBController {
                     map.put("address", branch.getAddress());
                     map.put("email", branch.getEmail());
                     map.put("phone", branch.getPhone());
-                    map.put("active", branch.getActive() != null ? branch.getActive() : false);
+                    map.put("active", Boolean.TRUE.equals(branch.getActive()));
                     
                     // Get owner name if ownerId exists
                     String ownerName = "-";

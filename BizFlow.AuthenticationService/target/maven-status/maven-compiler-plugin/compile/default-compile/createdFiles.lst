@@ -1,4 +1,5 @@
 com\example\bizflow\dto\LoginRequest.class
+com\example\bizflow\controller\AdminDashboardController.class
 com\example\bizflow\dto\CreateUserRequest.class
 com\example\bizflow\controller\AuthController.class
 com\example\bizflow\entity\Role.class
@@ -8,6 +9,7 @@ com\example\bizflow\dto\LoginResponse.class
 com\example\bizflow\service\AuthService.class
 com\example\bizflow\util\PasswordEncoder.class
 com\example\bizflow\config\SecurityConfig.class
+com\example\bizflow\service\UserService.class
 com\example\bizflow\controller\BranchController.class
 com\example\bizflow\repository\BranchRepository.class
 com\example\bizflow\BizflowApplication.class

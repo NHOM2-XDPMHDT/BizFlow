@@ -8,6 +8,7 @@ public class ProductOverviewDto {
     private String sku;
     private String name;
     private String category;
+    private String description;
     private Boolean active;
     private Integer stock;
     private Double price;
@@ -16,12 +17,13 @@ public class ProductOverviewDto {
     public ProductOverviewDto() {
     }
 
-    public ProductOverviewDto(Long id, String sku, String name, String category, Boolean active, Integer stock,
+    public ProductOverviewDto(Long id, String sku, String name, String category, String description, Boolean active, Integer stock,
                               Double price, Instant updatedAt) {
         this.id = id;
         this.sku = sku;
         this.name = name;
         this.category = category;
+        this.description = description;
         this.active = active;
         this.stock = stock;
         this.price = price;
@@ -58,6 +60,14 @@ public class ProductOverviewDto {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Boolean getActive() {

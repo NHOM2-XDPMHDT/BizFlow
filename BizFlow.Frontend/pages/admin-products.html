@@ -232,7 +232,7 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         // API Configuration
-        const API_BASE_URL = 'http://localhost:8204';
+        const API_BASE_URL = '/api/admin/products';
         
         // Load products from API
         async function loadProducts(searchQuery = '') {
@@ -243,7 +243,7 @@
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Đang tải dữ liệu...</td></tr>';
                 
                 // Build URL with search query if provided
-                let url = `${API_BASE_URL}/admin/products`;
+                let url = `${API_BASE_URL}`;
                 if (searchQuery) {
                     url += `?q=${encodeURIComponent(searchQuery)}`;
                 }
@@ -328,7 +328,7 @@
         async function viewProduct(id) {
             try {
                 // Fetch product details from API
-                const response = await fetch(`${API_BASE_URL}/admin/products/${id}`);
+                const response = await fetch(`${API_BASE_URL}/${id}`);
                 
                 if (!response.ok) {
                     throw new Error(`Không thể tải thông tin sản phẩm`);

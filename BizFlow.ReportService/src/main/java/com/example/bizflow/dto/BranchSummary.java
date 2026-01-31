@@ -4,31 +4,57 @@ public class BranchSummary {
     private Long id;
     private String name;
     private String ownerName;
-    private Boolean active;
-    private String note;
+    private Boolean isActive;
+    private String address;
 
-    public BranchSummary() {}
+    public BranchSummary() {
+    }
 
-    public BranchSummary(Long id, String name, String ownerName, Boolean active, String note) {
+    public BranchSummary(Long id, String name, String ownerName, Boolean isActive, String address) {
         this.id = id;
         this.name = name;
         this.ownerName = ownerName;
-        this.active = active;
-        this.note = note;
+        this.isActive = isActive;
+        this.address = address;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getOwnerName() { return ownerName; }
-    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public String getName() {
+        return name;
+    }
 
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getNote() { return note; }
-    public void setNote(String note) { this.note = note; }
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

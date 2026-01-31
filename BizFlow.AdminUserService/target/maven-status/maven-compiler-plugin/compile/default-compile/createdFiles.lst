@@ -1,5 +1,4 @@
 com\bizflow\adminuserservice\exception\AdminUserAlreadyExistsException.class
-com\bizflow\adminuserservice\entity\User.class
 com\bizflow\adminuserservice\exception\BranchInactiveException.class
 com\bizflow\adminuserservice\config\SecurityConfig$1.class
 com\bizflow\adminuserservice\service\AdminUserService.class

@@ -121,6 +121,114 @@ services:
         condition: service_started
       ai-service:
         condition: service_started
+      admin-user-service:
+        condition: service_started
+      admin-product-service:
+        condition: service_started
+      admin-order-service:
+        condition: service_started
+      admin-report-service:
+        condition: service_started
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.2 ADMIN PRODUCT SERVICE (SPRING BOOT)
+  # =========================
+  admin-product-service:
+    build:
+      context: ./BizFlow.AdminProductService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-product-service
+    restart: always
+    ports:
+      - "8204:8204"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.3 ADMIN ORDER SERVICE (SPRING BOOT)
+  # =========================
+  admin-order-service:
+    build:
+      context: ./BizFlow.AdminOrderService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-order-service
+    restart: always
+    ports:
+      - "8203:8203"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.4 ADMIN REPORT SERVICE (SPRING BOOT)
+  # =========================
+  admin-report-service:
+    build:
+      context: ./BizFlow.AdminReportService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-report-service
+    restart: always
+    ports:
+      - "8205:8205"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.1 ADMIN USER SERVICE (SPRING BOOT)
+  # =========================
+  admin-user-service:
+    build:
+      context: ./BizFlow.AdminUserService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-user-service
+    restart: always
+    ports:
+      - "8201:8201"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      JAVA_OPTS: -Xms128m -Xmx256m
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - bizflow-net
     mem_limit: 512m
