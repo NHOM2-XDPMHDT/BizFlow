@@ -245,10 +245,9 @@ public class OrderController {
         }
 
         int pointsUsed = 0;
-        BigDecimal memberDiscount = BigDecimal.ZERO;
         if (paid && customer != null && Boolean.TRUE.equals(request.getUsePoints())) {
             DiscountResult result = resolveMemberDiscount(customer, total);
-            memberDiscount = result.discount;
+            BigDecimal memberDiscount = result.discount;
             pointsUsed = result.pointsUsed;
             total = total.subtract(memberDiscount).max(BigDecimal.ZERO);
         }
@@ -415,7 +414,7 @@ public class OrderController {
         if (customer == null || total == null || total.compareTo(BigDecimal.ZERO) <= 0) {
             return new DiscountResult(BigDecimal.ZERO, 0);
         }
-        int points = customer.getTotalPoints() == null ? 0 : customer.getTotalPoints();
+        int points = customer.getTotalPoints() != null ? customer.getTotalPoints() : 0;
         if (points < 100) {
             return new DiscountResult(BigDecimal.ZERO, 0);
         }
@@ -478,7 +477,7 @@ public class OrderController {
         int itemCount = order.getItems() == null
                 ? 0
                 : order.getItems().stream()
-                .mapToInt(item -> item.getQuantity() == null ? 0 : item.getQuantity())
+                .mapToInt(item -> item.getQuantity() != null ? item.getQuantity() : 0)
                 .sum();
 
         return new OrderSummaryResponse(

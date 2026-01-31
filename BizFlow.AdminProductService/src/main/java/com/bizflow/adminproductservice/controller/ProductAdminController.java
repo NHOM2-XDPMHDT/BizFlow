@@ -35,9 +35,19 @@ public class ProductAdminController {
         return ResponseEntity.ok(Map.of("status", "ok", "service", "admin-product-service"));
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("API is working!");
+    }
+
     @GetMapping("/count")
     public ResponseEntity<Long> getProductsCount() {
-        return ResponseEntity.ok((long) adminProductService.listProducts(null, null).size());
+        try {
+            long count = (long) adminProductService.listProducts(null, null).size();
+            return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(-1L);
+        }
     }
 
     @GetMapping

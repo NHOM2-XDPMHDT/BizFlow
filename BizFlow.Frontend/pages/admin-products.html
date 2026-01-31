@@ -46,7 +46,7 @@
                     <div class="page-title">Quản lý Sản phẩm</div>
                     <div class="search">
                         <span>🔍</span>
-                        <input type="text" placeholder="Tìm sản phẩm, mã, danh mục..." />
+                        <input type="text" id="searchInput" placeholder="Tìm sản phẩm, mã, danh mục..." />
                     </div>
                 </div>
                 <div class="top-right">
@@ -91,12 +91,312 @@
         </div>
     </div>
 
+    <!-- Modal Chi tiết Sản phẩm -->
+    <div id="productModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Chi tiết Sản phẩm</h2>
+                <button class="close-btn" onclick="closeProductModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="product-detail">
+                    <div class="detail-row">
+                        <label>Tên sản phẩm:</label>
+                        <div id="modalProductName" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>SKU / Mã sản phẩm:</label>
+                        <div id="modalProductSku" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Mô tả:</label>
+                        <div id="modalProductDesc" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Danh mục:</label>
+                        <div id="modalProductCategory" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Giá:</label>
+                        <div id="modalProductPrice" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Tồn kho:</label>
+                        <div id="modalProductStock" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Trạng thái:</label>
+                        <div id="modalProductStatus" class="detail-value">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn" onclick="closeProductModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+        .close-btn:hover {
+            color: #000;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .product-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .detail-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .detail-row label {
+            font-weight: 600;
+            color: #555;
+        }
+        .detail-value {
+            color: #333;
+            word-wrap: break-word;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: right;
+        }
+    </style>
+
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        // API Configuration
+        const API_BASE_URL = '/api/admin/products';
+        
+        // Load products from API
+        async function loadProducts(searchQuery = '') {
+            const tbody = document.getElementById('productsBody');
+            
+            try {
+                // Show loading state
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Đang tải dữ liệu...</td></tr>';
+                
+                // Build URL with search query if provided
+                let url = `${API_BASE_URL}`;
+                if (searchQuery) {
+                    url += `?q=${encodeURIComponent(searchQuery)}`;
+                }
+                
+                // Fetch products from API
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const products = await response.json();
+                
+                // Clear loading state
+                tbody.innerHTML = '';
+                
+                if (products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Không có sản phẩm nào.</td></tr>';
+                    return;
+                }
+                
+                // Render products
+                products.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${escapeHtml(product.sku)}</strong></td>
+                        <td>${escapeHtml(product.name)}</td>
+                        <td>${formatCurrency(product.price)}</td>
+                        <td>${product.stock || 0}</td>
+                        <td>
+                            <button class="action-btn sm" onclick="viewProduct(${product.id})">Xem</button>
+                            <button class="action-btn sm" onclick="editProduct(${product.id})">Sửa</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-box" style="color: red;">
+                    Lỗi khi tải dữ liệu: ${error.message}<br>
+                    <small>Đảm bảo AdminProductService đang chạy trên ${API_BASE_URL}</small>
+                </td></tr>`;
+            }
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Helper function to format currency
+        function formatCurrency(amount) {
+            if (!amount) return '0 ₫';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+        
+        // Search products
+        function searchProducts() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim();
+            
+            if (searchTerm) {
+                loadProducts(searchTerm);
+            } else {
+                loadProducts();
+            }
+        }
+        
+        // Update loadProducts to accept search query
+        async function loadProductsOriginal() {
+            // Original function renamed
+        }
+        
+        // View product details
+        async function viewProduct(id) {
+            try {
+                // Fetch product details from API
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Không thể tải thông tin sản phẩm`);
+                }
+                
+                const product = await response.json();
+                
+                // Populate modal with product data
+                document.getElementById('modalProductName').textContent = product.name || 'N/A';
+                document.getElementById('modalProductSku').textContent = product.sku || 'N/A';
+                document.getElementById('modalProductDesc').textContent = product.description || 'Không có mô tả';
+                document.getElementById('modalProductCategory').textContent = product.category || 'Chưa phân loại';
+                document.getElementById('modalProductPrice').textContent = formatCurrency(product.price);
+                document.getElementById('modalProductStock').textContent = product.stock || 0;
+                
+                // Status badge
+                const statusElement = document.getElementById('modalProductStatus');
+                const isActive = product.active === true || product.active === null;
+                const statusText = isActive ? 'Active' : 'Inactive';
+                const statusClass = isActive ? 'status-active' : 'status-inactive';
+                statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                
+                // Show modal
+                document.getElementById('productModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error fetching product details:', error);
+                alert('Lỗi khi tải thông tin sản phẩm: ' + error.message);
+            }
+        }
+        
+        // Close modal
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeProductModal();
+            }
+        }
+        
+        // Edit product
+        function editProduct(id) {
+            alert(`Chỉnh sửa sản phẩm ID: ${id}`);
+            // TODO: Implement edit product
+        }
+        
+        // Initialize page
         window.addEventListener('load', () => {
+            
+            // Setup search
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchProducts();
+                }, 500); // Debounce 500ms
+            });
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
+            
+            // Load products data
+            loadProducts();
         });
     </script>
 </body>

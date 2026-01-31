@@ -9,6 +9,4 @@ com\bizflow\adminproductservice\controller\ProductAdminController.class
 com\bizflow\adminproductservice\service\AdminProductService.class
 com\bizflow\adminproductservice\exception\ProductNotFoundException.class
 com\bizflow\adminproductservice\entity\ProductInventory.class
-com\bizflow\config\SecurityConfig.class
 com\bizflow\adminproductservice\service\AdminProductServiceImpl.class
-com\bizflow\config\SecurityConfig$1.class

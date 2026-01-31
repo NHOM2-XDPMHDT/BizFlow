@@ -46,7 +46,7 @@
                     <div class="page-title">Quản lý Đơn hàng</div>
                     <div class="search">
                         <span>🔍</span>
-                        <input type="text" placeholder="Tìm đơn hàng theo mã, khách hàng..." />
+                        <input id="searchInput" type="text" placeholder="Tìm đơn hàng theo mã, khách hàng..." />
                     </div>
                 </div>
                 <div class="top-right">
@@ -93,10 +93,96 @@
 
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        // API Configuration (through Nginx -> Gateway)
+        const API_BASE_URL = '/api/admin/orders';
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '0 ₫';
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        async function loadOrders(searchQuery = '') {
+            const tbody = document.getElementById('ordersBody');
+
+            try {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Đang tải dữ liệu...</td></tr>';
+
+                let url = `${API_BASE_URL}`;
+                if (searchQuery) {
+                    url += `?q=${encodeURIComponent(searchQuery)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const orders = await response.json();
+                tbody.innerHTML = '';
+
+                if (!orders || orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Không có đơn hàng.</td></tr>';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${escapeHtml(order.invoiceNumber || order.orderNumber || order.id)}</strong></td>
+                        <td>${escapeHtml(order.customerName || '—')}</td>
+                        <td>${formatCurrency(order.totalAmount)}</td>
+                        <td>${escapeHtml(order.status || '—')}</td>
+                        <td>
+                            <button class="action-btn sm" onclick="viewOrder(${order.id})">Xem</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-box" style="color: red;">
+                    Lỗi khi tải dữ liệu: ${escapeHtml(error.message)}<br>
+                    <small>Đảm bảo AdminOrderService đang chạy và gateway route hoạt động: ${escapeHtml(API_BASE_URL)}</small>
+                </td></tr>`;
+            }
+        }
+
+        async function viewOrder(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                if (!response.ok) {
+                    throw new Error('Không thể tải chi tiết đơn hàng');
+                }
+                const order = await response.json();
+                alert(`Đơn hàng #${order.invoiceNumber || order.id}\nKhách: ${order.customerName || '—'}\nTổng: ${formatCurrency(order.totalAmount)}\nTrạng thái: ${order.status || '—'}`);
+            } catch (error) {
+                console.error('Error loading order:', error);
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
+
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadOrders(searchInput.value.trim());
+                }, 400);
+            });
+
+            loadOrders();
         });
     </script>
 </body>

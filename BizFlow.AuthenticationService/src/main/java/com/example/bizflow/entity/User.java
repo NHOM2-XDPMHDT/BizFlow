@@ -9,22 +9,25 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false, unique = true, length = 50)
     private String username;
-    
+
     @Column(nullable = false)
     private String password;
-    
+
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
-    
+
     @Column(length = 100)
     private String fullName;
-    
+
     @Column(length = 20)
     private String phoneNumber;
-    
+
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -32,23 +35,24 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branch branch;
-    
+
     @Column(nullable = false)
     private Boolean enabled = true;
-    
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
-    
+
     @Column(columnDefinition = "TEXT")
     private String note;
 
     public User() {
     }
 
-    public User(Long id, String username, String password, String email, String fullName, String phoneNumber, Role role, Boolean enabled, LocalDateTime createdAt, LocalDateTime updatedAt, String note) {
+    public User(Long id, String username, String password, String email, String fullName, String phoneNumber, Role role,
+            Boolean enabled, LocalDateTime createdAt, LocalDateTime updatedAt, String note) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -84,6 +88,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getEmail() {

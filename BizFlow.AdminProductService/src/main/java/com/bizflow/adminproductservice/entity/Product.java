@@ -1,6 +1,7 @@
 package com.bizflow.adminproductservice.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,23 +18,20 @@ public class Product {
     @Column(name = "product_id")
     private Long id;
 
-    @Column(name = "category_id")
-    private Long categoryId;
+    @Column(name = "product_name", nullable = false)
+    private String productName;
 
-    @Column(name = "sku", unique = true, nullable = false)
-    private String code;
+    @Column(name = "sku", nullable = false, unique = true)
+    private String sku;
 
     @Column(name = "barcode")
     private String barcode;
 
-    @Column(name = "product_name", nullable = false)
-    private String name;
+    @Column(name = "category_id")
+    private Long categoryId;
 
-    @Column(name = "code", nullable = false)
-    private String legacyCode;
-
-    @Column(name = "name", nullable = false)
-    private String legacyName;
+    @Column(name = "unit", nullable = false)
+    private String unit;
 
     @Column(name = "price", nullable = false, precision = 15, scale = 2)
     private BigDecimal price;
@@ -41,14 +39,20 @@ public class Product {
     @Column(name = "cost_price", precision = 12, scale = 2)
     private BigDecimal costPrice;
 
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "active")
+    private Boolean active;
 
     @Column(name = "stock")
     private Integer stock;
@@ -66,20 +70,20 @@ public class Product {
         this.id = id;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public String getCode() {
-        return code;
+    public String getSku() {
+        return sku;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public String getBarcode() {
@@ -90,28 +94,20 @@ public class Product {
         this.barcode = barcode;
     }
 
-    public String getName() {
-        return name;
+    public Long getCategoryId() {
+        return categoryId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
-    public String getLegacyCode() {
-        return legacyCode;
+    public String getUnit() {
+        return unit;
     }
 
-    public void setLegacyCode(String legacyCode) {
-        this.legacyCode = legacyCode;
-    }
-
-    public String getLegacyName() {
-        return legacyName;
-    }
-
-    public void setLegacyName(String legacyName) {
-        this.legacyName = legacyName;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public BigDecimal getPrice() {
@@ -130,12 +126,12 @@ public class Product {
         this.costPrice = costPrice;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getStatus() {
+        return status;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getDescription() {
@@ -146,12 +142,28 @@ public class Product {
         this.description = description;
     }
 
-    public String getStatus() {
-        return status;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Integer getStock() {
