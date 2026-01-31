@@ -8,24 +8,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bizflow.adminproductservice.dto.ProductOverviewDto;
-import com.bizflow.adminproductservice.entity.ProductInventory;
+import com.bizflow.adminproductservice.entity.Product;
 import com.bizflow.adminproductservice.exception.ProductNotFoundException;
-import com.bizflow.adminproductservice.repository.ProductInventoryRepository;
+import com.bizflow.adminproductservice.repository.ProductRepository;
 import com.bizflow.adminproductservice.request.ProductStatusUpdateRequest;
 
 @Service
 public class AdminProductServiceImpl implements AdminProductService {
 
-    private final ProductInventoryRepository productInventoryRepository;
+    private final ProductRepository productRepository;
 
-    public AdminProductServiceImpl(ProductInventoryRepository productInventoryRepository) {
-        this.productInventoryRepository = productInventoryRepository;
+    public AdminProductServiceImpl(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ProductOverviewDto> listProducts(String query, Boolean active) {
-        return productInventoryRepository.findAll().stream()
+        return productRepository.findAll().stream()
                 .filter(product -> matchesActive(active, product))
                 .filter(product -> matchesQuery(query, product))
                 .map(this::toDto)
@@ -35,7 +35,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductOverviewDto getProduct(Long id) {
-        return productInventoryRepository.findById(id)
+        return productRepository.findById(id)
                 .map(this::toDto)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
@@ -43,38 +43,41 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Override
     @Transactional
     public ProductOverviewDto updateProductStatus(Long id, ProductStatusUpdateRequest request) {
-        ProductInventory inventory = productInventoryRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-        inventory.setActive(request.getActive());
-        return toDto(productInventoryRepository.save(inventory));
+        product.setActive(request.getActive());
+        return toDto(productRepository.save(product));
     }
 
-    private ProductOverviewDto toDto(ProductInventory product) {
+    private ProductOverviewDto toDto(Product product) {
+        // Lấy category name từ categoryId nếu cần, tạm thời để null hoặc "N/A"
+        String categoryName = product.getCategoryId() != null ? "Category " + product.getCategoryId() : "N/A";
+        
         return new ProductOverviewDto(
                 product.getId(),
                 product.getSku(),
-                product.getName(),
-                product.getCategory(),
-                product.getActive(),
-                product.getStock(),
-                product.getPrice(),
-                product.getUpdatedAt()
+                product.getProductName(),
+                categoryName,
+                product.getActive() != null ? product.getActive() : Boolean.TRUE,
+                product.getStock() != null ? product.getStock() : 0,
+                product.getPrice() != null ? product.getPrice().doubleValue() : 0.0,
+                null  // Tạm thời bỏ updatedAt
         );
     }
 
-    private boolean matchesActive(Boolean active, ProductInventory product) {
+    private boolean matchesActive(Boolean active, Product product) {
         if (active == null) {
             return true;
         }
         return active.equals(product.getActive());
     }
 
-    private boolean matchesQuery(String query, ProductInventory product) {
+    private boolean matchesQuery(String query, Product product) {
         if (query == null || query.isBlank()) {
             return true;
         }
         String normalized = query.trim().toLowerCase(Locale.ROOT);
-        return product.getSku().toLowerCase(Locale.ROOT).contains(normalized)
-                || product.getName().toLowerCase(Locale.ROOT).contains(normalized);
+        return (product.getSku() != null && product.getSku().toLowerCase(Locale.ROOT).contains(normalized))
+                || (product.getProductName() != null && product.getProductName().toLowerCase(Locale.ROOT).contains(normalized));
     }
 }
