@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 // @RestController - DISABLED: Conflicts with DashboardController
@@ -56,7 +57,7 @@ public class DirectDashboardController {
             Long productCount = restTemplate.getForObject(productServiceUrl + "/api/admin/products/count", Long.class);
             summary.put("productCount", productCount != null ? productCount : 0);
             
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             // Return zeros if services are unavailable
             summary.put("totalUsers", 0);
             summary.put("employeeCount", 0);
@@ -77,7 +78,7 @@ public class DirectDashboardController {
                 List.class
             );
             return ResponseEntity.ok(users != null ? users : new ArrayList<>());
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             return ResponseEntity.ok(new ArrayList<>());
         }
     }
@@ -91,7 +92,7 @@ public class DirectDashboardController {
                 List.class
             );
             return ResponseEntity.ok(branches != null ? branches : new ArrayList<>());
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             return ResponseEntity.ok(new ArrayList<>());
         }
     }
