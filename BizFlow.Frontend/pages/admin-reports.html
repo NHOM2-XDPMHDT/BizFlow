@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BizFlow - Báo cáo (Admin)</title>
     <link rel="stylesheet" href="../assets/css/admin-base.css">
+    <link rel="stylesheet" href="../assets/css/admin-reports.css">
 </head>
 <body data-admin-page="reports">
     <div class="layout">
@@ -63,47 +64,109 @@
             </header>
 
             <main class="main">
-                <section class="cards">
-                    <div class="card">
-                        <div class="card-title">Báo cáo doanh thu</div>
-                        <div class="card-subtitle">Xuất dữ liệu doanh thu theo thời gian.</div>
-                        <ul class="info-list">
-                            <li>Chọn khoảng thời gian (tuần, tháng, quý).</li>
-                            <li>Kết xuất CSV / PDF để gửi ban lãnh đạo.</li>
-                            <li>Phân tích tăng trưởng theo kênh và chi nhánh.</li>
-                        </ul>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">Báo cáo tồn kho & đơn hàng</div>
-                        <div class="card-subtitle">Giám sát kho và hoạt động bán hàng.</div>
-                        <ul class="info-list">
-                            <li>Danh sách sản phẩm dưới mức tồn tối thiểu.</li>
-                            <li>Thống kê đơn hàng theo trạng thái giao hàng.</li>
-                            <li>So sánh tồn kho giữa các chi nhánh.</li>
-                        </ul>
-                    </div>
-                </section>
+                <section class="report-panels">
+                    <section class="card report-panel" aria-label="Báo cáo doanh thu">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <div class="card-title">Báo cáo doanh thu</div>
+                                <div class="card-subtitle">Xuất dữ liệu doanh thu theo thời gian và xem nhanh thống kê.</div>
+                            </div>
 
-                <section class="card" style="margin-top: 18px;">
-                    <div class="card-title">Danh sách báo cáo</div>
-                    <div class="card-subtitle">Dữ liệu lấy từ microservice Admin Report (đọc trực tiếp từ MySQL).</div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Mã</th>
-                                <th>Tên</th>
-                                <th>Tần suất</th>
-                                <th>Trạng thái</th>
-                                <th>Lần chạy gần nhất</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportsBody">
-                            <tr>
-                                <td colspan="6" class="empty-box">Chưa có dữ liệu báo cáo.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            <div class="panel-actions">
+                                <div class="form-group" style="min-width: 150px;">
+                                    <label for="salesFrom">Từ ngày</label>
+                                    <input id="salesFrom" type="date" />
+                                </div>
+                                <div class="form-group" style="min-width: 150px;">
+                                    <label for="salesTo">Đến ngày</label>
+                                    <input id="salesTo" type="date" />
+                                </div>
+
+                                <button class="action-btn primary" type="button" id="salesLoadBtn">Xem báo cáo</button>
+                                <button class="action-btn" type="button" id="salesExportCsv">Xuất CSV</button>
+                                <button class="action-btn" type="button" id="salesExportPdf">Xuất PDF</button>
+                                <button class="action-btn" type="button" id="salesExportXlsx">Xuất Excel</button>
+                            </div>
+                        </div>
+
+                        <ul class="info-list">
+                            <li>Chọn khoảng thời gian (tuần, tháng, quý) bằng bộ lọc ngày.</li>
+                            <li>Kết xuất CSV / PDF / Excel để gửi ban lãnh đạo.</li>
+                            <li>Xem nhanh: tổng số đơn, số đơn đã thanh toán, doanh thu, giá trị đơn trung bình.</li>
+                        </ul>
+
+                        <div class="kpi-grid" id="salesKpis">
+                            <div class="kpi"><div class="kpi-label">Tổng số đơn</div><div class="kpi-value">—</div></div>
+                            <div class="kpi"><div class="kpi-label">Đã thanh toán</div><div class="kpi-value">—</div></div>
+                            <div class="kpi"><div class="kpi-label">Doanh thu</div><div class="kpi-value">—</div></div>
+                            <div class="kpi"><div class="kpi-label">Giá trị TB/đơn</div><div class="kpi-value">—</div></div>
+                        </div>
+
+                        <div class="table-wrap" aria-label="Bảng doanh thu theo ngày">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Số đơn</th>
+                                        <th>Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesDailyBody">
+                                    <tr><td colspan="3" class="empty-box">Chưa tải dữ liệu.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
+                    </section>
+
+                    <section class="card report-panel" aria-label="Báo cáo tồn kho và đơn hàng">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <div class="card-title">Báo cáo tồn kho & đơn hàng</div>
+                                <div class="card-subtitle">Giám sát kho (tồn kho thấp) và điều hướng sang quản lý đơn hàng.</div>
+                            </div>
+
+                            <div class="panel-actions">
+                                <div class="form-group" style="min-width: 140px;">
+                                    <label for="lowStockThreshold">Ngưỡng tồn kho</label>
+                                    <input id="lowStockThreshold" type="number" min="0" step="1" value="10" />
+                                </div>
+                                <div class="form-group" style="min-width: 140px;">
+                                    <label for="lowStockLimit">Giới hạn</label>
+                                    <input id="lowStockLimit" type="number" min="1" step="1" value="50" />
+                                </div>
+
+                                <button class="action-btn primary" type="button" id="lowStockLoadBtn">Xem tồn kho thấp</button>
+                                <button class="action-btn" type="button" id="lowStockExportCsv">Xuất CSV</button>
+                                <button class="action-btn" type="button" id="lowStockExportPdf">Xuất PDF</button>
+                                <button class="action-btn" type="button" id="lowStockExportXlsx">Xuất Excel</button>
+                            </div>
+                        </div>
+
+                        <ul class="info-list">
+                            <li>Danh sách sản phẩm dưới mức tồn tối thiểu (theo ngưỡng).</li>
+                            <li>Thống kê đơn hàng theo trạng thái: xem tại <a class="inline-link" href="admin-orders.html">Trang Đơn hàng</a>.</li>
+                            <li>So sánh tồn kho giữa các chi nhánh: có thể mở rộng khi có API theo chi nhánh.</li>
+                        </ul>
+
+                        <div class="table-wrap" aria-label="Bảng tồn kho thấp">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã SP</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Tồn kho</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lowStockBody">
+                                    <tr><td colspan="3" class="empty-box">Chưa tải dữ liệu.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
+                    </section>
                 </section>
             </main>
         </div>
@@ -112,7 +175,8 @@
     <script src="../assets/js/admin-layout.js"></script>
     <script>
         // API Configuration (through Nginx -> Gateway)
-        const API_BASE_URL = '/api/admin/reports';
+        const API_ANALYTICS_BASE_URL = '/api/admin/reports/analytics';
+        const API_EXPORT_BASE_URL = '/api/admin/reports/export';
 
         function escapeHtml(text) {
             if (text === null || text === undefined) return '';
@@ -132,66 +196,205 @@
             }
         }
 
-        async function loadReports() {
-            const tbody = document.getElementById('reportsBody');
+        function setButtonLoading(btn, isLoading, textWhenLoading) {
+            if (!btn) return;
+            btn.disabled = !!isLoading;
+            btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+            btn.textContent = isLoading ? (textWhenLoading || 'Đang xử lý...') : btn.dataset.originalText;
+        }
+
+        function formatNumber(value) {
+            const n = Number(value);
+            if (Number.isFinite(n)) {
+                return new Intl.NumberFormat('vi-VN').format(n);
+            }
+            return value === null || value === undefined ? '—' : String(value);
+        }
+
+        function formatMoneyVnd(value) {
+            const n = Number(value);
+            if (Number.isFinite(n)) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+            }
+            return value === null || value === undefined ? '—' : String(value);
+        }
+
+        function buildQuery(params) {
+            const usp = new URLSearchParams();
+            Object.entries(params || {}).forEach(([k, v]) => {
+                if (v === null || v === undefined || v === '') return;
+                usp.set(k, String(v));
+            });
+            const s = usp.toString();
+            return s ? `?${s}` : '';
+        }
+
+        async function fetchJson(url) {
+            const res = await fetch(url);
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status} ${text}`.trim());
+            }
+            return res.json();
+        }
+
+        function setDefaultDateRange() {
+            // Default: last 7 days
+            const to = new Date();
+            const from = new Date();
+            from.setDate(from.getDate() - 6);
+
+            const toStr = to.toISOString().slice(0, 10);
+            const fromStr = from.toISOString().slice(0, 10);
+
+            const fromEl = document.getElementById('salesFrom');
+            const toEl = document.getElementById('salesTo');
+            if (fromEl && !fromEl.value) fromEl.value = fromStr;
+            if (toEl && !toEl.value) toEl.value = toStr;
+        }
+
+        function renderSalesKpis(overview) {
+            const kpis = document.getElementById('salesKpis');
+            if (!kpis) return;
+
+            const items = [
+                { label: 'Tổng số đơn', value: formatNumber(overview?.totalOrders) },
+                { label: 'Đã thanh toán', value: formatNumber(overview?.paidOrders) },
+                { label: 'Doanh thu', value: formatMoneyVnd(overview?.revenue) },
+                { label: 'Giá trị TB/đơn', value: formatMoneyVnd(overview?.averageOrderValue) },
+            ];
+
+            kpis.innerHTML = items.map(i => `
+                <div class="kpi">
+                    <div class="kpi-label">${escapeHtml(i.label)}</div>
+                    <div class="kpi-value">${escapeHtml(i.value)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderSalesDaily(rows) {
+            const tbody = document.getElementById('salesDailyBody');
+            if (!tbody) return;
+
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-box">Không có dữ liệu trong khoảng thời gian này.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td>${escapeHtml(r.date || '—')}</td>
+                    <td>${escapeHtml(formatNumber(r.orderCount))}</td>
+                    <td>${escapeHtml(formatMoneyVnd(r.revenue))}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderLowStock(rows) {
+            const tbody = document.getElementById('lowStockBody');
+            if (!tbody) return;
+
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-box">Không có sản phẩm nào dưới ngưỡng tồn kho.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td><strong>${escapeHtml(r.productId ?? '—')}</strong></td>
+                    <td>${escapeHtml(r.productName ?? '—')}</td>
+                    <td>${escapeHtml(formatNumber(r.stock))}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadSalesReport() {
+            const btn = document.getElementById('salesLoadBtn');
+            const from = document.getElementById('salesFrom')?.value;
+            const to = document.getElementById('salesTo')?.value;
+            const q = buildQuery({ from, to });
+
             try {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-box">Đang tải dữ liệu...</td></tr>';
+                setButtonLoading(btn, true, 'Đang tải...');
+                renderSalesKpis(null);
+                renderSalesDaily(null);
 
-                const response = await fetch(`${API_BASE_URL}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const [overview, daily] = await Promise.all([
+                    fetchJson(`${API_ANALYTICS_BASE_URL}/sales/overview${q}`),
+                    fetchJson(`${API_ANALYTICS_BASE_URL}/sales/daily${q}`),
+                ]);
+
+                renderSalesKpis(overview);
+                renderSalesDaily(daily);
+            } catch (e) {
+                console.error(e);
+                const tbody = document.getElementById('salesDailyBody');
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="empty-box" style="color: red;">Lỗi tải báo cáo: ${escapeHtml(e.message)}</td></tr>`;
                 }
-
-                const reports = await response.json();
-                tbody.innerHTML = '';
-
-                if (!reports || reports.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="empty-box">Không có mẫu báo cáo nào.</td></tr>';
-                    return;
-                }
-
-                reports.forEach(r => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${escapeHtml(r.code || r.id)}</strong></td>
-                        <td>${escapeHtml(r.name || '—')}</td>
-                        <td>${escapeHtml(r.frequency || '—')}</td>
-                        <td>${escapeHtml(r.status || '—')}</td>
-                        <td>${escapeHtml(formatDateTime(r.lastRun))}</td>
-                        <td>
-                            <button class="action-btn sm" onclick="triggerReport(${r.id})">Chạy</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error loading reports:', error);
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-box" style="color: red;">
-                    Lỗi khi tải dữ liệu: ${escapeHtml(error.message)}<br>
-                    <small>Đảm bảo AdminReportService đang chạy và gateway route hoạt động: ${escapeHtml(API_BASE_URL)}</small>
-                </td></tr>`;
+            } finally {
+                setButtonLoading(btn, false);
             }
         }
 
-        async function triggerReport(id) {
+        async function loadLowStockReport() {
+            const btn = document.getElementById('lowStockLoadBtn');
+            const threshold = document.getElementById('lowStockThreshold')?.value;
+            const limit = document.getElementById('lowStockLimit')?.value;
+            const q = buildQuery({ threshold, limit });
+
             try {
-                const response = await fetch(`${API_BASE_URL}/${id}/trigger`, { method: 'POST' });
-                if (!response.ok) {
-                    throw new Error('Không thể chạy báo cáo');
+                setButtonLoading(btn, true, 'Đang tải...');
+                renderLowStock(null);
+
+                const rows = await fetchJson(`${API_ANALYTICS_BASE_URL}/inventory/low-stock${q}`);
+                renderLowStock(rows);
+            } catch (e) {
+                console.error(e);
+                const tbody = document.getElementById('lowStockBody');
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="empty-box" style="color: red;">Lỗi tải báo cáo: ${escapeHtml(e.message)}</td></tr>`;
                 }
-                await loadReports();
-            } catch (error) {
-                console.error('Error triggering report:', error);
-                alert('Lỗi: ' + error.message);
+            } finally {
+                setButtonLoading(btn, false);
             }
         }
+
+        function exportSales(format) {
+            const from = document.getElementById('salesFrom')?.value;
+            const to = document.getElementById('salesTo')?.value;
+            const q = buildQuery({ from, to, format });
+            window.location.href = `${API_EXPORT_BASE_URL}/sales/daily${q}`;
+        }
+
+        function exportLowStock(format) {
+            const threshold = document.getElementById('lowStockThreshold')?.value;
+            const limit = document.getElementById('lowStockLimit')?.value;
+            const q = buildQuery({ threshold, limit, format });
+            window.location.href = `${API_EXPORT_BASE_URL}/inventory/low-stock${q}`;
+        }
+
 
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
 
-            loadReports();
+            setDefaultDateRange();
+
+            document.getElementById('salesLoadBtn')?.addEventListener('click', loadSalesReport);
+            document.getElementById('salesExportCsv')?.addEventListener('click', () => exportSales('csv'));
+            document.getElementById('salesExportPdf')?.addEventListener('click', () => exportSales('pdf'));
+            document.getElementById('salesExportXlsx')?.addEventListener('click', () => exportSales('xlsx'));
+
+            document.getElementById('lowStockLoadBtn')?.addEventListener('click', loadLowStockReport);
+            document.getElementById('lowStockExportCsv')?.addEventListener('click', () => exportLowStock('csv'));
+            document.getElementById('lowStockExportPdf')?.addEventListener('click', () => exportLowStock('pdf'));
+            document.getElementById('lowStockExportXlsx')?.addEventListener('click', () => exportLowStock('xlsx'));
+
+            // Load initial previews
+            loadSalesReport();
+            loadLowStockReport();
         });
     </script>
 </body>

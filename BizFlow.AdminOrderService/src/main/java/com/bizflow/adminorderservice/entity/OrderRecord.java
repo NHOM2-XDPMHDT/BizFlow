@@ -18,10 +18,10 @@ public class OrderRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "invoice_number", nullable = false, unique = true)
+    @Column(name = "invoice_number", unique = true)
     private String invoiceNumber;
 
-    @Column(nullable = false)
+    @Column
     private String status;
 
     @Column(name = "customer_name")
