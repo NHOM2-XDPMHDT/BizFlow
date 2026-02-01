@@ -387,9 +387,26 @@ public class ReportService {
             ProductSalesData data = entry.getValue();
             CatalogClient.ProductSnapshot product = catalogClient.getProduct(productId);
 
+            // Get catalog price and cost price from product
+            BigDecimal catalogPrice = (product != null && product.getPrice() != null) 
+                ? product.getPrice() 
+                : BigDecimal.ZERO;
             BigDecimal costPrice = getCostPrice(productId);
+            if (costPrice != null) {
+                costPrice = costPrice.abs();
+            } else {
+                costPrice = BigDecimal.ZERO;
+            }
+
+            // Recalculate revenue using catalog price as fallback if needed
+            BigDecimal totalRevenue = data.totalRevenue;
+            if (totalRevenue.compareTo(BigDecimal.ZERO) == 0 && data.quantitySold > 0) {
+                totalRevenue = catalogPrice.multiply(BigDecimal.valueOf(data.quantitySold));
+            }
+
+            // Cash-flow accounting: profit = cumulative_revenue - cumulative_cost
             BigDecimal totalCost = costPrice.multiply(BigDecimal.valueOf(data.quantitySold));
-            BigDecimal profit = data.totalRevenue.subtract(totalCost);
+            BigDecimal profit = totalRevenue.subtract(totalCost);
 
             InventoryClient.StockSummary stock = stockMap.get(productId);
 
@@ -399,7 +416,7 @@ public class ReportService {
                     product == null ? null : product.getCode(),
                     product == null ? null : product.getCategoryId(),
                     data.quantitySold,
-                    data.totalRevenue,
+                    totalRevenue,
                     totalCost,
                     profit,
                     stock == null ? null : stock.getStock()
