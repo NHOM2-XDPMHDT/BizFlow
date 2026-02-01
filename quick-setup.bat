@@ -2,6 +2,15 @@
 REM Admin Services Quick Setup for Windows
 REM Chạy script này để setup nhanh Admin Services
 
+setlocal
+
+REM Prefer repo-local JDK (team-friendly) if present
+set "REPO_JDK=%~dp0.jdk\jdk-21.0.8"
+if exist "%REPO_JDK%\bin\java.exe" (
+    set "JAVA_HOME=%REPO_JDK%"
+    set "PATH=%JAVA_HOME%\bin;%PATH%"
+)
+
 echo ==========================================
 echo.🚀 Admin Services Quick Setup (Windows)
 echo ==========================================
@@ -52,3 +61,5 @@ echo    http://localhost:3000/admin/reports.html
 echo.
 echo ==========================================
 pause
+
+endlocal

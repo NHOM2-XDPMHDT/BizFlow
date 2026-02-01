@@ -12,6 +12,11 @@
     <name>BizFlow Parent</name>
 
     <modules>
+        <module>BizFlow.AdminHomeService</module>
+        <module>BizFlow.AdminOrderService</module>
+        <module>BizFlow.AdminProductService</module>
+        <module>BizFlow.AdminReportService</module>
+        <module>BizFlow.AdminUserService</module>
         <module>BizFlow.Gateway</module>
         <module>BizFlow.SalesService</module>
         <module>BizFlow.CatalogService</module>

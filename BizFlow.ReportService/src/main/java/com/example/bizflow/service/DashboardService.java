@@ -159,6 +159,9 @@ public class DashboardService {
     }
 
     public Optional<UserDetailDto> getUserDetail(Long userId) {
+        if (userId == null) {
+            return Optional.empty();
+        }
         return runInDatabase("auth", () -> userRepository.findById(userId).map(this::toUserDetailDto));
     }
 
@@ -204,8 +207,9 @@ public class DashboardService {
                 : null;
 
         String branchName = null;
-        if (user.getBranchId() != null) {
-            branchName = branchRepository.findById(user.getBranchId())
+        Long branchId = user.getBranchId();
+        if (branchId != null) {
+            branchName = branchRepository.findById(branchId)
                     .map(Branch::getName)
                     .orElse(null);
         }

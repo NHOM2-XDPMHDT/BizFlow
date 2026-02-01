@@ -1,13 +1,14 @@
 package com.bizflow.consumer;
 
-import com.bizflow.entity.CustomerPurchaseHistory;
-import com.bizflow.event.PurchaseEvent;
-import com.bizflow.repository.CustomerPurchaseHistoryRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import com.bizflow.entity.CustomerPurchaseHistory;
+import com.bizflow.event.PurchaseEvent;
+import com.bizflow.repository.CustomerPurchaseHistoryRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Kafka consumer for customer purchase events

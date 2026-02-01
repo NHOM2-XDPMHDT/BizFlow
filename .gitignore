@@ -4,10 +4,19 @@
 # Env / secrets
 .env
 
+# Local JDKs
+.jdk/
+
 # Build outputs
+target/
+**/target/
 /target/
 /frontend/dist/
 /node_modules/
+
+# Java build artifacts
+*.class
+*.jar
 
 # Logs
 *.log

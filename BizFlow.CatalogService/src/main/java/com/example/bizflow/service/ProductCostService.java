@@ -152,6 +152,9 @@ public class ProductCostService {
     }
 
     private BigDecimal resolveCostPrice(Long productId, BigDecimal inputCost) {
+        if (productId == null) {
+            throw new IllegalArgumentException("productId is required");
+        }
         if (inputCost != null) {
             return inputCost;
         }
@@ -173,6 +176,9 @@ public class ProductCostService {
     }
 
     public List<ProductCostHistoryDTO> getCostHistory(Long productId) {
+        if (productId == null) {
+            return List.of();
+        }
         return costHistoryRepository.findByProductIdOrderByCreatedAtDesc(productId)
                 .stream()
                 .map(ProductCostHistoryDTO::fromEntity)
@@ -198,6 +204,9 @@ public class ProductCostService {
 
     public List<ProductCostHistoryDTO> getProductCostHistoryByDateRange(
             Long productId, LocalDate startDate, LocalDate endDate) {
+        if (productId == null) {
+            return List.of();
+        }
         LocalDateTime start = startDate.atStartOfDay();
         LocalDateTime end = endDate.atTime(LocalTime.MAX);
 

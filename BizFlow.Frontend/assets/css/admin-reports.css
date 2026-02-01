@@ -93,8 +93,3 @@
     text-decoration: underline;
 }
 
-@media (min-width: 1024px) {
-    .report-panels {
-        grid-template-columns: 1fr 1fr;
-    }
-}

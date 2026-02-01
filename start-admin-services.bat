@@ -2,6 +2,15 @@
 REM Start all Admin Services for BizFlow
 REM Make sure MySQL is running in Docker first
 
+setlocal
+
+REM Prefer repo-local JDK (team-friendly) if present
+set "REPO_JDK=%~dp0.jdk\jdk-21.0.8"
+if exist "%REPO_JDK%\bin\java.exe" (
+    set "JAVA_HOME=%REPO_JDK%"
+    set "PATH=%JAVA_HOME%\bin;%PATH%"
+)
+
 echo ============================================
 echo  STARTING BIZFLOW ADMIN SERVICES
 echo ============================================
@@ -80,3 +89,5 @@ netstat -ano | findstr ":8200 :8201 :8202 :8203 :8204" | findstr "LISTENING"
 echo.
 echo Press any key to exit...
 pause >nul
+
+endlocal

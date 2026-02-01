@@ -238,6 +238,45 @@
             return res.json();
         }
 
+        function extractFilenameFromContentDisposition(contentDisposition) {
+            if (!contentDisposition) return null;
+            // Handles: attachment; filename="foo.csv" and RFC5987: filename*=UTF-8''foo.csv
+            const matchStar = contentDisposition.match(/filename\*=(?:UTF-8''|utf-8'')([^;]+)/);
+            if (matchStar && matchStar[1]) {
+                try { return decodeURIComponent(matchStar[1].trim().replace(/^"|"$/g, '')); } catch { /* ignore */ }
+                return matchStar[1].trim().replace(/^"|"$/g, '');
+            }
+            const match = contentDisposition.match(/filename=([^;]+)/);
+            if (match && match[1]) {
+                return match[1].trim().replace(/^"|"$/g, '');
+            }
+            return null;
+        }
+
+        async function downloadFile(url, fallbackFilename) {
+            const res = await fetch(url);
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status} ${text}`.trim());
+            }
+
+            const blob = await res.blob();
+            const cd = res.headers.get('content-disposition');
+            const filename = extractFilenameFromContentDisposition(cd) || fallbackFilename || 'report.csv';
+
+            const objectUrl = URL.createObjectURL(blob);
+            try {
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } finally {
+                URL.revokeObjectURL(objectUrl);
+            }
+        }
+
         function setDefaultDateRange() {
             // Default: last 7 days
             const to = new Date();
@@ -363,15 +402,23 @@
         function exportSales(format) {
             const from = document.getElementById('salesFrom')?.value;
             const to = document.getElementById('salesTo')?.value;
+            const ext = (format === 'pdf') ? 'pdf' : (format === 'xlsx' ? 'xlsx' : 'csv');
             const q = buildQuery({ from, to, format });
-            window.location.href = `${API_EXPORT_BASE_URL}/sales/daily${q}`;
+            downloadFile(`${API_EXPORT_BASE_URL}/sales${q}`, `sales-report.${ext}`).catch((e) => {
+                console.error(e);
+                alert(`Không thể xuất báo cáo: ${e.message}`);
+            });
         }
 
         function exportLowStock(format) {
             const threshold = document.getElementById('lowStockThreshold')?.value;
             const limit = document.getElementById('lowStockLimit')?.value;
+            const ext = (format === 'pdf') ? 'pdf' : (format === 'xlsx' ? 'xlsx' : 'csv');
             const q = buildQuery({ threshold, limit, format });
-            window.location.href = `${API_EXPORT_BASE_URL}/inventory/low-stock${q}`;
+            downloadFile(`${API_EXPORT_BASE_URL}/inventory/low-stock${q}`, `low-stock.${ext}`).catch((e) => {
+                console.error(e);
+                alert(`Không thể xuất báo cáo: ${e.message}`);
+            });
         }
 
 

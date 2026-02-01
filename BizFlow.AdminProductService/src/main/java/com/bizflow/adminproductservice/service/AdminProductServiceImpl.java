@@ -2,6 +2,7 @@ package com.bizflow.adminproductservice.service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class AdminProductServiceImpl implements AdminProductService {
                 categoryName,
                 product.getDescription(),  // Thêm description từ database
                 product.getActive() != null ? product.getActive() : Boolean.TRUE,
-                product.getStock() != null ? product.getStock().intValue() : 0,
+                Objects.requireNonNullElse(product.getStock(), 0),
                 product.getPrice() != null ? product.getPrice().doubleValue() : 0.0,
                 null  // Tạm thời bỏ updatedAt
         );
