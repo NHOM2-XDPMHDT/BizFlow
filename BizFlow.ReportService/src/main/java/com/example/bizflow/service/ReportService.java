@@ -3,6 +3,7 @@ package com.example.bizflow.service;
 import com.example.bizflow.dto.DailyReportDTO;
 import com.example.bizflow.dto.LowStockAlertDTO;
 import com.example.bizflow.dto.RevenueReportDTO;
+import com.example.bizflow.dto.ShelfReportDTO;
 import com.example.bizflow.dto.TopProductDTO;
 import com.example.bizflow.integration.CatalogClient;
 import com.example.bizflow.integration.InventoryClient;
@@ -40,67 +41,52 @@ public class ReportService {
         this.inventoryClient = inventoryClient;
     }
 
-    private BigDecimal getCostPrice(Long productId) {
-        if (productId == null) {
-            return BigDecimal.ZERO;
-        }
-        if (costPriceCache.containsKey(productId)) {
-            return costPriceCache.get(productId);
-        }
-        BigDecimal costPrice = catalogClient.getCostPrice(productId);
-        if (costPrice == null) {
-            costPrice = BigDecimal.ZERO;
-        }
-        costPriceCache.put(productId, costPrice);
-        return costPrice;
-    }
-
     public void clearCostPriceCache() {
         costPriceCache.clear();
     }
 
     public RevenueReportDTO getRevenueReport(LocalDate startDate, LocalDate endDate, String period) {
-        List<SalesClient.OrderSnapshot> orders = salesClient.getOrders(startDate, endDate);
-
-        List<SalesClient.OrderSnapshot> paidOrders = orders.stream()
-                .filter(o -> "PAID".equalsIgnoreCase(o.getStatus()))
-                .filter(o -> !Boolean.TRUE.equals(o.getReturnOrder()))
-                .collect(Collectors.toList());
+        List<SalesClient.DailyRevenueSummary> dailySummaries = salesClient.getDailyRevenue(startDate, endDate);
+        List<SalesClient.DailyProductSummary> dailyProductSummaries = salesClient.getDailyProductSummaries(startDate, endDate);
 
         RevenueReportDTO report = new RevenueReportDTO();
         report.setPeriod(period);
         report.setStartDate(startDate.format(DateTimeFormatter.ISO_DATE));
         report.setEndDate(endDate.format(DateTimeFormatter.ISO_DATE));
-        report.setTotalOrders(paidOrders.size());
 
         BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalCost = BigDecimal.ZERO;
         long totalItemsSold = 0;
 
-        Map<LocalDate, List<SalesClient.OrderSnapshot>> ordersByDate = paidOrders.stream()
-                .filter(o -> o.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(o -> o.getCreatedAt().toLocalDate()));
+        Map<LocalDate, SalesClient.DailyRevenueSummary> dailyRevenueMap = new HashMap<>();
+        for (SalesClient.DailyRevenueSummary summary : dailySummaries) {
+            if (summary.getDate() == null) {
+                continue;
+            }
+            dailyRevenueMap.put(LocalDate.parse(summary.getDate()), summary);
+        }
+
+        Map<LocalDate, BigDecimal> dailyCostMap = new HashMap<>();
+        Map<Long, BigDecimal> costPriceMap = loadCostPrices(dailyProductSummaries);
+        for (SalesClient.DailyProductSummary item : dailyProductSummaries) {
+            if (item.getDate() == null || item.getProductId() == null) {
+                continue;
+            }
+            LocalDate date = LocalDate.parse(item.getDate());
+            long qty = item.getQuantitySold();
+            totalItemsSold += qty;
+            BigDecimal costPrice = costPriceMap.getOrDefault(item.getProductId(), BigDecimal.ZERO);
+            BigDecimal itemCost = costPrice.multiply(BigDecimal.valueOf(qty));
+            dailyCostMap.merge(date, itemCost, BigDecimal::add);
+        }
 
         List<RevenueReportDTO.DailyRevenueItem> dailyBreakdown = new ArrayList<>();
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            List<SalesClient.OrderSnapshot> dayOrders = ordersByDate.getOrDefault(date, Collections.emptyList());
-
-            BigDecimal dayRevenue = BigDecimal.ZERO;
-            BigDecimal dayCost = BigDecimal.ZERO;
-
-            for (SalesClient.OrderSnapshot order : dayOrders) {
-                dayRevenue = dayRevenue.add(safeAmount(order.getTotalAmount()));
-                if (order.getItems() != null) {
-                    for (SalesClient.OrderItemSnapshot item : order.getItems()) {
-                        Integer qtyValue = item.getQuantity();
-                        int qty = qtyValue != null ? qtyValue : 0;
-                        totalItemsSold += qty;
-                        BigDecimal costPrice = getCostPrice(item.getProductId());
-                        dayCost = dayCost.add(costPrice.multiply(BigDecimal.valueOf(qty)));
-                    }
-                }
-            }
+            SalesClient.DailyRevenueSummary summary = dailyRevenueMap.get(date);
+            BigDecimal dayRevenue = summary == null ? BigDecimal.ZERO : safeAmount(summary.getRevenue());
+            long orderCount = summary == null ? 0 : summary.getOrderCount();
+            BigDecimal dayCost = dailyCostMap.getOrDefault(date, BigDecimal.ZERO);
 
             totalRevenue = totalRevenue.add(dayRevenue);
             totalCost = totalCost.add(dayCost);
@@ -118,13 +104,14 @@ public class ReportService {
                     dayCost,
                     dayProfit,
                     dayMargin,
-                    dayOrders.size()
+                    orderCount
             ));
         }
 
         report.setTotalRevenue(totalRevenue);
         report.setTotalCost(totalCost);
         report.setGrossProfit(totalRevenue.subtract(totalCost));
+        report.setTotalOrders(dailySummaries.stream().mapToLong(SalesClient.DailyRevenueSummary::getOrderCount).sum());
         report.setTotalItemsSold(totalItemsSold);
         report.setDailyBreakdown(dailyBreakdown);
 
@@ -158,50 +145,20 @@ public class ReportService {
     }
 
     public DailyReportDTO getDailyReport(LocalDate date) {
-        List<SalesClient.OrderSnapshot> orders = salesClient.getOrders(date, date);
-        List<SalesClient.OrderSnapshot> paidOrders = orders.stream()
-                .filter(o -> "PAID".equalsIgnoreCase(o.getStatus()))
-                .collect(Collectors.toList());
+        SalesClient.DailyReportSummary salesSummary = salesClient.getDailyReportSummary(date);
 
-        List<SalesClient.OrderSnapshot> paidSales = paidOrders.stream()
-                .filter(o -> !Boolean.TRUE.equals(o.getReturnOrder()))
-                .collect(Collectors.toList());
-
-        List<SalesClient.OrderSnapshot> paidReturns = paidOrders.stream()
-                .filter(o -> Boolean.TRUE.equals(o.getReturnOrder()))
-                .collect(Collectors.toList());
-
-        BigDecimal salesRevenue = sumOrderAmount(paidSales);
-        BigDecimal returnAmount = sumOrderAmount(paidReturns);
-
-        long salesQuantity = sumOrderQuantity(paidSales);
-        long returnQuantity = sumOrderQuantity(paidReturns);
-
-        BigDecimal debtIncrease = orders.stream()
-                .filter(o -> "UNPAID".equalsIgnoreCase(o.getStatus()))
-                .filter(o -> !Boolean.TRUE.equals(o.getReturnOrder()))
-                .map(o -> safeAmount(o.getTotalAmount()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        BigDecimal salesRevenue = safeAmount(salesSummary.getSalesRevenue());
+        BigDecimal returnAmount = safeAmount(salesSummary.getReturnRevenue());
+        long salesQuantity = salesSummary.getSalesQuantity();
+        long returnQuantity = salesSummary.getReturnQuantity();
+        BigDecimal debtIncrease = safeAmount(salesSummary.getDebtIncrease());
         BigDecimal debtDecrease = BigDecimal.ZERO;
-
-        Map<String, BigDecimal> incomeByMethod = new HashMap<>();
-        Map<String, BigDecimal> expenseByMethod = new HashMap<>();
-
-        List<SalesClient.PaymentSnapshot> payments = salesClient.getPayments(date, date);
-        for (SalesClient.PaymentSnapshot payment : payments) {
-            if (payment == null || payment.getAmount() == null) {
-                continue;
-            }
-            String method = normalizePaymentMethod(payment.getMethod());
-            incomeByMethod.merge(method, payment.getAmount(), BigDecimal::add);
-        }
-
-        for (SalesClient.OrderSnapshot order : paidReturns) {
-            BigDecimal amount = safeAmount(order.getTotalAmount());
-            String refundMethod = normalizePaymentMethod(order.getRefundMethod());
-            expenseByMethod.merge(refundMethod, amount, BigDecimal::add);
-        }
+        Map<String, BigDecimal> incomeByMethod = salesSummary.getIncomeByMethod() == null
+                ? new HashMap<>()
+                : new HashMap<>(salesSummary.getIncomeByMethod());
+        Map<String, BigDecimal> expenseByMethod = salesSummary.getExpenseByMethod() == null
+                ? new HashMap<>()
+                : new HashMap<>(salesSummary.getExpenseByMethod());
 
         DailyReportDTO report = new DailyReportDTO();
         report.setDate(date.format(DateTimeFormatter.ISO_DATE));
@@ -255,19 +212,13 @@ public class ReportService {
         report.setReturns(returns);
 
         DailyReportDTO.OtherSummary other = new DailyReportDTO.OtherSummary();
-        other.setTotalInvoices(paidOrders.size());
-        other.setSalesInvoices(paidSales.size());
-        other.setReturnInvoices(paidReturns.size());
-        other.setExchangeInvoices(paidReturns.stream()
-                .filter(o -> isExchangeOrder(o.getOrderType()))
-                .count());
-        other.setVoucherCount(payments.stream()
-                .filter(p -> "VOUCHER".equals(normalizePaymentMethod(p.getMethod())))
-                .count());
+        other.setTotalInvoices(salesSummary.getTotalInvoices());
+        other.setSalesInvoices(salesSummary.getSalesInvoices());
+        other.setReturnInvoices(salesSummary.getReturnInvoices());
+        other.setExchangeInvoices(salesSummary.getExchangeInvoices());
+        other.setVoucherCount(getCount(salesSummary.getPaymentCountByMethod(), "VOUCHER"));
         other.setDiscountCount(0);
-        other.setCardPaymentCount(payments.stream()
-                .filter(p -> "CARD".equals(normalizePaymentMethod(p.getMethod())))
-                .count());
+        other.setCardPaymentCount(getCount(salesSummary.getPaymentCountByMethod(), "CARD"));
         report.setOther(other);
 
         DailyReportDTO.CashSummary cash = new DailyReportDTO.CashSummary();
@@ -351,84 +302,74 @@ public class ReportService {
     }
 
     public List<TopProductDTO> getTopSellingProducts(LocalDate startDate, LocalDate endDate, int limit) {
-        List<SalesClient.OrderSnapshot> orders = salesClient.getOrders(startDate, endDate);
-        List<SalesClient.OrderSnapshot> paidOrders = orders.stream()
-                .filter(o -> "PAID".equalsIgnoreCase(o.getStatus()))
-                .filter(o -> !Boolean.TRUE.equals(o.getReturnOrder()))
+        List<SalesClient.ProductSalesSummary> productSummaries = salesClient.getTopProductSales(startDate, endDate, limit);
+        List<Long> productIds = productSummaries.stream()
+                .map(SalesClient.ProductSalesSummary::getProductId)
+                .filter(id -> id != null && id > 0)
                 .collect(Collectors.toList());
 
-        Map<Long, ProductSalesData> productSales = new HashMap<>();
+        Map<Long, CatalogClient.ProductCostSummary> productMap = catalogClient.getProductCostSummaries(productIds).stream()
+                .filter(p -> p.getId() != null)
+                .collect(Collectors.toMap(CatalogClient.ProductCostSummary::getId, p -> p, (a, b) -> a));
 
-        for (SalesClient.OrderSnapshot order : paidOrders) {
-            if (order.getItems() == null) {
-                continue;
-            }
-            for (SalesClient.OrderItemSnapshot item : order.getItems()) {
-                if (item.getProductId() == null) {
-                    continue;
-                }
-                ProductSalesData data = productSales.getOrDefault(item.getProductId(), new ProductSalesData());
-                Integer qtyValue = item.getQuantity();
-                int qty = qtyValue != null ? qtyValue : 0;
-                BigDecimal itemRevenue = safeAmount(item.getPrice()).multiply(BigDecimal.valueOf(qty));
-                data.quantitySold += qty;
-                data.totalRevenue = data.totalRevenue.add(itemRevenue);
-                productSales.put(item.getProductId(), data);
-            }
-        }
-
-        Map<Long, InventoryClient.StockSummary> stockMap = inventoryClient.getAllStocks().stream()
+        Map<Long, Integer> stockMap = inventoryClient.getStocks(productIds).stream()
                 .filter(s -> s.getProductId() != null)
-                .collect(Collectors.toMap(InventoryClient.StockSummary::getProductId, s -> s, (a, b) -> a));
+                .collect(Collectors.toMap(InventoryClient.StockItem::getProductId, s -> s.getStock(), (a, b) -> a));
 
         List<TopProductDTO> results = new ArrayList<>();
-        for (Map.Entry<Long, ProductSalesData> entry : productSales.entrySet()) {
-            Long productId = entry.getKey();
-            ProductSalesData data = entry.getValue();
-            CatalogClient.ProductSnapshot product = catalogClient.getProduct(productId);
-
-            BigDecimal costPrice = getCostPrice(productId);
-            BigDecimal totalCost = costPrice.multiply(BigDecimal.valueOf(data.quantitySold));
-            BigDecimal profit = data.totalRevenue.subtract(totalCost);
-
-            InventoryClient.StockSummary stock = stockMap.get(productId);
+        for (SalesClient.ProductSalesSummary summary : productSummaries) {
+            Long productId = summary.getProductId();
+            if (productId == null) {
+                continue;
+            }
+            CatalogClient.ProductCostSummary product = productMap.get(productId);
+            long quantitySold = summary.getQuantitySold();
+            BigDecimal totalRevenue = safeAmount(summary.getRevenue());
+            BigDecimal costPrice = product == null ? BigDecimal.ZERO : safeAmount(product.getCostPrice());
+            BigDecimal totalCost = costPrice.multiply(BigDecimal.valueOf(quantitySold));
+            BigDecimal profit = totalRevenue.subtract(totalCost);
+            Integer stock = stockMap.get(productId);
 
             TopProductDTO dto = new TopProductDTO(
                     productId,
                     product == null ? null : product.getName(),
                     product == null ? null : product.getCode(),
                     product == null ? null : product.getCategoryId(),
-                    data.quantitySold,
-                    data.totalRevenue,
+                    quantitySold,
+                    totalRevenue,
                     totalCost,
                     profit,
-                    stock == null ? null : stock.getStock()
+                    stock
             );
             results.add(dto);
         }
 
-        return results.stream()
-                .sorted((a, b) -> Long.compare(b.getQuantitySold(), a.getQuantitySold()))
-                .limit(limit)
-                .collect(Collectors.toList());
+        return results;
     }
 
     public List<LowStockAlertDTO> getLowStockAlerts(Integer threshold) {
         int limit = threshold == null ? DEFAULT_LOW_STOCK_THRESHOLD : threshold;
-        List<InventoryClient.StockSummary> stocks = inventoryClient.getAllStocks();
+        List<InventoryClient.LowStockItem> stocks = inventoryClient.getLowStock(limit);
+        List<Long> productIds = stocks.stream()
+                .map(InventoryClient.LowStockItem::getProductId)
+                .filter(id -> id != null && id > 0)
+                .collect(Collectors.toList());
+        Map<Long, CatalogClient.ProductCostSummary> productMap = catalogClient.getProductCostSummaries(productIds).stream()
+                .filter(p -> p.getId() != null)
+                .collect(Collectors.toMap(CatalogClient.ProductCostSummary::getId, p -> p, (a, b) -> a));
         List<LowStockAlertDTO> result = new ArrayList<>();
-        for (InventoryClient.StockSummary stock : stocks) {
-            Integer currentValue = stock.getStock();
-            int current = currentValue != null ? currentValue : 0;
+        for (InventoryClient.LowStockItem stock : stocks) {
+            int current = stock.getStock() == null ? 0 : stock.getStock();
             if (current > limit) {
                 continue;
             }
             String level = current <= CRITICAL_STOCK_THRESHOLD ? "CRITICAL" : "WARNING";
+            CatalogClient.ProductCostSummary product = productMap.get(stock.getProductId());
             LowStockAlertDTO alert = new LowStockAlertDTO(
                     stock.getProductId(),
-                    stock.getProductName(),
-                    stock.getProductCode(),
-                    stock.getCategoryId(),
+                    product == null ? null : product.getName(),
+                    product == null ? null : product.getCode(),
+                    product == null ? null : product.getCategoryId(),
                     current,
                     limit,
                     level
@@ -458,55 +399,103 @@ public class ReportService {
         return summary;
     }
 
-    private BigDecimal safeAmount(BigDecimal value) {
-        return value == null ? BigDecimal.ZERO : value;
-    }
-
-    private BigDecimal sumOrderAmount(List<SalesClient.OrderSnapshot> orders) {
-        return orders.stream()
-                .map(o -> safeAmount(o.getTotalAmount()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private long sumOrderQuantity(List<SalesClient.OrderSnapshot> orders) {
-        long total = 0;
-        for (SalesClient.OrderSnapshot order : orders) {
-            if (order.getItems() == null) {
+    // ==================== BÁO CÁO KỆ HÀNG ====================
+    
+    public List<ShelfReportDTO> getShelfReport(Integer threshold) {
+        List<InventoryClient.ShelfStockSummary> shelves = inventoryClient.getAllShelfStocks();
+        List<ShelfReportDTO> result = new ArrayList<>();
+        
+        for (InventoryClient.ShelfStockSummary shelf : shelves) {
+            Integer qty = shelf.getQuantity();
+            int quantity = qty != null ? qty : 0;
+            
+            // Nếu có threshold, chỉ lấy những sản phẩm có quantity < threshold
+            if (threshold != null && quantity >= threshold) {
                 continue;
             }
-            for (SalesClient.OrderItemSnapshot item : order.getItems()) {
-                Integer qtyValue = item.getQuantity();
-                total += qtyValue != null ? qtyValue : 0;
+            
+            ShelfReportDTO dto = new ShelfReportDTO(
+                    shelf.getProductId(),
+                    shelf.getProductName(),
+                    shelf.getProductCode(),
+                    shelf.getCategoryId(),
+                    quantity,
+                    shelf.getAlertLevel()
+            );
+            result.add(dto);
+        }
+        
+        return result;
+    }
+    
+    public Map<String, Long> getShelfStockSummary(Integer threshold) {
+        int limit = threshold == null ? DEFAULT_LOW_STOCK_THRESHOLD : threshold;
+        List<ShelfReportDTO> reports = getShelfReport(limit);
+        
+        long danger = 0;
+        long warning = 0;
+        long total = reports.size();
+        
+        for (ShelfReportDTO report : reports) {
+            if ("DANGER".equalsIgnoreCase(report.getAlertLevel())) {
+                danger++;
+            } else if ("WARNING".equalsIgnoreCase(report.getAlertLevel())) {
+                warning++;
             }
         }
-        return total;
+        
+        Map<String, Long> summary = new HashMap<>();
+        summary.put("total", total);
+        summary.put("danger", danger);
+        summary.put("warning", warning);
+        return summary;
+    }
+
+    private BigDecimal safeAmount(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 
     private BigDecimal getAmount(Map<String, BigDecimal> map, String key) {
         return map.getOrDefault(key, BigDecimal.ZERO);
     }
 
-    private String normalizePaymentMethod(String method) {
-        if (method == null || method.isBlank()) {
-            return "OTHER";
+    @SuppressWarnings("unused")
+    private long getCount(Map<String, Long> map, String key) {
+        if (map == null) {
+            return 0;
         }
-        String normalized = method.trim().toUpperCase();
-        return switch (normalized) {
-            case "CASH", "CARD", "TRANSFER", "VOUCHER" -> normalized;
-            default -> "OTHER";
-        };
+        return map.getOrDefault(key, 0L);
     }
 
-    private boolean isExchangeOrder(String orderType) {
-        if (orderType == null) {
-            return false;
+    private Map<Long, BigDecimal> loadCostPrices(List<SalesClient.DailyProductSummary> items) {
+        List<Long> productIds = items.stream()
+                .map(SalesClient.DailyProductSummary::getProductId)
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .collect(Collectors.toList());
+        if (productIds.isEmpty()) {
+            return Collections.emptyMap();
         }
-        String normalized = orderType.trim().toUpperCase();
-        return "EXCHANGE".equals(normalized);
-    }
-
-    private static class ProductSalesData {
-        long quantitySold = 0;
-        BigDecimal totalRevenue = BigDecimal.ZERO;
+        Map<Long, BigDecimal> costMap = new HashMap<>();
+        List<Long> missing = new ArrayList<>();
+        for (Long productId : productIds) {
+            BigDecimal cached = costPriceCache.get(productId);
+            if (cached != null) {
+                costMap.put(productId, cached);
+            } else {
+                missing.add(productId);
+            }
+        }
+        if (!missing.isEmpty()) {
+            for (CatalogClient.ProductCostSummary summary : catalogClient.getProductCostSummaries(missing)) {
+                if (summary.getId() == null) {
+                    continue;
+                }
+                BigDecimal cost = summary.getCostPrice() == null ? BigDecimal.ZERO : summary.getCostPrice();
+                costMap.put(summary.getId(), cost);
+                costPriceCache.put(summary.getId(), cost);
+            }
+        }
+        return costMap;
     }
 }

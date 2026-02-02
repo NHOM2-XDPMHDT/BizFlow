@@ -13,6 +13,25 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     java.util.List<Product> findByStatus(String status);
 
     @Query("""
+        SELECT p.id AS id,
+               p.categoryId AS categoryId,
+               p.code AS code,
+               p.name AS name,
+               p.costPrice AS costPrice
+        FROM Product p
+        WHERE p.id IN :ids
+        """)
+    java.util.List<ProductCostView> findCostViewByIdIn(@Param("ids") java.util.List<Long> ids);
+
+    interface ProductCostView {
+        Long getId();
+        Long getCategoryId();
+        String getCode();
+        String getName();
+        java.math.BigDecimal getCostPrice();
+    }
+
+    @Query("""
         SELECT p FROM Product p
         WHERE (:status IS NULL OR p.status = :status)
           AND (

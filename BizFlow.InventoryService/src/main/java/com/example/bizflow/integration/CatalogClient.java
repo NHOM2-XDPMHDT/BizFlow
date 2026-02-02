@@ -63,6 +63,7 @@ public class CatalogClient {
         private String code;
         private String barcode;
         private String name;
+        private Double price;
         private String unit;
         private String status;
 
@@ -104,6 +105,14 @@ public class CatalogClient {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public Double getPrice() {
+            return price;
+        }
+
+        public void setPrice(Double price) {
+            this.price = price;
         }
 
         public String getUnit() {

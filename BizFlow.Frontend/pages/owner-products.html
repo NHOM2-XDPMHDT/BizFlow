@@ -176,6 +176,8 @@
             font-size: 12px;
             font-weight: 600;
         }
+        .badge-success { background: #d1fae5; color: #059669; }
+        .badge-secondary { background: #e5e7eb; color: #6b7280; }
         .badge-active { background: #d1fae5; color: #059669; }
         .badge-inactive { background: #fee2e2; color: #dc2626; }
         .cost-price {
@@ -375,40 +377,142 @@
 
         <div class="content">
             <div class="page-header">
-                <h1 class="page-title">📦 Quản lý sản phẩm</h1>
-                <button class="btn btn-primary" onclick="openAddModal()">+ Thêm sản phẩm</button>
+                <h1 class="page-title">📦 Quản lý sản phẩm & Kệ hàng</h1>
             </div>
 
-            <div class="toolbar">
-                <div class="search-box">
-                    <span>🔍</span>
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." onkeyup="searchProducts()">
+            <!-- Tab Navigation -->
+            <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border);">
+                <button class="btn tab-btn" id="tab-products-btn" onclick="switchMainTab('products')" style="border-radius: 8px 8px 0 0; border-bottom: 3px solid var(--primary);">
+                    🛍️ Sản phẩm
+                </button>
+                <button class="btn tab-btn" id="tab-shelves-btn" onclick="switchMainTab('shelves')" style="border-radius: 8px 8px 0 0; background: white; color: var(--text); border-bottom: 3px solid transparent;">
+                    🏪 Kệ hàng
+                </button>
+            </div>
+
+            <!-- Tab: Sản phẩm -->
+            <div id="products-tab" class="main-tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div></div>
+                    <button class="btn btn-primary" onclick="openAddModal()">+ Thêm sản phẩm</button>
                 </div>
-                <select id="categoryFilter" onchange="loadProducts()">
-                    <option value="">Tất cả danh mục</option>
-                </select>
+
+                <div class="toolbar">
+                    <div class="search-box">
+                        <span>🔍</span>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." onkeyup="searchProducts()">
+                    </div>
+                    <select id="categoryFilter" onchange="loadProducts()">
+                        <option value="">Tất cả danh mục</option>
+                    </select>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Danh sách sản phẩm (Bao gồm giá vốn - chỉ Owner xem được)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Barcode</th>
+                                <th>Giá vốn</th>
+                                <th>Giá bán</th>
+                                <th>Lợi nhuận</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr><td colspan="9" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-title">Danh sách sản phẩm (Bao gồm giá vốn - chỉ Owner xem được)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Mã SP</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Barcode</th>
-                            <th>Giá vốn</th>
-                            <th>Giá bán</th>
-                            <th>Lợi nhuận</th>
-                            <th>Tồn kho</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody">
-                        <tr><td colspan="9" class="loading">Đang tải...</td></tr>
-                    </tbody>
-                </table>
+            <!-- Tab: Kệ hàng -->
+            <div id="shelves-tab" class="main-tab-content" style="display: none;">
+                <!-- Sub-tabs for shelves -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <button class="btn btn-sm" id="shelf-view-btn" onclick="switchShelfTab('view')" style="background: var(--primary); color: white;">📊 Xem kệ</button>
+                    <button class="btn btn-sm" id="shelf-move-btn" onclick="switchShelfTab('move')">⬆️ Đưa lên kệ</button>
+                    <button class="btn btn-sm" id="shelf-remove-btn" onclick="switchShelfTab('remove')">⬇️ Bỏ khỏi kệ</button>
+                    <button class="btn btn-sm" id="shelf-report-btn" onclick="switchShelfTab('report')">📈 Báo cáo</button>
+                </div>
+
+                <!-- Sub-tab: Xem kệ hàng -->
+                <div id="shelf-view" class="shelf-sub-tab">
+                    <div class="card" id="shelf-summary-cards"></div>
+                    <div class="card">
+                        <div class="card-title">Sản phẩm trên kệ</div>
+                        <div id="shelf-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div>
+                        <div id="shelf-loading" class="loading" style="display:none;">Đang tải...</div>
+                        <div id="shelf-empty" style="display:none; text-align:center; padding:40px; color:var(--muted);">Chưa có sản phẩm nào trên kệ</div>
+                    </div>
+                </div>
+
+                <!-- Sub-tab: Đưa lên kệ -->
+                <div id="shelf-move" class="shelf-sub-tab" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">Đưa sản phẩm lên kệ</div>
+                        <div class="form-group">
+                            <label>Chọn sản phẩm từ kho:</label>
+                            <select id="move-product" onchange="loadStockQuantity()" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                                <option value="">-- Chọn sản phẩm --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Số lượng hiện có trong kho: <strong id="move-stock" style="color:var(--primary);">0</strong></label>
+                        </div>
+                        <div class="form-group">
+                            <label>Số lượng đưa lên kệ:</label>
+                            <input type="number" id="move-quantity" min="1" placeholder="Nhập số lượng" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú (tùy chọn):</label>
+                            <input type="text" id="move-note" placeholder="Ghi chú..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="moveToShelf()">⬆️ Đưa lên kệ</button>
+                    </div>
+                </div>
+
+                <!-- Sub-tab: Bỏ khỏi kệ -->
+                <div id="shelf-remove" class="shelf-sub-tab" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">Bỏ sản phẩm khỏi kệ (Trả về kho)</div>
+                        <div class="form-group">
+                            <label>Chọn sản phẩm trên kệ:</label>
+                            <select id="remove-product" onchange="loadShelfQuantity()" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                                <option value="">-- Chọn sản phẩm --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Số lượng hiện có trên kệ: <strong id="remove-shelf" style="color:var(--danger);">0</strong></label>
+                        </div>
+                        <div class="form-group">
+                            <label>Số lượng bỏ khỏi kệ:</label>
+                            <input type="number" id="remove-quantity" min="1" placeholder="Nhập số lượng" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú (tùy chọn):</label>
+                            <input type="text" id="remove-note" placeholder="Ghi chú..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
+                        </div>
+                        <button class="btn btn-danger" onclick="removeFromShelf()">⬇️ Bỏ khỏi kệ</button>
+                    </div>
+                </div>
+
+                <!-- Sub-tab: Báo cáo -->
+                <div id="shelf-report" class="shelf-sub-tab" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">Báo cáo kệ hàng</div>
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                            <label style="margin:0;">Ngưỡng cảnh báo:</label>
+                            <input type="number" id="report-threshold" value="10" min="1" style="width:100px; padding:8px; border:1px solid var(--border); border-radius:8px;">
+                            <button class="btn btn-sm btn-primary" onclick="loadShelfReport()">🔄 Làm mới</button>
+                        </div>
+                    </div>
+                    <div id="report-content"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -520,10 +624,28 @@
                 const res = await fetch(url, { headers: getAuthHeaders() });
                 if (res.ok) {
                     allProducts = await res.json();
+                    // Load shelves data để kiểm tra trạng thái bán
+                    await loadShelvesData();
                     renderProducts(allProducts);
                 }
             } catch (e) {
                 console.error('Error loading products:', e);
+            }
+        }
+
+        async function loadShelvesData() {
+            try {
+                const res = await fetch('http://localhost:8084/api/inventory/shelves', { 
+                    headers: getAuthHeaders() 
+                });
+                if (res.ok) {
+                    shelvesData = await res.json();
+                } else {
+                    shelvesData = [];
+                }
+            } catch (e) {
+                console.error('Error loading shelves:', e);
+                shelvesData = [];
             }
         }
 
@@ -547,6 +669,15 @@
             tbody.innerHTML = products.map(p => {
                 const profit = (p.price || 0) - (p.costPrice || 0);
                 const profitPercent = p.costPrice ? ((profit / p.costPrice) * 100).toFixed(1) : 0;
+                
+                // Kiểm tra sản phẩm có trên kệ không
+                const shelfItem = shelvesData.find(s => s.productId === p.id);
+                const isOnShelf = shelfItem && shelfItem.quantity > 0;
+                const statusBadge = isOnShelf 
+                    ? '<span class="badge badge-success">✅ Đang bán</span>' 
+                    : '<span class="badge badge-secondary">❌ Ngừng bán</span>';
+                const shelfQty = shelfItem ? shelfItem.quantity : 0;
+                
                 return `
                     <tr>
                         <td>${p.code || '-'}</td>
@@ -558,11 +689,13 @@
                             <span class="profit">${formatCurrency(profit)}</span>
                             <br><small style="color:var(--muted)">(${profitPercent}%)</small>
                         </td>
-                        <td>${p.stock || 0}</td>
                         <td>
-                            <button class="btn btn-sm ${p.status === 'active' ? 'btn-success' : 'btn-danger'}" onclick="toggleProductStatus(${p.id}, '${p.status}')">
-                                ${p.status === 'active' ? '✅ Đang bán' : '❌ Ngừng bán'}
-                            </button>
+                            Kho: ${p.stock || 0}<br>
+                            <small style="color:var(--primary)">Kệ: ${shelfQty}</small>
+                        </td>
+                        <td>
+                            ${statusBadge}
+                            ${shelfItem ? `<br><small style="color:var(--muted)">${shelfItem.alertLevel}</small>` : ''}
                         </td>
                         <td class="actions">
                             <button class="btn btn-sm btn-primary" onclick="editProduct(${p.id})">✏️</button>
@@ -663,29 +796,264 @@
             }
         }
 
-        async function toggleProductStatus(id, currentStatus) {
-            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            const statusText = newStatus === 'active' ? 'Đang bán' : 'Ngừng bán';
+        // Hàm toggleProductStatus đã bị xóa vì giờ trạng thái "Đang bán" tự động dựa vào shelves
+        // Muốn sản phẩm "Đang bán" → OWNER phải đưa lên kệ ở tab "Kệ Hàng"
+
+        // ==================== TAB SWITCHING ====================
+        function switchMainTab(tabName) {
+            // Update tab buttons
+            document.getElementById('tab-products-btn').style.borderBottom = tabName === 'products' ? '3px solid var(--primary)' : '3px solid transparent';
+            document.getElementById('tab-products-btn').style.background = tabName === 'products' ? 'var(--primary)' : 'white';
+            document.getElementById('tab-products-btn').style.color = tabName === 'products' ? 'white' : 'var(--text)';
             
-            if (!confirm(`Chuyển trạng thái sản phẩm thành "${statusText}"?`)) return;
+            document.getElementById('tab-shelves-btn').style.borderBottom = tabName === 'shelves' ? '3px solid var(--primary)' : '3px solid transparent';
+            document.getElementById('tab-shelves-btn').style.background = tabName === 'shelves' ? 'var(--primary)' : 'white';
+            document.getElementById('tab-shelves-btn').style.color = tabName === 'shelves' ? 'white' : 'var(--text)';
+            
+            // Show/hide content
+            document.getElementById('products-tab').style.display = tabName === 'products' ? 'block' : 'none';
+            document.getElementById('shelves-tab').style.display = tabName === 'shelves' ? 'block' : 'none';
+            
+            if (tabName === 'shelves') {
+                loadShelves();
+            }
+        }
 
+        function switchShelfTab(tabName) {
+            // Update sub-tab buttons
+            const btns = ['shelf-view-btn', 'shelf-move-btn', 'shelf-remove-btn', 'shelf-report-btn'];
+            btns.forEach(id => {
+                const btn = document.getElementById(id);
+                const isActive = id === `shelf-${tabName}-btn`;
+                btn.style.background = isActive ? 'var(--primary)' : 'white';
+                btn.style.color = isActive ? 'white' : 'var(--text)';
+            });
+            
+            // Show/hide sub-tab content
+            document.getElementById('shelf-view').style.display = tabName === 'view' ? 'block' : 'none';
+            document.getElementById('shelf-move').style.display = tabName === 'move' ? 'block' : 'none';
+            document.getElementById('shelf-remove').style.display = tabName === 'remove' ? 'block' : 'none';
+            document.getElementById('shelf-report').style.display = tabName === 'report' ? 'block' : 'none';
+            
+            if (tabName === 'view') loadShelves();
+            if (tabName === 'move') loadInventoryForMove();
+            if (tabName === 'remove') loadShelvesForRemove();
+            if (tabName === 'report') loadShelfReport();
+        }
+
+        // ==================== SHELF MANAGEMENT ====================
+        async function loadShelves() {
+            const grid = document.getElementById('shelf-grid');
+            const loading = document.getElementById('shelf-loading');
+            const empty = document.getElementById('shelf-empty');
+            
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            empty.style.display = 'none';
+            
             try {
-                const product = allProducts.find(p => p.id === id);
-                const data = { ...product, status: newStatus };
-                
-                const res = await fetch(`${API_BASE}/products/${id}`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(data)
+                const res = await fetch(`${API_BASE}/inventory/shelves`, {
+                    headers: getAuthHeaders()
                 });
-
-                if (res.ok) {
-                    loadProducts();
-                } else {
-                    alert('Lỗi khi thay đổi trạng thái');
+                const shelves = await res.json();
+                
+                loading.style.display = 'none';
+                
+                if (shelves.length === 0) {
+                    empty.style.display = 'block';
+                    return;
                 }
-            } catch (e) {
-                console.error('Error toggling status:', e);
+                
+                loadShelfSummary(shelves);
+                
+                shelves.forEach(shelf => {
+                    const alertClass = shelf.alertLevel.toLowerCase();
+                    const alertColor = alertClass === 'normal' ? 'var(--success)' : alertClass === 'warning' ? 'var(--warning)' : 'var(--danger)';
+                    
+                    grid.innerHTML += `
+                        <div style="border:1px solid var(--border); border-left:4px solid ${alertColor}; padding:16px; border-radius:8px; background:white;">
+                            <div style="font-weight:600; margin-bottom:8px;">${shelf.productName}</div>
+                            <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Mã: ${shelf.productCode}</div>
+                            <div style="font-size:28px; font-weight:bold; color:var(--primary); margin:10px 0;">${shelf.quantity}</div>
+                            <span style="background:${alertColor}; color:white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600;">${shelf.alertLevel}</span>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                loading.style.display = 'none';
+                grid.innerHTML = `<div style="color:var(--danger); padding:20px;">Lỗi: ${error.message}</div>`;
+            }
+        }
+
+        function loadShelfSummary(shelves) {
+            const summaryDiv = document.getElementById('shelf-summary-cards');
+            const normal = shelves.filter(s => s.alertLevel === 'NORMAL').length;
+            const warning = shelves.filter(s => s.alertLevel === 'WARNING').length;
+            const danger = shelves.filter(s => s.alertLevel === 'DANGER').length;
+            
+            summaryDiv.innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px;">
+                    <div style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:20px; border-radius:10px; text-align:center;">
+                        <div style="font-size:12px; opacity:0.9;">Tổng sản phẩm</div>
+                        <div style="font-size:32px; font-weight:bold; margin:8px 0;">${shelves.length}</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#f093fb,#f5576c); color:white; padding:20px; border-radius:10px; text-align:center;">
+                        <div style="font-size:12px; opacity:0.9;">Cảnh báo</div>
+                        <div style="font-size:32px; font-weight:bold; margin:8px 0;">${warning}</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#fa709a,#fee140); color:white; padding:20px; border-radius:10px; text-align:center;">
+                        <div style="font-size:12px; opacity:0.9;">Nguy hiểm</div>
+                        <div style="font-size:32px; font-weight:bold; margin:8px 0;">${danger}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadInventoryForMove() {
+            try {
+                const res = await fetch(`${API_BASE}/inventory/stock`, {
+                    headers: getAuthHeaders()
+                });
+                const products = await res.json();
+                
+                const select = document.getElementById('move-product');
+                select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
+                
+                products.forEach(p => {
+                    select.innerHTML += `<option value="${p.productId}" data-stock="${p.stock}">${p.productName} (${p.productCode}) - Tồn: ${p.stock}</option>`;
+                });
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        function loadStockQuantity() {
+            const select = document.getElementById('move-product');
+            const option = select.options[select.selectedIndex];
+            const stock = option.getAttribute('data-stock') || 0;
+            document.getElementById('move-stock').textContent = stock;
+        }
+
+        async function loadShelvesForRemove() {
+            try {
+                const res = await fetch(`${API_BASE}/inventory/shelves`, {
+                    headers: getAuthHeaders()
+                });
+                const shelves = await res.json();
+                
+                const select = document.getElementById('remove-product');
+                select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
+                
+                shelves.forEach(s => {
+                    select.innerHTML += `<option value="${s.productId}" data-quantity="${s.quantity}">${s.productName} (${s.productCode}) - Kệ: ${s.quantity}</option>`;
+                });
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        function loadShelfQuantity() {
+            const select = document.getElementById('remove-product');
+            const option = select.options[select.selectedIndex];
+            const quantity = option.getAttribute('data-quantity') || 0;
+            document.getElementById('remove-shelf').textContent = quantity;
+        }
+
+        async function moveToShelf() {
+            const productId = document.getElementById('move-product').value;
+            const quantity = parseInt(document.getElementById('move-quantity').value);
+            const note = document.getElementById('move-note').value;
+            
+            if (!productId || !quantity || quantity <= 0) {
+                alert('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/inventory/shelves/move-to-shelf`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ productId, quantity, note })
+                });
+                
+                if (res.ok) {
+                    alert('✅ Đã đưa sản phẩm lên kệ thành công!');
+                    document.getElementById('move-quantity').value = '';
+                    document.getElementById('move-note').value = '';
+                    loadInventoryForMove();
+                } else {
+                    const error = await res.json();
+                    alert('❌ Lỗi: ' + (error.message || 'Không thể đưa hàng lên kệ'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi: ' + error.message);
+            }
+        }
+
+        async function removeFromShelf() {
+            const productId = document.getElementById('remove-product').value;
+            const quantity = parseInt(document.getElementById('remove-quantity').value);
+            const note = document.getElementById('remove-note').value;
+            
+            if (!productId || !quantity || quantity <= 0) {
+                alert('Vui lòng chọn sản phẩm và nhập số lượng hợp lệ');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/inventory/shelves/remove-from-shelf`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ productId, quantity, note })
+                });
+                
+                if (res.ok) {
+                    alert('✅ Đã bỏ sản phẩm khỏi kệ thành công!');
+                    document.getElementById('remove-quantity').value = '';
+                    document.getElementById('remove-note').value = '';
+                    loadShelvesForRemove();
+                } else {
+                    const error = await res.json();
+                    alert('❌ Lỗi: ' + (error.message || 'Không thể bỏ hàng khỏi kệ'));
+                }
+            } catch (error) {
+                alert('❌ Lỗi: ' + error.message);
+            }
+        }
+
+        async function loadShelfReport() {
+            const threshold = document.getElementById('report-threshold').value;
+            const content = document.getElementById('report-content');
+            
+            content.innerHTML = '<div class="loading">Đang tải báo cáo...</div>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/reports/shelf-stock?threshold=${threshold}`, {
+                    headers: getAuthHeaders()
+                });
+                const report = await res.json();
+                
+                if (report.length === 0) {
+                    content.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted);">Không có sản phẩm nào cần cảnh báo</div>';
+                    return;
+                }
+                
+                let html = '<div class="card"><div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;">';
+                report.forEach(item => {
+                    const alertColor = item.alertLevel === 'NORMAL' ? 'var(--success)' : item.alertLevel === 'WARNING' ? 'var(--warning)' : 'var(--danger)';
+                    html += `
+                        <div style="border:1px solid var(--border); border-left:4px solid ${alertColor}; padding:16px; border-radius:8px;">
+                            <div style="font-weight:600;">${item.productName}</div>
+                            <div style="font-size:12px; color:var(--muted); margin:4px 0;">Mã: ${item.productCode}</div>
+                            <div style="font-size:24px; font-weight:bold; color:var(--primary); margin:8px 0;">${item.quantity}</div>
+                            <span style="background:${alertColor}; color:white; padding:4px 10px; border-radius:12px; font-size:11px;">${item.alertLevel}</span>
+                        </div>
+                    `;
+                });
+                html += '</div></div>';
+                content.innerHTML = html;
+            } catch (error) {
+                content.innerHTML = `<div style="color:var(--danger); padding:20px;">Lỗi: ${error.message}</div>`;
             }
         }
 

@@ -65,6 +65,7 @@ public class CustomerController {
             customer.setEmail(trimToNull(request.email));
             customer.setAddress(trimToNull(request.address));
             customer.setCccd(trimToNull(request.cccd));
+            customer.setGender(trimToNull(request.gender));
             if (trimToNull(request.dob) != null) {
                 customer.setDob(LocalDate.parse(request.dob.trim()));
             }
@@ -84,6 +85,44 @@ public class CustomerController {
         return ResponseEntity.ok(salesClient.getCustomerOrderHistory(id));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'OWNER', 'ADMIN')")
+    public ResponseEntity<?> updateCustomer(@PathVariable @NonNull Long id, @RequestBody @NonNull CustomerUpdateRequest request) {
+        try {
+            return customerRepository.findById(id)
+                    .map(customer -> {
+                        // Update basic info
+                        if (request.name != null && !request.name.trim().isEmpty()) {
+                            customer.setName(request.name.trim());
+                        }
+                        if (request.phone != null && !request.phone.trim().isEmpty()) {
+                            customer.setPhone(request.phone.trim());
+                        }
+                        
+                        // Update optional fields
+                        customer.setEmail(trimToNull(request.email));
+                        customer.setAddress(trimToNull(request.address));
+                        customer.setCccd(trimToNull(request.cccd));
+                        customer.setGender(trimToNull(request.gender));
+                        
+                        // Update date of birth
+                        if (trimToNull(request.dob) != null) {
+                            try {
+                                customer.setDob(LocalDate.parse(request.dob.trim()));
+                            } catch (Exception e) {
+                                // Keep existing date if parse fails
+                            }
+                        }
+                        
+                        Customer updated = customerRepository.save(customer);
+                        return ResponseEntity.ok(updated);
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating customer: " + e.getMessage());
+        }
+    }
+
     private static String trimToNull(String value) {
         if (value == null) {
             return null;
@@ -100,5 +139,17 @@ public class CustomerController {
         public String address;
         public String cccd;
         public String dob;
+        public String gender;
+    }
+
+    private static class CustomerUpdateRequest {
+
+        public String name;
+        public String phone;
+        public String email;
+        public String address;
+        public String cccd;
+        public String dob;
+        public String gender;
     }
 }

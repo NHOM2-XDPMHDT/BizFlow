@@ -26,6 +26,8 @@ let promotionIndex = null;
 let activeInventoryProductId = null;
 let allPromotions = []; // Luu t?t c? khuy?n m×i cho AI combo
 let isAnalyzingCombo = false; // Flag d? tr×nh v×ng l?p v× h?n
+let activeCustomerDetailId = null;
+const customerOrderCache = new Map();
 const TIER_DISCOUNT_BY_100 = {
     DONG: 10000,
     BAC: 12000,
@@ -45,6 +47,7 @@ const productImageMap = new Map();
 const productImageEntries = [];
 let productImageMapReady = false;
 const POINTS_EARN_RATE_VND = 1000;
+const EARN_POLICY_POINTS = 100;
 
 const FALLBACK_PRODUCTS = [
     {
@@ -386,8 +389,14 @@ async function loadCurrentEmployee() {
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${API_BASE}/products`, {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}` }
+        // Cache-busting: thêm timestamp để luôn lấy data mới nhất
+        const timestamp = Date.now();
+        const response = await fetch(`${API_BASE}/inventory/shelves?_t=${timestamp}`, {
+            headers: { 
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+            }
         });
 
         if (!response.ok) {
@@ -399,12 +408,38 @@ async function loadProducts() {
             throw new Error('Failed to load products');
         }
 
-        const data = await response.json();
-        products = Array.isArray(data) && data.length > 0 ? data : FALLBACK_PRODUCTS;
+        const shelvesData = await response.json();
+        
+        console.log('[loadProducts] Raw shelves data:', shelvesData);
+        
+        // CHỈ map những sản phẩm có quantity > 0 (đang thực sự bán)
+        products = shelvesData
+            .filter(shelf => shelf.quantity > 0)
+            .map(shelf => ({
+                id: shelf.productId,
+                name: shelf.productName,
+                code: shelf.productCode,
+                barcode: shelf.productCode,
+                price: shelf.price || 0,
+                stock: shelf.quantity,
+                categoryId: shelf.categoryId,
+                unit: shelf.unit || 'cái',
+                status: 'active'
+            }));
+        
+        console.log('[loadProducts] Loaded from shelves (quantity > 0):', products.length);
+        console.log('[loadProducts] Products:', products.map(p => `${p.code} (${p.name}) - qty: ${p.stock}`));
+        
+        if (products.length === 0) {
+            console.warn('[loadProducts] No products on shelves with quantity > 0');
+            products = [];
+        }
+        
         await loadPromotionIndex();
         filterProducts();
     } catch (err) {
-        products = FALLBACK_PRODUCTS;
+        console.error('[loadProducts] Error:', err);
+        products = [];
         filterProducts();
     }
 }
@@ -1111,7 +1146,22 @@ async function loadPromotionIndex(forceRefresh = false) {
             .then(res => (res.ok ? res.json() : []));
         const productPromise = (products && products.length > 0)
             ? Promise.resolve(products)
-            : fetch(`${API_BASE}/products`, { headers }).then(res => (res.ok ? res.json() : []));
+            : fetch(`${API_BASE}/inventory/shelves`, { headers })
+                .then(res => {
+                    if (!res.ok) return [];
+                    return res.json();
+                })
+                .then(shelvesData => shelvesData.map(shelf => ({
+                    id: shelf.productId,
+                    name: shelf.productName,
+                    code: shelf.productCode,
+                    barcode: shelf.productCode,
+                    price: shelf.price || 0,
+                    stock: shelf.quantity,
+                    categoryId: shelf.categoryId,
+                    unit: shelf.unit || 'cái',
+                    status: 'active'
+                })));
 
         const [promoList, productList] = await Promise.all([promoPromise, productPromise]);
         
@@ -2640,12 +2690,21 @@ function setupInventoryModal() {
 
 function setupCustomerDetailModal() {
     const modal = document.getElementById('customerDetailModal');
+    if (!modal) return;
     const selectedView = document.getElementById('selectedCustomer');
-    if (!modal || !selectedView) return;
 
-    selectedView.addEventListener('click', () => {
+    selectedView?.addEventListener('click', () => {
         if (!selectedCustomer || !selectedCustomer.id) return;
         openCustomerDetail(selectedCustomer.id);
+    });
+
+    const tabs = modal.querySelectorAll('.detail-tabs .tab[data-tab]');
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            const key = tab.dataset.tab;
+            if (!key) return;
+            switchCustomerDetailTab(key);
+        });
     });
 
     modal.addEventListener('click', (e) => {
@@ -3585,31 +3644,89 @@ function openCustomerDetail(customerId) {
     const modal = document.getElementById('customerDetailModal');
     if (!modal) return;
 
-    const customer = customers.find(c => c.id === customerId);
-    if (!customer) {
+    const cachedCustomer = customers.find(c => c.id === customerId);
+    if (!cachedCustomer) {
         showPopup('Không tìm thấy khách hàng.', { type: 'error' });
         return;
     }
+
+    activeCustomerDetailId = customerId;
+    switchCustomerDetailTab('overview');
+
+    applyCustomerDetailData(cachedCustomer);
+    refreshCustomerDetailFromApi(customerId);
+
+    resetCustomerHistoryView();
+    if (activeCustomerDetailId) {
+        loadCustomerOrderHistory(activeCustomerDetailId);
+    }
+    updateCustomerDetailActions('overview');
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function applyCustomerDetailData(customer) {
+    if (!customer) return;
+    const customerCode = customer.id ? `KH${customer.id}` : '--';
+    setText('detailCustomerMemberCode', customerCode);
+    setText('detailCustomerCodeInfo', customerCode);
 
     document.getElementById('detailCustomerName').textContent = (customer.name || '').toUpperCase();
     const nameCard = document.getElementById('detailCustomerNameCard');
     if (nameCard) {
         nameCard.textContent = customer.name || '-';
     }
-    document.getElementById('detailCustomerPhone').textContent = customer.phone || '-';
-    document.getElementById('detailCustomerEmail').textContent = customer.email || '-';
-    document.getElementById('detailCustomerAddress').textContent = customer.address || '-';
+    setText('detailCustomerPhone', customer.phone || '-');
+    setText('detailCustomerEmail', customer.email || '-');
+    setText('detailCustomerAddress', customer.address || '-');
+    setText('detailCustomerNameInfo', customer.name || '-');
+    setText('detailCustomerPhoneInfo', customer.phone || '-');
+    setText('detailCustomerEmailInfo', customer.email || '-');
+    setText('detailCustomerAddressInfo', customer.address || '-');
+    setText('detailCustomerCccdInfo', customer.cccd || '-');
+    setText('detailCustomerDobInfo', customer.dob ? formatDateTime(customer.dob) : '-');
+
     const detailPoints = getCustomerPoints(customer);
     const detailTier = getEffectiveTier(customer);
     const redeemRate = TIER_DISCOUNT_BY_100[detailTier] || 0;
     setText('detailCustomerTier', formatTierLabel(detailTier));
     setText('detailCustomerPoints', formatCompactNumber(detailPoints));
-    setText('detailCustomerPointsUsed', formatCompactNumber(Math.floor(detailPoints / 100) * 100));
-    setText('detailEarnPolicy', `${formatCompactNumber(POINTS_EARN_RATE_VND)}đ = 1 điểm`);
+    setText('detailCustomerPointsUsed', formatCompactNumber(getCustomerPointsUsed(customer)));
+    const earnPolicyAmount = POINTS_EARN_RATE_VND * EARN_POLICY_POINTS;
+    setText('detailEarnPolicy', `${formatCompactNumber(earnPolicyAmount)}đ = ${formatCompactNumber(EARN_POLICY_POINTS)} điểm`);
     setText('detailRedeemPolicy', redeemRate ? `100 điểm = ${formatCompactNumber(redeemRate)}d` : '-');
+}
 
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden', 'false');
+async function refreshCustomerDetailFromApi(customerId) {
+    if (!customerId) return;
+    try {
+        const response = await fetch(`${API_BASE}/customers/${customerId}`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}` }
+        });
+        if (!response.ok) return;
+        const customer = await response.json();
+        if (!customer) return;
+        applyCustomerDetailData(customer);
+
+        const index = customers.findIndex(c => c.id === customerId);
+        if (index >= 0) {
+            customers[index] = customer;
+        }
+        if (selectedCustomer?.id === customerId) {
+            applyCustomerSelection(customer, { openDetail: false });
+        }
+    } catch (err) {
+    }
+}
+
+function getCustomerPointsUsed(customer) {
+    const used =
+        customer?.pointsUsed ??
+        customer?.usedPoints ??
+        customer?.redeemedPoints ??
+        customer?.monthlyPoints ??
+        customer?.monthly_points;
+    return Number.isFinite(Number(used)) ? Number(used) : 0;
 }
 
 function closeCustomerDetail() {
@@ -3617,6 +3734,161 @@ function closeCustomerDetail() {
     if (!modal) return;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
+}
+
+function switchCustomerDetailTab(key) {
+    const modal = document.getElementById('customerDetailModal');
+    if (!modal) return;
+
+    modal.querySelectorAll('.detail-tabs .tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.tab === key);
+    });
+    modal.querySelectorAll('.detail-panel').forEach((panel) => {
+        panel.classList.toggle('active', panel.dataset.panel === key);
+    });
+
+    updateCustomerDetailActions(key);
+
+    if (key === 'history' && activeCustomerDetailId) {
+        loadCustomerOrderHistory(activeCustomerDetailId);
+    }
+}
+
+function updateCustomerDetailActions(key) {
+    const primary = document.getElementById('detailPrimaryAction');
+    const secondary = document.getElementById('detailSecondaryAction');
+    if (!primary || !secondary) return;
+
+    secondary.style.display = '';
+    primary.onclick = null;
+
+    if (key === 'info') {
+        primary.textContent = 'Sửa';
+        return;
+    }
+    if (key === 'history') {
+        primary.textContent = 'Đóng';
+        secondary.style.display = 'none';
+        primary.onclick = closeCustomerDetail;
+        return;
+    }
+    if (key === 'debt') {
+        primary.textContent = 'Xác nhận';
+        return;
+    }
+    primary.textContent = 'Xác nhận';
+}
+
+function resetCustomerHistoryView() {
+    const list = document.getElementById('detailCustomerHistoryList');
+    if (list) {
+        list.innerHTML = '<div class="history-empty">Chưa có lịch sử mua hàng</div>';
+    }
+    setText('detailCustomerSpend', '0');
+    setText('detailCustomerOrders', '0');
+    setText('detailCustomerSpendHistory', '0');
+    setText('detailCustomerOrdersHistory', '0');
+}
+
+async function loadCustomerOrderHistory(customerId, force = false) {
+    if (!customerId) return;
+    const list = document.getElementById('detailCustomerHistoryList');
+    if (list) {
+        list.innerHTML = '<div class="history-empty">Đang tải lịch sử mua hàng...</div>';
+    }
+
+    if (!force && customerOrderCache.has(customerId)) {
+        renderCustomerOrderHistory(customerOrderCache.get(customerId));
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/customers/${customerId}/orders`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}` }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                sessionStorage.clear();
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            throw new Error('Failed to load customer order history');
+        }
+
+        const data = await response.json();
+        const orders = Array.isArray(data) ? data : [];
+        customerOrderCache.set(customerId, orders);
+        renderCustomerOrderHistory(orders);
+    } catch (err) {
+        if (list) {
+            list.innerHTML = '<div class="history-empty">Không tải được lịch sử mua hàng.</div>';
+        }
+    }
+}
+
+function renderCustomerOrderHistory(orders) {
+    const list = document.getElementById('detailCustomerHistoryList');
+    if (!list) return;
+
+    if (!orders || orders.length === 0) {
+        list.innerHTML = '<div class="history-empty">Chưa có lịch sử mua hàng</div>';
+        updateCustomerOrderSummary([], 0);
+        return;
+    }
+
+    const totalSpent = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
+    updateCustomerOrderSummary(orders, totalSpent);
+
+    list.innerHTML = orders.map((order) => {
+        const createdAt = formatDateTime(order.createdAt);
+        const invoice = order.invoiceNumber || `HD-${order.id || '-'}`;
+        const statusText = getOrderStatusText(order.status);
+        const statusClass = getOrderStatusClass(order.status);
+        const storeName = order.storeName || order.branchName || '-';
+        const total = formatPrice(order.totalAmount || 0);
+        const note = order.note || '-';
+        return `
+            <div class="history-item">
+                <span>${escapeHtml(createdAt)}</span>
+                <strong>${escapeHtml(invoice)}</strong>
+                <span>${escapeHtml(storeName)}</span>
+                <span class="status-badge ${statusClass}">${escapeHtml(statusText)}</span>
+                <span>${escapeHtml(total)}</span>
+                <span>${escapeHtml(note)}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateCustomerOrderSummary(orders, totalSpent) {
+    const count = orders.length;
+    setText('detailCustomerSpend', formatPrice(totalSpent));
+    setText('detailCustomerOrders', formatCompactNumber(count));
+    setText('detailCustomerSpendHistory', formatPrice(totalSpent));
+    setText('detailCustomerOrdersHistory', formatCompactNumber(count));
+}
+
+function getOrderStatusText(status) {
+    if (!status) return 'Đã thanh toán';
+    const textMap = {
+        COMPLETED: 'Đã thanh toán',
+        PAID: 'Đã thanh toán',
+        PENDING: 'Chờ xử lý',
+        CANCELLED: 'Đã hủy'
+    };
+    return textMap[status] || 'Đã thanh toán';
+}
+
+function getOrderStatusClass(status) {
+    if (!status) return 'success';
+    const classMap = {
+        COMPLETED: 'success',
+        PAID: 'success',
+        PENDING: 'pending',
+        CANCELLED: 'cancelled'
+    };
+    return classMap[status] || 'success';
 }
 
 function toggleEmptyState(isEmpty) {
@@ -4019,7 +4291,3 @@ window.addEventListener('load', async () => {
         console.log('[AI Combo] Service offline (combo features disabled)');
     }
 });
-
-
-
-

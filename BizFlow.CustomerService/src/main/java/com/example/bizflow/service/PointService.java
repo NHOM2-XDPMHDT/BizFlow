@@ -1,6 +1,8 @@
 package com.example.bizflow.service;
 
 import com.example.bizflow.repository.CustomerRepository;
+import com.example.bizflow.entity.Customer;
+import com.example.bizflow.entity.CustomerTier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class PointService {
 
         customerRepository.findByIdForUpdate(customerId).ifPresent(customer -> {
             customer.addPoints(points);
+            // Tự động nâng hạng thành viên dựa trên monthlyPoints
+            updateCustomerTier(customer);
             customerRepository.save(customer);
         });
     }
@@ -49,5 +53,37 @@ public class PointService {
             customerRepository.save(customer);
             return redeem;
         }).orElse(0);
+    }
+
+    /**
+     * Tự động nâng hạng thành viên dựa trên điểm tích lũy trong tháng
+     * Quy tắc:
+     * - DONG (Bronze): 0-999 điểm
+     * - BAC (Silver): 1000-2999 điểm
+     * - VANG (Gold): 3000-8999 điểm
+     * - BACH_KIM (Platinum): 9000-14999 điểm
+     * - KIM_CUONG (Diamond): 15000+ điểm
+     */
+    private void updateCustomerTier(Customer customer) {
+        if (customer == null) {
+            return;
+        }
+
+        int monthlyPoints = customer.getMonthlyPoints() != null ? customer.getMonthlyPoints() : 0;
+        CustomerTier newTier;
+
+        if (monthlyPoints >= 15000) {
+            newTier = CustomerTier.KIM_CUONG;
+        } else if (monthlyPoints >= 9000) {
+            newTier = CustomerTier.BACH_KIM;
+        } else if (monthlyPoints >= 3000) {
+            newTier = CustomerTier.VANG;
+        } else if (monthlyPoints >= 1000) {
+            newTier = CustomerTier.BAC;
+        } else {
+            newTier = CustomerTier.DONG;
+        }
+
+        customer.setTier(newTier);
     }
 }

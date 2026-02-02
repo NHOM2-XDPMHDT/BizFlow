@@ -331,6 +331,7 @@ services:
     environment:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      REDIS_HOST: redis
       INVENTORY_SERVICE_URL: http://inventory-service:8084
       JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
@@ -357,6 +358,7 @@ services:
     environment:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      REDIS_HOST: redis
       CATALOG_SERVICE_URL: http://catalog-service:8083
       JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
@@ -444,6 +446,7 @@ services:
     environment:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      REDIS_HOST: redis
       SALES_SERVICE_URL: http://sales-service:8081
       CATALOG_SERVICE_URL: http://catalog-service:8083
       INVENTORY_SERVICE_URL: http://inventory-service:8084
@@ -546,27 +549,6 @@ services:
     mem_limit: 512m
     cpus: 1.0
   # =========================
-  # 15. NIFI (DATA ORCHESTRATION)
-  # =========================
-  nifi:
-    image: apache/nifi:1.23.2
-    container_name: bizflow-nifi
-    restart: unless-stopped
-    ports:
-      - "8090:8080"
-    environment:
-      NIFI_WEB_HTTP_PORT: 8080
-      NIFI_JVM_HEAP_INIT: 1g
-      NIFI_JVM_HEAP_MAX: 1g
-    volumes:
-      - nifi_state:/opt/nifi/nifi-current/state
-    depends_on:
-      - promotion-service
-    networks:
-      - bizflow-net
-    mem_limit: 1024m
-
-  # =========================
   # 16. PROMETHEUS (METRICS COLLECTION)
   # =========================
   prometheus:
@@ -613,7 +595,6 @@ services:
 # =========================
 volumes:
   mysql_data:
-  nifi_state:
   prometheus_data:
   grafana_data:
 # =========================
@@ -622,4 +603,3 @@ volumes:
 networks:
   bizflow-net:
     driver: bridge
-
