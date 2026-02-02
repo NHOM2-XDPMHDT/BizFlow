@@ -19,7 +19,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -28,10 +27,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -46,7 +42,7 @@
                     <div class="page-title">Quản lý Người dùng</div>
                     <div class="search">
                         <span>🔍</span>
-                        <input type="text" placeholder="Tìm người dùng, vai trò hoặc chi nhánh..." />
+                        <input type="text" id="searchInput" placeholder="Tìm người dùng, email, SĐT..." />
                     </div>
                 </div>
                 <div class="top-right">
@@ -94,7 +90,24 @@
                     <div class="actions">
                         <button class="action-btn" type="button" onclick="location.href='admin-home.html'">Quay lại</button>
                         <button class="action-btn primary" type="button" onclick="createNewUser()">Tạo mới</button>
+                        <div style="flex: 1;"></div>
+                        <select id="pageSize" class="mini-select" aria-label="Số dòng mỗi trang">
+                            <option value="10">10 / trang</option>
+                            <option value="20" selected>20 / trang</option>
+                            <option value="50">50 / trang</option>
+                            <option value="100">100 / trang</option>
+                        </select>
                     </div>
+
+                    <div class="muted" style="margin-top: 10px; display:flex; align-items:center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                        <div id="usersMeta">—</div>
+                        <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+                            <button class="action-btn sm" type="button" id="prevPageBtn" onclick="goPrevPage()">◀ Trước</button>
+                            <span id="pageInfo">Trang 1/1</span>
+                            <button class="action-btn sm" type="button" id="nextPageBtn" onclick="goNextPage()">Sau ▶</button>
+                        </div>
+                    </div>
+
                     <table class="table">
                         <thead>
                             <tr>
@@ -181,15 +194,56 @@
 
     <script src="../assets/js/admin-layout.js"></script>
     <script>
+        // Extra UI helpers (shared look with other admin pages)
+        // Keep minimal inline styles to avoid CSS dependency drift
+        (function injectMiniSelectStyle() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .mini-select { padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(15,23,42,.15); background: #fff; color: #0f172a; }
+                .action-btn.sm { padding: 8px 10px; border-radius: 10px; }
+            `;
+            document.head.appendChild(style);
+        })();
+
         // API Configuration
         const API_BASE = '/api/admin';
         let currentUser = null;
+
+        // Paging state
+        let currentQuery = '';
+        let currentPage = 1;
+        let currentPageSize = 20;
+        let totalCount = 0;
+        let totalPages = 1;
+        let currentUsers = [];
 
         // Initialize page
         window.addEventListener('load', () => {
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
+            const pageSizeEl = document.getElementById('pageSize');
+            const searchInput = document.getElementById('searchInput');
+
+            currentPageSize = parseInt(pageSizeEl?.value || '20', 10) || 20;
+
+            let searchTimeout;
+            searchInput?.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentQuery = (searchInput.value || '').trim();
+                    currentPage = 1;
+                    loadUsers();
+                }, 400);
+            });
+
+            pageSizeEl?.addEventListener('change', () => {
+                const val = parseInt(pageSizeEl.value, 10);
+                currentPageSize = Number.isFinite(val) && val > 0 ? val : 20;
+                currentPage = 1;
+                loadUsers();
+            });
+
             loadUsers();
             loadStats();
         });
@@ -211,20 +265,79 @@
 
         // Load users with filters (backend handles filtering)
         function loadUsers() {
-            // Backend handles all filtering logic
-            fetch(`${API_BASE}/users`)
-                .then(res => {
+            const params = new URLSearchParams();
+            if (currentQuery) params.set('q', currentQuery);
+            params.set('page', String(Math.max(0, (currentPage || 1) - 1)));
+            params.set('size', String(currentPageSize || 20));
+
+            fetch(`${API_BASE}/users?${params.toString()}`)
+                .then(async res => {
                     if (!res.ok) throw new Error('Failed to fetch users');
-                    return res.json();
+
+                    const headerTotalCount = Number(res.headers.get('X-Total-Count'));
+                    const headerTotalPages = Number(res.headers.get('X-Total-Pages'));
+                    const users = await res.json();
+                    currentUsers = Array.isArray(users) ? users : [];
+
+                    const bodyCount = currentUsers.length;
+                    totalCount = (Number.isFinite(headerTotalCount) && headerTotalCount > 0) ? headerTotalCount : bodyCount;
+                    totalPages = (Number.isFinite(headerTotalPages) && headerTotalPages > 0)
+                        ? headerTotalPages
+                        : Math.max(1, Math.ceil((totalCount || 0) / (currentPageSize || 20)));
+
+                    return currentUsers;
                 })
                 .then(users => {
                     displayUsers(users);
+                    renderPagination();
                 })
                 .catch(err => {
                     console.error('Error loading users:', err);
                     document.getElementById('usersBody').innerHTML = 
                         '<tr><td colspan="6" class="empty-box">Lỗi khi tải dữ liệu. Vui lòng kiểm tra kết nối backend.</td></tr>';
+                    totalCount = 0;
+                    totalPages = 1;
+                    currentUsers = [];
+                    renderPagination();
                 });
+        }
+
+        function clampPage() {
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(Math.max(1, currentPage), tp);
+            return tp;
+        }
+
+        function renderPagination() {
+            const headerTotal = Number(totalCount);
+            const bodyTotal = Array.isArray(currentUsers) ? currentUsers.length : 0;
+            const total = headerTotal > 0 ? headerTotal : bodyTotal;
+            const tp = clampPage();
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const meta = document.getElementById('usersMeta');
+
+            const shown = bodyTotal;
+
+            const from = total === 0 ? 0 : (currentPage - 1) * currentPageSize + 1;
+            const to = total === 0 ? 0 : Math.min(total, (currentPage - 1) * currentPageSize + shown);
+
+            if (pageInfo) pageInfo.textContent = `Trang ${currentPage}/${tp}`;
+            if (meta) meta.textContent = total === 0 ? 'Hiển thị 0 / 0 người dùng' : `Hiển thị ${shown} / ${total} người dùng`;
+            if (prevBtn) prevBtn.disabled = currentPage <= 1;
+            if (nextBtn) nextBtn.disabled = currentPage >= tp;
+        }
+
+        function goPrevPage() {
+            currentPage = Math.max(1, currentPage - 1);
+            loadUsers();
+        }
+
+        function goNextPage() {
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(tp, currentPage + 1);
+            loadUsers();
         }
 
         // Display users in table (presentation only)

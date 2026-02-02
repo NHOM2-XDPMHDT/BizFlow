@@ -18,6 +18,10 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -158,6 +162,20 @@ public class DashboardService {
                 .collect(Collectors.toList());
     }
 
+        public List<UserSearchItem> searchUsersForSearch(String q, int limit) {
+        String keyword = (q == null) ? "" : q.trim();
+        int safeLimit = clamp(limit, 1, 50);
+
+        Page<User> page = runInDatabase("auth", () -> userRepository.searchUsers(
+            keyword,
+            PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "createdAt"))
+        ));
+
+        return page.getContent().stream()
+            .map(this::toUserSearchItem)
+            .collect(Collectors.toList());
+        }
+
     public Optional<UserDetailDto> getUserDetail(Long userId) {
         if (userId == null) {
             return Optional.empty();
@@ -246,5 +264,9 @@ public class DashboardService {
                 ownerName,
                 branch.getIsActive(),
                 branch.getAddress());
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

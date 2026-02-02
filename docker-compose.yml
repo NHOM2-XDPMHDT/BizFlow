@@ -92,6 +92,24 @@ services:
     mem_limit: 512m
 
   # =========================
+  # 3.6 KAFKA UI (Web Console)
+  # =========================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: bizflow-kafka-ui
+    restart: always
+    ports:
+      - "8089:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: bizflow
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      - kafka
+    networks:
+      - bizflow-net
+    mem_limit: 256m
+
+  # =========================
   # 4. API GATEWAY (SPRING CLOUD GATEWAY)
   # =========================
   gateway:
@@ -200,10 +218,40 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.4.1 ADMIN REPORT WORKER (SPRING BOOT - RabbitMQ Consumer)
+  # =========================
+  admin-report-worker:
+    build:
+      context: ./BizFlow.AdminReportService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-report-worker
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      JAVA_OPTS: -Xms128m -Xmx256m
+    command: ["--spring.profiles.active=worker", "--spring.main.web-application-type=none"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - bizflow-net
     mem_limit: 512m
