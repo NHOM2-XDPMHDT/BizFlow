@@ -36,6 +36,7 @@ public class Customer {
     // ===== THÔNG TIN MỞ RỘNG =====
     private LocalDate dob;
     private String cccd;
+    private String gender;
 
     public Customer(String name, String phone) {
         this.name = name;
@@ -116,6 +117,10 @@ public class Customer {
         return cccd;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
     // ===== SETTERS =====
     public void setId(Long id) {
         this.id = id;
@@ -155,5 +160,9 @@ public class Customer {
 
     public void setCccd(String cccd) {
         this.cccd = cccd;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

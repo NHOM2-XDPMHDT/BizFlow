@@ -10,12 +10,16 @@ import com.example.bizflow.service.InventoryService;
 import com.example.bizflow.service.ShelfService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/internal/inventory")
@@ -73,16 +77,27 @@ public class InventoryInternalController {
         if (productIds == null || productIds.isEmpty()) {
             return ResponseEntity.ok(List.of());
         }
+        List<InventoryStock> stocks = inventoryStockRepository.findByProductIdIn(productIds);
+        Map<Long, Integer> stockMap = new HashMap<>();
+        for (InventoryStock stock : stocks) {
+            stockMap.put(stock.getProductId(), stock.getStock() == null ? 0 : stock.getStock());
+        }
         List<StockItem> result = new ArrayList<>();
         for (Long productId : productIds) {
-            int stock = inventoryStockRepository.findByProductId(productId)
-                    .map(InventoryStock::getStock)
-                    .orElse(0);
             StockItem item = new StockItem();
             item.productId = productId;
-            item.stock = stock;
+            item.stock = stockMap.getOrDefault(productId, 0);
             result.add(item);
         }
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<LowStockItem>> getLowStock(
+            @RequestParam(required = false, defaultValue = "10") int threshold) {
+        List<LowStockItem> result = inventoryStockRepository.findLowStock(threshold).stream()
+                .map(view -> new LowStockItem(view.getProductId(), view.getStock()))
+                .toList();
         return ResponseEntity.ok(result);
     }
 
@@ -136,5 +151,15 @@ public class InventoryInternalController {
     public static class StockItem {
         public Long productId;
         public Integer stock;
+    }
+
+    public static class LowStockItem {
+        public Long productId;
+        public Integer stock;
+
+        public LowStockItem(Long productId, Integer stock) {
+            this.productId = productId;
+            this.stock = stock;
+        }
     }
 }

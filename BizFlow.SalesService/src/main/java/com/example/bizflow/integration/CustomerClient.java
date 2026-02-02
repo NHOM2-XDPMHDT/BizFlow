@@ -57,6 +57,7 @@ public class CustomerClient {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public int redeemPoints(Long customerId, int points) {
         if (customerId == null || points <= 0) {
             return 0;
@@ -66,14 +67,10 @@ public class CustomerClient {
                     "customerId", customerId,
                     "points", points
             );
-            ParameterizedTypeReference<Map<String, Object>> typeRef = 
-                new ParameterizedTypeReference<Map<String, Object>>() {};
-            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(payload);
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(
                     baseUrl + "/internal/customers/points/redeem",
-                    HttpMethod.POST,
-                    requestEntity,
-                    typeRef
+                    payload,
+                    (Class<Map<String, Object>>)(Class<?>)Map.class
             );
             Map<String, Object> body = response.getBody();
             if (body != null) {

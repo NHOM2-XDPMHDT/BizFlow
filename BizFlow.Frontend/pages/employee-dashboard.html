@@ -613,70 +613,197 @@
                 <button class="icon-btn small" type="button" aria-label="Đóng" onclick="closeCustomerDetail()">×</button>
             </div>
             <div class="detail-tabs">
-                <button class="tab active">Tổng quan</button>
-                <button class="tab">Thông tin</button>
-                <button class="tab">Lịch sử mua hàng</button>
-                <button class="tab">Công nợ</button>
+                <button class="tab active" data-tab="overview">Tổng quan</button>
+                <button class="tab" data-tab="info">Thông tin</button>
+                <button class="tab" data-tab="history">Lịch sử mua hàng</button>
             </div>
-            <div class="customer-detail-body">
-                <div class="customer-card">
-                    <div class="customer-card-header">
+            <div class="detail-panels">
+                <div class="detail-panel active" data-panel="overview">
+                    <div class="customer-overview-grid">
+                        <div class="member-card">
+                            <div class="member-card-header">
+                                <div class="member-avatar">KH</div>
+                                <div>
+                                    <div class="member-name" id="detailCustomerNameCard">-</div>
+                                    <div class="member-tier">Hạng thẻ: <span id="detailCustomerTier">-</span></div>
+                                </div>
+                                <button class="ghost-btn small">Đổi thẻ</button>
+                            </div>
+                            <div class="member-metrics">
+                                <div class="metric-row">
+                                    <span>Mã thẻ thành viên</span>
+                                    <strong id="detailCustomerMemberCode" class="muted">--</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Chính sách tích điểm</span>
+                                    <strong id="detailEarnPolicy">-</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Chính sách đổi điểm</span>
+                                    <strong id="detailRedeemPolicy">-</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Điểm tích lũy</span>
+                                    <strong id="detailCustomerPoints">0</strong>
+                                </div>
+                                <div class="metric-row">
+                                    <span>Số dùng điểm</span>
+                                    <strong id="detailCustomerPointsUsed">0</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-block">
+                                <h4>Mua hàng</h4>
+                                <div class="summary-row">
+                                    <span>Tổng chi tiêu</span>
+                                    <strong id="detailCustomerSpend">0</strong>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Số lượng hóa đơn</span>
+                                    <strong id="detailCustomerOrders">0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-panel" data-panel="info">
+                    <div class="detail-section">
+                        <div class="section-title">Thông tin cơ bản</div>
+                        <div class="detail-info-grid">
+                            <div class="info-row">
+                                <span>Mã khách hàng</span>
+                                <strong id="detailCustomerCodeInfo" class="muted">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Tên khách hàng</span>
+                                <strong id="detailCustomerNameInfo">-</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Số điện thoại</span>
+                                <strong id="detailCustomerPhoneInfo">-</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Ngày sinh</span>
+                                <strong id="detailCustomerDobInfo">-</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>CCCD</span>
+                                <strong id="detailCustomerCccdInfo">-</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Giới tính</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Email</span>
+                                <strong id="detailCustomerEmailInfo">-</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Địa chỉ</span>
+                                <strong id="detailCustomerAddressInfo">-</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="section-title">Thông tin thẻ thành viên</div>
+                        <div class="detail-info-grid">
+                            <div class="info-row">
+                                <span>Mã thẻ Lomas</span>
+                                <strong class="muted">--</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Hạng thẻ Lomas</span>
+                                <strong class="muted">Member</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Nhóm KH</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Nhân viên phụ trách</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="section-title">Thông tin công ty</div>
+                        <div class="detail-info-grid">
+                            <div class="info-row">
+                                <span>Công ty</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Mã số thuế</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Ghi chú</span>
+                                <strong class="muted">Chưa có thông tin</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-panel" data-panel="history">
+                    <div class="detail-history-summary">
                         <div>
-                            <div class="customer-name" id="detailCustomerNameCard">-</div>
-                            <div class="customer-tier">Hạng thẻ: <span id="detailCustomerTier">-</span></div>
+                            <span>Tổng chi tiêu</span>
+                            <strong id="detailCustomerSpendHistory">0</strong>
                         </div>
-                        <button class="ghost-btn small">Đổi thẻ</button>
-                    </div>
-                    <div class="customer-metrics">
-                        <div><span>Mã thẻ thành viên</span><strong>--</strong></div>
-                        <div><span>Chính sách tích điểm</span><strong id="detailEarnPolicy">-</strong></div>
-                        <div><span>Chính sách đổi điểm</span><strong id="detailRedeemPolicy">-</strong></div>
-                        <div><span>Điểm tích lũy</span><strong id="detailCustomerPoints">0</strong></div>
-                        <div><span>Số dùng điểm</span><strong id="detailCustomerPointsUsed">0</strong></div>
-                    </div>
-                </div>
-                <div class="customer-summary">
-                    <div class="summary-box">
-                        <h4>Mua hàng</h4>
-                        <div class="summary-row">
-                            <span>Tổng chi tiêu </span>
-                            <strong>0</strong>
-                        </div>
-                        <div class="summary-row">
+                        <div>
                             <span>Số lượng hóa đơn</span>
-                            <strong>0</strong>
+                            <strong id="detailCustomerOrdersHistory">0</strong>
                         </div>
                     </div>
-                    <div class="summary-box">
-                        <h4>Công nợ</h4>
-                        <div class="summary-row">
-                            <span>Tổng dư nợ khách hàng</span>
-                            <strong>0</strong>  
+                    <div class="history-filter-row">
+                        <div class="filter-field">
+                            <label>Ngày hóa đơn</label>
+                            <input type="date" placeholder="--/--/----">
                         </div>
-                        <div class="summary-row">
-                            <span>Số lượng chứng từ</span>
-                            <strong>0</strong>
+                        <div class="filter-field">
+                            <label>Số hóa đơn</label>
+                            <input type="text" placeholder="*">
+                        </div>
+                        <div class="filter-field">
+                            <label>Tên cửa hàng</label>
+                            <input type="text" placeholder="*">
+                        </div>
+                        <div class="filter-field">
+                            <label>Trạng thái</label>
+                            <select>
+                                <option>Tất cả</option>
+                                <option>Đã thanh toán</option>
+                                <option>Chờ xử lý</option>
+                                <option>Đã hủy</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label>Tổng thanh toán</label>
+                            <input type="text" placeholder="*">
+                        </div>
+                        <div class="filter-field">
+                            <label>Ghi chú</label>
+                            <input type="text" placeholder="*">
                         </div>
                     </div>
-                </div>
-                <div class="customer-info-list">
-                    <div class="info-row">
-                        <span>Số điện thoại</span>
-                        <strong id="detailCustomerPhone">-</strong>
-                    </div>
-                    <div class="info-row">
-                        <span>Email</span>
-                        <strong id="detailCustomerEmail">-</strong>
-                    </div>
-                    <div class="info-row">
-                        <span>Địa chỉ</span>
-                        <strong id="detailCustomerAddress">-</strong>
+                    <div class="history-table">
+                        <div class="history-table-header">
+                            <span>Ngày hóa đơn</span>
+                            <span>Số hóa đơn</span>
+                            <span>Tên cửa hàng</span>
+                            <span>Trạng thái</span>
+                            <span>Tổng thanh toán</span>
+                            <span>Ghi chú</span>
+                        </div>
+                        <div id="detailCustomerHistoryList" class="detail-history-list">
+                            <div class="history-empty">Chưa có lịch sử mua hàng</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-actions">
-                <button type="button" class="ghost-btn" onclick="closeCustomerDetail()">Đóng</button>
-                <button type="button" class="primary-btn">Xác nhận</button>
+                <button type="button" class="ghost-btn" id="detailSecondaryAction" onclick="closeCustomerDetail()">Đóng</button>
+                <button type="button" class="primary-btn" id="detailPrimaryAction">Xác nhận</button>
             </div>
         </div>
     </div>

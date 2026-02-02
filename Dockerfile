@@ -1,7 +1,7 @@
 # File: Dockerfile
-# Mô t?: File c?u hình Docker d? build image Spring Boot
+# Mï¿½ t?: File c?u hï¿½nh Docker d? build image Spring Boot
 # Ch?c nang: T?o image Docker t? source code Java,
-#            cài d?t dependencies, compile code, build JAR file,
+#            cï¿½i d?t dependencies, compile code, build JAR file,
 #            ch?y ?ng d?ng Spring Boot trong container
 
 # Stage 1: Build the application using Maven and Java 21

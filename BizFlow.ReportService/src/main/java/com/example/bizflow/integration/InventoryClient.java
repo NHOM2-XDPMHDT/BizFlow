@@ -48,6 +48,37 @@ public class InventoryClient {
         }
     }
 
+    public List<StockItem> getStocks(List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            ResponseEntity<StockItem[]> response = restTemplate.postForEntity(
+                    baseUrl + "/internal/inventory/stocks",
+                    productIds,
+                    StockItem[].class
+            );
+            StockItem[] body = response.getBody();
+            return body == null ? Collections.emptyList() : Arrays.asList(body);
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
+    }
+
+    public List<LowStockItem> getLowStock(int threshold) {
+        String url = baseUrl + "/internal/inventory/low-stock?threshold=" + threshold;
+        try {
+            ResponseEntity<LowStockItem[]> response = restTemplate.getForEntity(
+                    url,
+                    LowStockItem[].class
+            );
+            LowStockItem[] body = response.getBody();
+            return body == null ? Collections.emptyList() : Arrays.asList(body);
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
+    }
+
     private String normalizeBaseUrl(String raw) {
         if (raw == null || raw.isBlank()) {
             return "http://localhost:8084";
@@ -175,6 +206,48 @@ public class InventoryClient {
 
         public void setAlertLevel(String alertLevel) {
             this.alertLevel = alertLevel;
+        }
+    }
+
+    public static class StockItem {
+        private Long productId;
+        private Integer stock;
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Long productId) {
+            this.productId = productId;
+        }
+
+        public Integer getStock() {
+            return stock;
+        }
+
+        public void setStock(Integer stock) {
+            this.stock = stock;
+        }
+    }
+
+    public static class LowStockItem {
+        private Long productId;
+        private Integer stock;
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Long productId) {
+            this.productId = productId;
+        }
+
+        public Integer getStock() {
+            return stock;
+        }
+
+        public void setStock(Integer stock) {
+            this.stock = stock;
         }
     }
 }

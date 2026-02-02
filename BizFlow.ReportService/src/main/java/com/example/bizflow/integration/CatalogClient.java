@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class CatalogClient {
@@ -65,6 +68,23 @@ public class CatalogClient {
         }
         ProductSnapshot product = getProduct(productId);
         return product == null || product.getCostPrice() == null ? BigDecimal.ZERO : product.getCostPrice();
+    }
+
+    public List<ProductCostSummary> getProductCostSummaries(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            ResponseEntity<ProductCostSummary[]> response = restTemplate.postForEntity(
+                    baseUrl + "/internal/catalog/products/batch",
+                    ids,
+                    ProductCostSummary[].class
+            );
+            ProductCostSummary[] body = response.getBody();
+            return body == null ? Collections.emptyList() : Arrays.asList(body);
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
     }
 
     private String normalizeBaseUrl(String raw) {
@@ -159,6 +179,54 @@ public class CatalogClient {
 
         public void setProductId(Long productId) {
             this.productId = productId;
+        }
+
+        public BigDecimal getCostPrice() {
+            return costPrice;
+        }
+
+        public void setCostPrice(BigDecimal costPrice) {
+            this.costPrice = costPrice;
+        }
+    }
+
+    public static class ProductCostSummary {
+        private Long id;
+        private Long categoryId;
+        private String code;
+        private String name;
+        private BigDecimal costPrice;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public Long getCategoryId() {
+            return categoryId;
+        }
+
+        public void setCategoryId(Long categoryId) {
+            this.categoryId = categoryId;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public BigDecimal getCostPrice() {

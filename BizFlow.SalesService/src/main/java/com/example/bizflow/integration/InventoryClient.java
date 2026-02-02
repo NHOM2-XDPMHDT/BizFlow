@@ -25,18 +25,15 @@ public class InventoryClient {
         this.baseUrl = normalizeBaseUrl(baseUrl);
     }
 
+    @SuppressWarnings("unchecked")
     public int getStock(Long productId) {
         if (productId == null) {
             return 0;
         }
         try {
-            ParameterizedTypeReference<Map<String, Object>> typeRef = 
-                new ParameterizedTypeReference<Map<String, Object>>() {};
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.getForEntity(
                     baseUrl + "/api/inventory/stock/" + productId,
-                    HttpMethod.GET,
-                    null,
-                    typeRef
+                    (Class<Map<String, Object>>)(Class<?>)Map.class
             );
             Map<String, Object> body = response.getBody();
             if (body != null) {
