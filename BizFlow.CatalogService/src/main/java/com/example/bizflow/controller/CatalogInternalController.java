@@ -46,6 +46,7 @@ public class CatalogInternalController {
         public String code;
         public String barcode;
         public String name;
+        public Double price;
         public String unit;
         public String status;
 
@@ -56,6 +57,7 @@ public class CatalogInternalController {
             summary.code = product.getCode();
             summary.barcode = product.getBarcode();
             summary.name = product.getName();
+            summary.price = product.getPrice() != null ? product.getPrice().doubleValue() : null;
             summary.unit = product.getUnit();
             summary.status = product.getStatus();
             return summary;

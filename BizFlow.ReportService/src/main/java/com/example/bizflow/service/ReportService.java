@@ -3,6 +3,7 @@ package com.example.bizflow.service;
 import com.example.bizflow.dto.DailyReportDTO;
 import com.example.bizflow.dto.LowStockAlertDTO;
 import com.example.bizflow.dto.RevenueReportDTO;
+import com.example.bizflow.dto.ShelfReportDTO;
 import com.example.bizflow.dto.TopProductDTO;
 import com.example.bizflow.integration.CatalogClient;
 import com.example.bizflow.integration.InventoryClient;
@@ -471,6 +472,58 @@ public class ReportService {
         Map<String, Long> summary = new HashMap<>();
         summary.put("total", total);
         summary.put("critical", critical);
+        summary.put("warning", warning);
+        return summary;
+    }
+
+    // ==================== BÁO CÁO KỆ HÀNG ====================
+    
+    public List<ShelfReportDTO> getShelfReport(Integer threshold) {
+        List<InventoryClient.ShelfStockSummary> shelves = inventoryClient.getAllShelfStocks();
+        List<ShelfReportDTO> result = new ArrayList<>();
+        
+        for (InventoryClient.ShelfStockSummary shelf : shelves) {
+            Integer qty = shelf.getQuantity();
+            int quantity = qty != null ? qty : 0;
+            
+            // Nếu có threshold, chỉ lấy những sản phẩm có quantity < threshold
+            if (threshold != null && quantity >= threshold) {
+                continue;
+            }
+            
+            ShelfReportDTO dto = new ShelfReportDTO(
+                    shelf.getProductId(),
+                    shelf.getProductName(),
+                    shelf.getProductCode(),
+                    shelf.getCategoryId(),
+                    quantity,
+                    shelf.getAlertLevel()
+            );
+            result.add(dto);
+        }
+        
+        return result;
+    }
+    
+    public Map<String, Long> getShelfStockSummary(Integer threshold) {
+        int limit = threshold == null ? DEFAULT_LOW_STOCK_THRESHOLD : threshold;
+        List<ShelfReportDTO> reports = getShelfReport(limit);
+        
+        long danger = 0;
+        long warning = 0;
+        long total = reports.size();
+        
+        for (ShelfReportDTO report : reports) {
+            if ("DANGER".equalsIgnoreCase(report.getAlertLevel())) {
+                danger++;
+            } else if ("WARNING".equalsIgnoreCase(report.getAlertLevel())) {
+                warning++;
+            }
+        }
+        
+        Map<String, Long> summary = new HashMap<>();
+        summary.put("total", total);
+        summary.put("danger", danger);
         summary.put("warning", warning);
         return summary;
     }

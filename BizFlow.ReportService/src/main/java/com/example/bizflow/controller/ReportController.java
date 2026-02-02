@@ -3,6 +3,7 @@ package com.example.bizflow.controller;
 import com.example.bizflow.dto.DailyReportDTO;
 import com.example.bizflow.dto.LowStockAlertDTO;
 import com.example.bizflow.dto.RevenueReportDTO;
+import com.example.bizflow.dto.ShelfReportDTO;
 import com.example.bizflow.dto.TopProductDTO;
 import com.example.bizflow.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -150,5 +151,28 @@ public class ReportController {
     public ResponseEntity<Map<String, Long>> getLowStockSummary(
             @RequestParam(required = false) Integer threshold) {
         return ResponseEntity.ok(reportService.getLowStockSummary(threshold));
+    }
+
+    // ==================== BÁO CÁO KỆ HÀNG (OWNER) ====================
+    
+    /**
+     * Danh sách sản phẩm trên kệ hàng
+     * Nếu có threshold, chỉ lấy những sản phẩm có quantity < threshold
+     */
+    @GetMapping("/shelf-stock")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<ShelfReportDTO>> getShelfReport(
+            @RequestParam(required = false) Integer threshold) {
+        return ResponseEntity.ok(reportService.getShelfReport(threshold));
+    }
+
+    /**
+     * Tổng quan cảnh báo kệ hàng
+     */
+    @GetMapping("/shelf-stock/summary")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Map<String, Long>> getShelfStockSummary(
+            @RequestParam(required = false) Integer threshold) {
+        return ResponseEntity.ok(reportService.getShelfStockSummary(threshold));
     }
 }
