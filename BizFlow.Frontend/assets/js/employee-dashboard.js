@@ -386,8 +386,14 @@ async function loadCurrentEmployee() {
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${API_BASE}/products`, {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}` }
+        // Cache-busting: thêm timestamp để luôn lấy data mới nhất
+        const timestamp = Date.now();
+        const response = await fetch(`${API_BASE}/inventory/shelves?_t=${timestamp}`, {
+            headers: { 
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+            }
         });
 
         if (!response.ok) {
@@ -399,12 +405,38 @@ async function loadProducts() {
             throw new Error('Failed to load products');
         }
 
-        const data = await response.json();
-        products = Array.isArray(data) && data.length > 0 ? data : FALLBACK_PRODUCTS;
+        const shelvesData = await response.json();
+        
+        console.log('[loadProducts] Raw shelves data:', shelvesData);
+        
+        // CHỈ map những sản phẩm có quantity > 0 (đang thực sự bán)
+        products = shelvesData
+            .filter(shelf => shelf.quantity > 0)
+            .map(shelf => ({
+                id: shelf.productId,
+                name: shelf.productName,
+                code: shelf.productCode,
+                barcode: shelf.productCode,
+                price: shelf.price || 0,
+                stock: shelf.quantity,
+                categoryId: shelf.categoryId,
+                unit: shelf.unit || 'cái',
+                status: 'active'
+            }));
+        
+        console.log('[loadProducts] Loaded from shelves (quantity > 0):', products.length);
+        console.log('[loadProducts] Products:', products.map(p => `${p.code} (${p.name}) - qty: ${p.stock}`));
+        
+        if (products.length === 0) {
+            console.warn('[loadProducts] No products on shelves with quantity > 0');
+            products = [];
+        }
+        
         await loadPromotionIndex();
         filterProducts();
     } catch (err) {
-        products = FALLBACK_PRODUCTS;
+        console.error('[loadProducts] Error:', err);
+        products = [];
         filterProducts();
     }
 }
@@ -1111,7 +1143,22 @@ async function loadPromotionIndex(forceRefresh = false) {
             .then(res => (res.ok ? res.json() : []));
         const productPromise = (products && products.length > 0)
             ? Promise.resolve(products)
-            : fetch(`${API_BASE}/products`, { headers }).then(res => (res.ok ? res.json() : []));
+            : fetch(`${API_BASE}/inventory/shelves`, { headers })
+                .then(res => {
+                    if (!res.ok) return [];
+                    return res.json();
+                })
+                .then(shelvesData => shelvesData.map(shelf => ({
+                    id: shelf.productId,
+                    name: shelf.productName,
+                    code: shelf.productCode,
+                    barcode: shelf.productCode,
+                    price: shelf.price || 0,
+                    stock: shelf.quantity,
+                    categoryId: shelf.categoryId,
+                    unit: shelf.unit || 'cái',
+                    status: 'active'
+                })));
 
         const [promoList, productList] = await Promise.all([promoPromise, productPromise]);
         

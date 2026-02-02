@@ -35,6 +35,19 @@ public class InventoryClient {
         }
     }
 
+    public List<ShelfStockSummary> getAllShelfStocks() {
+        try {
+            ResponseEntity<ShelfStockSummary[]> response = restTemplate.getForEntity(
+                    baseUrl + "/api/inventory/shelves",
+                    ShelfStockSummary[].class
+            );
+            ShelfStockSummary[] body = response.getBody();
+            return body == null ? Collections.emptyList() : Arrays.asList(body);
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
+    }
+
     private String normalizeBaseUrl(String raw) {
         if (raw == null || raw.isBlank()) {
             return "http://localhost:8084";
@@ -96,6 +109,72 @@ public class InventoryClient {
 
         public void setUnit(String unit) {
             this.unit = unit;
+        }
+    }
+
+    public static class ShelfStockSummary {
+        private Long id;
+        private Long productId;
+        private String productCode;
+        private String productName;
+        private Long categoryId;
+        private Integer quantity;
+        private String alertLevel;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public Long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Long productId) {
+            this.productId = productId;
+        }
+
+        public String getProductCode() {
+            return productCode;
+        }
+
+        public void setProductCode(String productCode) {
+            this.productCode = productCode;
+        }
+
+        public String getProductName() {
+            return productName;
+        }
+
+        public void setProductName(String productName) {
+            this.productName = productName;
+        }
+
+        public Long getCategoryId() {
+            return categoryId;
+        }
+
+        public void setCategoryId(Long categoryId) {
+            this.categoryId = categoryId;
+        }
+
+        public Integer getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(Integer quantity) {
+            this.quantity = quantity;
+        }
+
+        public String getAlertLevel() {
+            return alertLevel;
+        }
+
+        public void setAlertLevel(String alertLevel) {
+            this.alertLevel = alertLevel;
         }
     }
 }

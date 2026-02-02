@@ -3,8 +3,11 @@ package com.example.bizflow.controller;
 import com.example.bizflow.dto.InventoryReceiptRequest;
 import com.example.bizflow.dto.InventoryReceiptResponse;
 import com.example.bizflow.entity.InventoryStock;
+import com.example.bizflow.entity.Shelf;
 import com.example.bizflow.repository.InventoryStockRepository;
+import com.example.bizflow.repository.ShelfRepository;
 import com.example.bizflow.service.InventoryService;
+import com.example.bizflow.service.ShelfService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,11 +23,17 @@ public class InventoryInternalController {
 
     private final InventoryService inventoryService;
     private final InventoryStockRepository inventoryStockRepository;
+    private final ShelfService shelfService;
+    private final ShelfRepository shelfRepository;
 
     public InventoryInternalController(InventoryService inventoryService,
-                                       InventoryStockRepository inventoryStockRepository) {
+                                       InventoryStockRepository inventoryStockRepository,
+                                       ShelfService shelfService,
+                                       ShelfRepository shelfRepository) {
         this.inventoryService = inventoryService;
         this.inventoryStockRepository = inventoryStockRepository;
+        this.shelfService = shelfService;
+        this.shelfRepository = shelfRepository;
     }
 
     @PostMapping("/sales")
@@ -32,8 +41,31 @@ public class InventoryInternalController {
         if (request == null || request.items == null || request.items.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        inventoryService.applySale(request.orderId, toServiceItems(request.items), request.userId);
+        // Trừ từ shelf thay vì inventory_stock
+        for (SaleItem item : request.items) {
+            if (item.productId != null && item.quantity != null && item.quantity > 0) {
+                shelfService.deductFromShelf(item.productId, item.quantity, request.orderId, request.userId);
+            }
+        }
         return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/shelves/stocks")
+    public ResponseEntity<List<StockItem>> getShelfStocks(@RequestBody List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<StockItem> result = new ArrayList<>();
+        for (Long productId : productIds) {
+            int stock = shelfRepository.findByProductId(productId)
+                    .map(Shelf::getQuantity)
+                    .orElse(0);
+            StockItem item = new StockItem();
+            item.productId = productId;
+            item.stock = stock;
+            result.add(item);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/stocks")
