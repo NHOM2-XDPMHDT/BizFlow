@@ -21,7 +21,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -30,10 +29,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -273,11 +269,10 @@
 
     <script src="../assets/js/admin-layout.js"></script>
     <script>
-        // API Configuration - Use dashboard endpoints for direct database access
+        // API Configuration - Use dashboard endpoints (Report Service via Gateway)
         const API = '/api/dashboard';
         let currentUser = null;
         let searchTimeout = null;
-        let allUsers = [];
 
         async function fetchJsonWithRetry(url, attempts = 5, delayMs = 400) {
             let lastErr;
@@ -318,18 +313,6 @@
             loadStats();
             loadRecentUsers();
             loadBranches();
-            loadAllUsers();
-        }
-
-        // Load all users for search
-        async function loadAllUsers() {
-            try {
-                const data = await fetchJsonWithRetry(`${API}/users`);
-                allUsers = Array.isArray(data) ? data : [];
-            } catch (err) {
-                console.error('Error loading users:', err);
-                allUsers = [];
-            }
         }
 
         // Initialize search
@@ -356,37 +339,40 @@
             });
         }
 
-        // Perform search - filter cached users
-        function performSearch(query) {
+        // Perform search - backend powered (avoid loading all users)
+        async function performSearch(query) {
             const results = document.getElementById('searchResults');
-            const q = query.toLowerCase();
-            
-            const filtered = allUsers.filter(u => 
-                (u.username && u.username.toLowerCase().includes(q)) ||
-                (u.fullName && u.fullName.toLowerCase().includes(q)) ||
-                (u.email && u.email.toLowerCase().includes(q))
-            );
-            
-            if (!filtered.length) {
-                results.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Không tìm thấy kết quả</div>';
+            try {
+                results.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Đang tìm kiếm...</div>';
                 results.style.display = 'block';
-                return;
-            }
-            
-            results.innerHTML = filtered.slice(0, 10).map(user => `
-                <div onclick="showUserDetail(${user.id})" style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; cursor: pointer;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
-                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${esc(user.fullName || user.username)}</div>
-                    <div style="font-size: 0.875rem; color: #666;">
-                        ${esc(user.username)} • ${esc(user.email || '-')} • <span class="pill" style="font-size: 0.75rem;">${esc(user.role)}</span>
+
+                const usp = new URLSearchParams();
+                usp.set('q', query);
+                usp.set('limit', '10');
+                const users = await fetchJsonWithRetry(`${API}/users?${usp.toString()}`);
+                const filtered = Array.isArray(users) ? users : [];
+
+                if (!filtered.length) {
+                    results.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Không tìm thấy kết quả</div>';
+                    results.style.display = 'block';
+                    return;
+                }
+
+                results.innerHTML = filtered.map(user => `
+                    <div onclick="showUserDetail(${user.id})" style="padding: 0.75rem 1rem; border-bottom: 1px solid #eee; cursor: pointer;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                        <div style="font-weight: 600; margin-bottom: 0.25rem;">${esc(user.fullName || user.username)}</div>
+                        <div style="font-size: 0.875rem; color: #666;">
+                            ${esc(user.username)} • ${esc(user.email || '-')} • <span class="pill" style="font-size: 0.75rem;">${esc(user.role)}</span>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-            
-            if (filtered.length > 10) {
-                results.innerHTML += `<div style="padding: 0.75rem 1rem; text-align: center; color: #666; font-size: 0.875rem;">Còn ${filtered.length - 10} kết quả khác...</div>`;
+                `).join('');
+
+                results.style.display = 'block';
+            } catch (err) {
+                console.error('Search error:', err);
+                results.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Lỗi tìm kiếm</div>';
+                results.style.display = 'block';
             }
-            
-            results.style.display = 'block';
         }
 
         // Show user detail - fetch from backend

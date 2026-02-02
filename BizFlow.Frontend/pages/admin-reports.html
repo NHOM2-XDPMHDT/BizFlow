@@ -20,7 +20,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -29,10 +28,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -89,11 +85,7 @@
                             </div>
                         </div>
 
-                        <ul class="info-list">
-                            <li>Chọn khoảng thời gian (tuần, tháng, quý) bằng bộ lọc ngày.</li>
-                            <li>Kết xuất CSV / PDF / Excel để gửi ban lãnh đạo.</li>
-                            <li>Xem nhanh: tổng số đơn, số đơn đã thanh toán, doanh thu, giá trị đơn trung bình.</li>
-                        </ul>
+ 
 
                         <div class="kpi-grid" id="salesKpis">
                             <div class="kpi"><div class="kpi-label">Tổng số đơn</div><div class="kpi-value">—</div></div>
@@ -116,8 +108,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
                     </section>
 
                     <section class="card report-panel" aria-label="Báo cáo tồn kho và đơn hàng">
@@ -144,11 +134,7 @@
                             </div>
                         </div>
 
-                        <ul class="info-list">
-                            <li>Danh sách sản phẩm dưới mức tồn tối thiểu (theo ngưỡng).</li>
-                            <li>Thống kê đơn hàng theo trạng thái: xem tại <a class="inline-link" href="admin-orders.html">Trang Đơn hàng</a>.</li>
-                            <li>So sánh tồn kho giữa các chi nhánh: có thể mở rộng khi có API theo chi nhánh.</li>
-                        </ul>
+ 
 
                         <div class="table-wrap" aria-label="Bảng tồn kho thấp">
                             <table class="table">
@@ -164,8 +150,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
                     </section>
                 </section>
             </main>

@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,12 +46,24 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderSummaryDto> listOrders(String status, String query) {
-        return orderRecordRepository.findAll().stream()
-                .filter(order -> matchesStatus(status, order))
-                .filter(order -> matchesQuery(query, order))
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return orderRecordRepository
+            .searchOrders(status, query, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "createdAt")))
+            .getContent()
+            .stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
     }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<OrderSummaryDto> listOrdersPage(String status, String query, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 200);
+
+        return orderRecordRepository
+            .searchOrders(status, query, PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt")))
+            .map(this::toDto);
+        }
 
     @Override
     @Transactional(readOnly = true)
@@ -210,30 +225,12 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         );
     }
 
-    private boolean matchesStatus(String status, OrderRecord record) {
-        if (status == null || status.isBlank()) {
-            return true;
-        }
-        return status.equalsIgnoreCase(record.getStatus());
-    }
-
-    private boolean matchesQuery(String query, OrderRecord record) {
-        if (query == null || query.isBlank()) {
-            return true;
-        }
-        String normalized = query.trim().toLowerCase(Locale.ROOT);
-        String invoiceNumber = record.getInvoiceNumber();
-        String customerName = record.getCustomerName();
-        return (invoiceNumber != null && invoiceNumber.toLowerCase(Locale.ROOT).contains(normalized)) ||
-                (customerName != null && customerName.toLowerCase(Locale.ROOT).contains(normalized));
-    }
-
     private static Long toLong(Object value) {
         if (value == null) return null;
         if (value instanceof Number n) return n.longValue();
         try {
-            return Long.parseLong(String.valueOf(value));
-        } catch (Exception e) {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
             return null;
         }
     }

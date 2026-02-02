@@ -3,6 +3,8 @@ package com.bizflow.adminorderservice.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +38,24 @@ public class OrderAdminController {
 
     @GetMapping
     public ResponseEntity<List<OrderSummaryDto>> listOrders(@RequestParam(required = false) String status,
-                                                            @RequestParam(required = false) String q) {
+                                                            @RequestParam(required = false) String q,
+                                                            @RequestParam(required = false) Integer page,
+                                                            @RequestParam(required = false) Integer size) {
+        if (page != null || size != null) {
+            int p = page == null ? 0 : page;
+            int s = size == null ? 20 : size;
+
+            Page<OrderSummaryDto> result = adminOrderService.listOrdersPage(status, q, p, s);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("X-Total-Count", String.valueOf(result.getTotalElements()));
+            headers.add("X-Total-Pages", String.valueOf(result.getTotalPages()));
+            headers.add("X-Page", String.valueOf(result.getNumber()));
+            headers.add("X-Page-Size", String.valueOf(result.getSize()));
+
+            return ResponseEntity.ok().headers(headers).body(result.getContent());
+        }
+
         return ResponseEntity.ok(adminOrderService.listOrders(status, q));
     }
 

@@ -19,7 +19,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -28,10 +27,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -69,7 +65,24 @@
                     <div class="actions">
                         <button class="action-btn" type="button" onclick="location.href='admin-home.html'">Quay lại</button>
                         <button class="action-btn primary" type="button">Tạo mới</button>
+                        <div style="flex: 1;"></div>
+                        <select id="pageSize" class="mini-select" aria-label="Số dòng mỗi trang">
+                            <option value="10">10 / trang</option>
+                            <option value="20" selected>20 / trang</option>
+                            <option value="50">50 / trang</option>
+                            <option value="100">100 / trang</option>
+                        </select>
                     </div>
+
+                    <div class="muted" style="margin-top: 10px; display:flex; align-items:center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                        <div id="productsMeta">—</div>
+                        <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+                            <button class="action-btn sm" type="button" id="prevPageBtn" onclick="goPrevPage()">◀ Trước</button>
+                            <span id="pageInfo">Trang 1/1</span>
+                            <button class="action-btn sm" type="button" id="nextPageBtn" onclick="goNextPage()">Sau ▶</button>
+                        </div>
+                    </div>
+
                     <table class="table">
                         <thead>
                             <tr>
@@ -233,20 +246,80 @@
     <script>
         // API Configuration
         const API_BASE_URL = '/api/admin/products';
+
+        // Paging state
+        let currentQuery = '';
+        let currentPage = 1;
+        let currentPageSize = 20;
+        let totalCount = 0;
+        let totalPages = 1;
+
+        (function injectMiniSelectStyle() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .mini-select { padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(15,23,42,.15); background: #fff; color: #0f172a; }
+                .action-btn.sm { padding: 8px 10px; border-radius: 10px; }
+            `;
+            document.head.appendChild(style);
+        })();
+
+        function clampPage() {
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(Math.max(1, currentPage), tp);
+            return tp;
+        }
+
+        function buildProductsUrl() {
+            const params = new URLSearchParams();
+            if (currentQuery) params.set('q', currentQuery);
+            params.set('page', String(Math.max(0, (currentPage || 1) - 1)));
+            params.set('size', String(currentPageSize || 20));
+            return `${API_BASE_URL}?${params.toString()}`;
+        }
+
+        function renderPagination(currentRows) {
+            const headerTotal = Number(totalCount);
+            const shown = Number(currentRows || 0);
+            const total = headerTotal > 0 ? headerTotal : shown;
+            const tp = clampPage();
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const meta = document.getElementById('productsMeta');
+
+            const from = total === 0 ? 0 : (currentPage - 1) * currentPageSize + 1;
+            const to = total === 0 ? 0 : Math.min(total, (currentPage - 1) * currentPageSize + (currentRows || 0));
+
+            if (pageInfo) pageInfo.textContent = `Trang ${currentPage}/${tp}`;
+            if (meta) meta.textContent = total === 0 ? 'Hiển thị 0 / 0 sản phẩm' : `Hiển thị ${shown} / ${total} sản phẩm`;
+            if (prevBtn) prevBtn.disabled = currentPage <= 1;
+            if (nextBtn) nextBtn.disabled = currentPage >= tp;
+        }
+
+        function goPrevPage() {
+            currentPage = Math.max(1, currentPage - 1);
+            loadProducts();
+        }
+
+        function goNextPage() {
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(tp, currentPage + 1);
+            loadProducts();
+        }
         
-        // Load products from API
-        async function loadProducts(searchQuery = '') {
+        // Load products from API (server-side pagination)
+        async function loadProducts(searchQuery) {
             const tbody = document.getElementById('productsBody');
             
             try {
                 // Show loading state
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Đang tải dữ liệu...</td></tr>';
-                
-                // Build URL with search query if provided
-                let url = `${API_BASE_URL}`;
-                if (searchQuery) {
-                    url += `?q=${encodeURIComponent(searchQuery)}`;
+
+                if (typeof searchQuery === 'string') {
+                    currentQuery = searchQuery.trim();
                 }
+
+                const url = buildProductsUrl();
                 
                 // Fetch products from API
                 const response = await fetch(url);
@@ -254,14 +327,25 @@
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
+                const headerTotalCount = Number(response.headers.get('X-Total-Count'));
+                const headerTotalPages = Number(response.headers.get('X-Total-Pages'));
+
                 const products = await response.json();
+                const bodyCount = Array.isArray(products) ? products.length : 0;
+
+                // Fallback when backend doesn't return pagination headers
+                totalCount = (Number.isFinite(headerTotalCount) && headerTotalCount > 0) ? headerTotalCount : bodyCount;
+                totalPages = (Number.isFinite(headerTotalPages) && headerTotalPages > 0)
+                    ? headerTotalPages
+                    : Math.max(1, Math.ceil((totalCount || 0) / (currentPageSize || 20)));
                 
                 // Clear loading state
                 tbody.innerHTML = '';
                 
                 if (products.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="empty-box">Không có sản phẩm nào.</td></tr>';
+                    renderPagination(0);
                     return;
                 }
                 
@@ -275,11 +359,12 @@
                         <td>${product.stock || 0}</td>
                         <td>
                             <button class="action-btn sm" onclick="viewProduct(${product.id})">Xem</button>
-                            <button class="action-btn sm" onclick="editProduct(${product.id})">Sửa</button>
                         </td>
                     `;
                     tbody.appendChild(row);
                 });
+
+                renderPagination(products.length);
                 
             } catch (error) {
                 console.error('Error loading products:', error);
@@ -287,6 +372,9 @@
                     Lỗi khi tải dữ liệu: ${error.message}<br>
                     <small>Đảm bảo AdminProductService đang chạy trên ${API_BASE_URL}</small>
                 </td></tr>`;
+                totalCount = 0;
+                totalPages = 1;
+                renderPagination(0);
             }
         }
         
@@ -311,12 +399,9 @@
         function searchProducts() {
             const searchInput = document.getElementById('searchInput');
             const searchTerm = searchInput.value.trim();
-            
-            if (searchTerm) {
-                loadProducts(searchTerm);
-            } else {
-                loadProducts();
-            }
+
+            currentPage = 1;
+            loadProducts(searchTerm);
         }
         
         // Update loadProducts to accept search query
@@ -384,6 +469,7 @@
             
             // Setup search
             const searchInput = document.getElementById('searchInput');
+            const pageSizeEl = document.getElementById('pageSize');
             let searchTimeout;
             searchInput.addEventListener('input', () => {
                 clearTimeout(searchTimeout);
@@ -391,12 +477,20 @@
                     searchProducts();
                 }, 500); // Debounce 500ms
             });
+
+            pageSizeEl?.addEventListener('change', () => {
+                const val = parseInt(pageSizeEl.value, 10);
+                currentPageSize = Number.isFinite(val) && val > 0 ? val : 20;
+                currentPage = 1;
+                loadProducts(currentQuery);
+            });
             adminLayout.enforceAuth();
             adminLayout.renderHeader();
             adminLayout.setActiveNav();
             
             // Load products data
-            loadProducts();
+            currentPageSize = parseInt(pageSizeEl?.value || '20', 10) || 20;
+            loadProducts('');
         });
     </script>
 </body>
