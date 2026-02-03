@@ -1274,6 +1274,7 @@
         const numberFormatter = new Intl.NumberFormat('vi-VN');
         const apiEndpoints = {
             summary: '/api/dashboard/owner-summary',
+            financial: '/api/dashboard/financial-summary',
             branches: '/api/branches',
             users: '/api/users'
         };
@@ -1569,54 +1570,64 @@
         // Load financial data and render charts
         async function loadFinancialData() {
             try {
-                // Simulate loading financial data - in production, fetch from API
-                const now = new Date();
-                const currentMonth = now.getMonth();
-                const currentYear = now.getFullYear();
+                const response = await fetch(apiEndpoints.financial);
+                if (!response.ok) {
+                    throw new Error('Không thể tải dữ liệu tài chính');
+                }
+                const data = await response.json();
                 
-                // Generate sample data for the current month
-                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                const dailyRevenue = Array.from({ length: daysInMonth }, (_, i) => {
-                    // Simulate varying daily revenue
-                    const baseRevenue = 15000000 + Math.random() * 10000000;
-                    const weekendMultiplier = (i % 7 === 0 || i % 7 === 6) ? 1.5 : 1;
-                    return Math.floor(baseRevenue * weekendMultiplier);
-                });
-
-                const totalRevenue = dailyRevenue.reduce((sum, val) => sum + val, 0);
-                const totalExpense = Math.floor(totalRevenue * 0.65); // 65% cost
-                const netProfit = totalRevenue - totalExpense;
-                const profitMargin = ((netProfit / totalRevenue) * 100).toFixed(1);
-
                 // Update finance stats
-                document.getElementById('totalRevenue').textContent = formatNumber(totalRevenue) + ' ₫';
-                document.getElementById('totalExpense').textContent = formatNumber(totalExpense) + ' ₫';
-                document.getElementById('netProfit').textContent = formatNumber(netProfit) + ' ₫';
-                document.getElementById('profitMargin').textContent = profitMargin + '%';
-                document.getElementById('financeTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
+                document.getElementById('totalRevenue').textContent = formatNumber(data.totalRevenue) + ' ₫';
+                document.getElementById('totalExpense').textContent = formatNumber(data.totalExpense) + ' ₫';
+                document.getElementById('netProfit').textContent = formatNumber(data.netProfit) + ' ₫';
+                document.getElementById('profitMargin').textContent = data.profitMargin.toFixed(1) + '%';
+                document.getElementById('financeTimestamp').textContent = `Cập nhật: ${formatTimestamp(data.timestamp)}`;
 
-                // Render revenue chart (last 10 days)
-                renderRevenueChart(dailyRevenue.slice(-10));
-
-                // Render cash flow chart
-                renderCashFlowChart(dailyRevenue);
+                // Render charts with real data
+                if (data.dailyRevenues && data.dailyRevenues.length > 0) {
+                    renderRevenueChart(data.dailyRevenues);
+                    renderCashFlowChart(data.dailyRevenues);
+                } else {
+                    document.getElementById('revenueChart').textContent = 'Chưa có dữ liệu doanh thu trong tháng này.';
+                    document.getElementById('cashChart').textContent = 'Chưa có dữ liệu thu chi trong tháng này.';
+                }
 
                 // Render revenue distribution pie chart
-                renderRevenueDistribution(totalRevenue);
+                if (data.categoryRevenues && data.categoryRevenues.length > 0) {
+                    renderRevenueDistribution(data.categoryRevenues, data.totalRevenue);
+                } else {
+                    document.getElementById('donutChart').style.background = 'conic-gradient(#d1d5db 0deg 360deg)';
+                    document.getElementById('donutValue').textContent = '--';
+                    document.getElementById('donutLegend').innerHTML = '<p style="color: var(--muted);">Chưa có dữ liệu doanh thu theo danh mục.</p>';
+                }
             } catch (error) {
                 console.error('Error loading financial data:', error);
+                // Show error message
+                document.getElementById('totalRevenue').textContent = 'Lỗi tải dữ liệu';
+                document.getElementById('totalExpense').textContent = 'Lỗi tải dữ liệu';
+                document.getElementById('netProfit').textContent = 'Lỗi tải dữ liệu';
+                document.getElementById('profitMargin').textContent = '--';
             }
         }
 
-        function renderRevenueChart(last10Days) {
+        function renderRevenueChart(dailyRevenues) {
             const container = document.getElementById('revenueChart');
-            const maxRevenue = Math.max(...last10Days);
+            
+            // Get last 10 days
+            const last10Days = dailyRevenues.slice(-10);
+            if (last10Days.length === 0) {
+                container.textContent = 'Chưa có dữ liệu doanh thu.';
+                return;
+            }
+            
+            const revenues = last10Days.map(d => parseFloat(d.revenue));
+            const maxRevenue = Math.max(...revenues);
             const barWidth = 100 / last10Days.length;
             
             let svg = '<svg viewBox="0 0 100 60" style="width:100%; height:100%;">';
             
-            last10Days.forEach((revenue, i) => {
-                const height = (revenue / maxRevenue) * 50;
+            revenues.forEach((revenue, i) => {
+                const height = maxRevenue > 0 ? (revenue / maxRevenue) * 50 : 0;
                 const x = i * barWidth + barWidth * 0.1;
                 const y = 55 - height;
                 const color = '#3b82f6';
@@ -1627,24 +1638,32 @@
             svg += '</svg>';
             container.innerHTML = svg;
             
-            const now = new Date();
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            const startDay = daysInMonth - 9;
-            document.getElementById('revenueNote').textContent = `Biểu đồ cột thể hiện doanh thu 10 ngày gần nhất (${startDay}-${daysInMonth}/${now.getMonth()+1}/${now.getFullYear()})`;
+            const firstDate = new Date(last10Days[0].date);
+            const lastDate = new Date(last10Days[last10Days.length - 1].date);
+            document.getElementById('revenueNote').textContent = 
+                `Biểu đồ cột thể hiện doanh thu từ ${firstDate.getDate()}/${firstDate.getMonth()+1} đến ${lastDate.getDate()}/${lastDate.getMonth()+1}/${lastDate.getFullYear()}`;
             document.getElementById('revenueTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
         }
 
-        function renderCashFlowChart(dailyData) {
+        function renderCashFlowChart(dailyRevenues) {
             const container = document.getElementById('cashChart');
-            const last15Days = dailyData.slice(-15);
-            const maxValue = Math.max(...last15Days);
+            
+            // Get last 15 days
+            const last15Days = dailyRevenues.slice(-15);
+            if (last15Days.length === 0) {
+                container.textContent = 'Chưa có dữ liệu thu chi.';
+                return;
+            }
+            
+            const revenues = last15Days.map(d => parseFloat(d.revenue));
+            const maxValue = Math.max(...revenues);
             
             let svg = '<svg viewBox="0 0 100 50" style="width:100%; height:100%;">';
             
             // Create line chart
-            const points = last15Days.map((value, i) => {
-                const x = (i / (last15Days.length - 1)) * 95 + 2.5;
-                const y = 45 - ((value / maxValue) * 40);
+            const points = revenues.map((value, i) => {
+                const x = (i / (revenues.length - 1)) * 95 + 2.5;
+                const y = maxValue > 0 ? 45 - ((value / maxValue) * 40) : 45;
                 return `${x},${y}`;
             }).join(' ');
             
@@ -1653,16 +1672,16 @@
             // Line
             svg += `<polyline points="${points}" fill="none" stroke="#3b82f6" stroke-width="0.5" />`;
             // Points
-            last15Days.forEach((value, i) => {
-                const x = (i / (last15Days.length - 1)) * 95 + 2.5;
-                const y = 45 - ((value / maxValue) * 40);
+            revenues.forEach((value, i) => {
+                const x = (i / (revenues.length - 1)) * 95 + 2.5;
+                const y = maxValue > 0 ? 45 - ((value / maxValue) * 40) : 45;
                 svg += `<circle cx="${x}" cy="${y}" r="0.8" fill="#3b82f6" />`;
             });
             
             svg += '</svg>';
             container.innerHTML = svg;
             
-            document.getElementById('cashNote').textContent = 'Biểu đồ đường thể hiện xu hướng thu chi 15 ngày gần nhất';
+            document.getElementById('cashNote').textContent = 'Biểu đồ đường thể hiện xu hướng doanh thu theo ngày';
             document.getElementById('cashTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
             
             // Add legend
@@ -1670,23 +1689,18 @@
             legend.innerHTML = '<div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span><span>Dòng tiền thuần</span></div>';
         }
 
-        function renderRevenueDistribution(totalRevenue) {
-            // Simulate product category distribution
-            const categories = [
-                { name: 'Điện tử', percent: 28, color: '#3b82f6' },
-                { name: 'Thời trang', percent: 22, color: '#fbbf24' },
-                { name: 'Thực phẩm', percent: 18, color: '#10b981' },
-                { name: 'Gia dụng', percent: 15, color: '#e11d48' },
-                { name: 'Khác', percent: 17, color: '#6366f1' }
-            ];
-            
+        function renderRevenueDistribution(categoryRevenues, totalRevenue) {
             // Update donut chart
             let startAngle = 0;
             let gradientParts = [];
             
-            categories.forEach(cat => {
-                const angle = (cat.percent / 100) * 360;
-                gradientParts.push(`${cat.color} ${startAngle}deg ${startAngle + angle}deg`);
+            // Color palette
+            const colors = ['#3b82f6', '#fbbf24', '#10b981', '#e11d48', '#6366f1', '#8b5cf6', '#ec4899', '#f97316'];
+            
+            categoryRevenues.forEach((cat, idx) => {
+                const color = colors[idx % colors.length];
+                const angle = (cat.percentage / 100) * 360;
+                gradientParts.push(`${color} ${startAngle}deg ${startAngle + angle}deg`);
                 startAngle += angle;
             });
             
@@ -1697,14 +1711,14 @@
             
             // Update legend
             const legend = document.getElementById('donutLegend');
-            legend.innerHTML = categories.map(cat => {
-                const revenue = Math.floor(totalRevenue * cat.percent / 100);
+            legend.innerHTML = categoryRevenues.map((cat, idx) => {
+                const color = colors[idx % colors.length];
                 return `
                     <div class="legend-item">
-                        <span class="legend-dot" style="background:${cat.color};"></span>
+                        <span class="legend-dot" style="background:${color};"></span>
                         <div style="display:flex; flex-direction:column;">
-                            <span style="font-weight:600; color:var(--text);">${cat.name}</span>
-                            <span style="font-size:12px; color:var(--muted);">${cat.percent}% • ${formatNumber(revenue)} ₫</span>
+                            <span style="font-weight:600; color:var(--text);">${cat.categoryName}</span>
+                            <span style="font-size:12px; color:var(--muted);">${cat.percentage.toFixed(1)}% • ${formatNumber(cat.revenue)} ₫</span>
                         </div>
                     </div>
                 `;
