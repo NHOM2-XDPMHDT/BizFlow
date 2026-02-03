@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/product-images")
@@ -65,6 +66,50 @@ public class ProductImageController {
             return ResponseEntity.ok(Map.of("path", webPath));
         } catch (IOException e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to save image"));
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<?> listProductImages() {
+        try {
+            List<String> entries = readIndexEntries();
+            List<String> apiEntries = entries.stream()
+                    .map(this::toApiPath)
+                    .filter(path -> path != null && !path.isBlank())
+                    .collect(Collectors.toList());
+            List<String> merged = new ArrayList<>(apiEntries);
+            for (String entry : entries) {
+                if (entry != null && !entry.isBlank() && !merged.contains(entry)) {
+                    merged.add(entry);
+                }
+            }
+            return ResponseEntity.ok(merged);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to load image list"));
+        }
+    }
+
+    @GetMapping(path = "/files/{filename:.+}")
+    public ResponseEntity<?> serveProductImage(@PathVariable("filename") String filename) {
+        if (filename == null || filename.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Filename is required"));
+        }
+        try {
+            Path target = IMAGE_DIR.resolve(filename).normalize();
+            if (!target.startsWith(IMAGE_DIR) || !Files.exists(target)) {
+                return ResponseEntity.notFound().build();
+            }
+            String contentType = Files.probeContentType(target);
+            if (contentType == null || contentType.isBlank()) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+            byte[] content = Files.readAllBytes(target);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(content);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to read image"));
         }
     }
 
@@ -126,6 +171,17 @@ public class ProductImageController {
             return "";
         }
         return justName.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    private String toApiPath(String webPath) {
+        if (webPath == null || webPath.isBlank()) {
+            return "";
+        }
+        Path name = Paths.get(webPath).getFileName();
+        if (name == null) {
+            return "";
+        }
+        return "/api/product-images/files/" + name.toString();
     }
 
     private static Path resolveAssetsRoot() {

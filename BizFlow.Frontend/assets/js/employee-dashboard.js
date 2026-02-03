@@ -42,7 +42,8 @@ const PRODUCT_ICON = `
         <path d="M9 8V6a3 3 0 0 1 6 0v2" />
     </svg>
 `;
-const PRODUCT_IMAGE_LIST_URL = '/assets/data/product-image-files.json';
+const PRODUCT_IMAGE_LIST_URL = `${API_BASE}/product-images`;
+const PRODUCT_IMAGE_LIST_FALLBACK_URL = '/assets/data/product-image-files.json';
 const productImageMap = new Map();
 const productImageEntries = [];
 let productImageMapReady = false;
@@ -448,11 +449,7 @@ async function loadProductImageMap() {
     if (productImageMapReady) return;
     productImageMapReady = true;
     try {
-        const response = await fetch(PRODUCT_IMAGE_LIST_URL, { cache: 'no-store' });
-        if (!response.ok) {
-            throw new Error('Failed to load product images');
-        }
-        const files = await response.json();
+        const files = await fetchProductImageList();
         if (!Array.isArray(files)) {
             return;
         }
@@ -469,6 +466,48 @@ async function loadProductImageMap() {
         });
     } catch (err) {
     }
+}
+
+async function fetchProductImageList() {
+    const token = sessionStorage.getItem('accessToken');
+    const candidates = [
+        {
+            url: PRODUCT_IMAGE_LIST_URL,
+            options: {
+                cache: 'no-store',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
+            }
+        },
+        {
+            url: PRODUCT_IMAGE_LIST_FALLBACK_URL,
+            options: { cache: 'no-store' }
+        }
+    ];
+
+    const merged = [];
+    const seen = new Set();
+
+    for (const candidate of candidates) {
+        try {
+            const response = await fetch(candidate.url, candidate.options);
+            if (!response.ok) {
+                continue;
+            }
+            const data = await response.json();
+            if (!Array.isArray(data)) {
+                continue;
+            }
+            for (const entry of data) {
+                if (!entry || typeof entry !== 'string') continue;
+                if (seen.has(entry)) continue;
+                seen.add(entry);
+                merged.push(entry);
+            }
+        } catch (err) {
+        }
+    }
+
+    return merged.length > 0 ? merged : null;
 }
 
 function normalizeProductKey(value) {
