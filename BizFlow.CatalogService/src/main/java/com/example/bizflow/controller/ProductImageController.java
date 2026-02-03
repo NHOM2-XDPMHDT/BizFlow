@@ -20,8 +20,7 @@ import java.util.Optional;
 @RequestMapping("/api/product-images")
 public class ProductImageController {
 
-    private static final Path ASSETS_ROOT = Paths.get(
-            Optional.ofNullable(System.getenv("BIZFLOW_ASSETS_DIR")).orElse("FE/assets"));
+    private static final Path ASSETS_ROOT = resolveAssetsRoot();
     private static final Path IMAGE_DIR = ASSETS_ROOT.resolve(Paths.get("img", "img_sanpham"));
     private static final Path IMAGE_INDEX = ASSETS_ROOT.resolve(Paths.get("data", "product-image-files.json"));
     private static final String WEB_PREFIX = "/assets/img/img_sanpham/";
@@ -87,6 +86,10 @@ public class ProductImageController {
     }
 
     private void writeIndexEntries(List<String> entries) throws IOException {
+        Path parent = IMAGE_INDEX.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
         ObjectMapper mapper = new ObjectMapper();
         mapper.writerWithDefaultPrettyPrinter().writeValue(IMAGE_INDEX.toFile(), entries);
     }
@@ -123,5 +126,24 @@ public class ProductImageController {
             return "";
         }
         return justName.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    private static Path resolveAssetsRoot() {
+        String override = System.getenv("BIZFLOW_ASSETS_DIR");
+        if (override != null && !override.isBlank()) {
+            return Paths.get(override);
+        }
+        List<Path> candidates = List.of(
+                Paths.get("BizFlow.Frontend", "assets"),
+                Paths.get("FE", "assets"),
+                Paths.get("frontend", "assets"),
+                Paths.get("assets")
+        );
+        for (Path candidate : candidates) {
+            if (Files.exists(candidate)) {
+                return candidate;
+            }
+        }
+        return Paths.get("BizFlow.Frontend", "assets");
     }
 }
