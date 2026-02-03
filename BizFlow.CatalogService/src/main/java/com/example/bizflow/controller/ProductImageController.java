@@ -46,6 +46,7 @@ public class ProductImageController {
 
         try {
             Files.createDirectories(IMAGE_DIR);
+            Files.createDirectories(IMAGE_INDEX.getParent());
             String filename = sanitizedName;
             if (filename.isEmpty()) {
                 filename = baseName + "." + ext;
