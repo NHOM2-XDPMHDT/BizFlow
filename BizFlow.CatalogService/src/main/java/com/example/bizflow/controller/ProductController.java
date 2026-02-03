@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,7 +33,6 @@ public class ProductController {
             } else {
                 products = productRepository.findByStatus("active");
             }
-            applyInventoryStocks(products);
             boolean showCostPrice = true;
             List<ProductDTO> dtos = products.stream()
                     .map(p -> ProductDTO.fromEntity(p, showCostPrice))
@@ -49,7 +47,6 @@ public class ProductController {
                 } else {
                     products = productRepository.findAll();
                 }
-                applyInventoryStocks(products);
                 boolean showCostPrice = true;
                 List<ProductDTO> dtos = products.stream()
                         .map(p -> ProductDTO.fromEntity(p, showCostPrice))
@@ -67,7 +64,6 @@ public class ProductController {
         try {
             return productRepository.findById(id)
                     .map(product -> {
-                        applyInventoryStocks(List.of(product));
                         boolean showCostPrice = true;
                         return ResponseEntity.ok(ProductDTO.fromEntity(product, showCostPrice));
                     })
@@ -88,8 +84,9 @@ public class ProductController {
                 product.setLegacyName(product.getName());
             }
             Product saved = productRepository.save(product);
-            inventoryClient.receiveStock(saved.getId(), 20, saved.getCostPrice(), "Initial stock", null);
-            applyInventoryStocks(List.of(saved));
+            Integer savedStock = saved.getStock();
+            int initialStock = savedStock != null ? savedStock : 0;
+            inventoryClient.receiveStock(saved.getId(), initialStock, saved.getCostPrice(), "Initial stock", null);
             return ResponseEntity.ok(ProductDTO.fromEntity(saved, true));
         } catch (Exception e) {
             return ResponseEntity.status(400).body("Error creating product: " + e.getMessage());
@@ -113,8 +110,10 @@ public class ProductController {
                         existing.setDescription(product.getDescription());
                         existing.setCategoryId(product.getCategoryId());
                         existing.setStatus(product.getStatus());
+                        if (product.getStock() != null) {
+                            existing.setStock(product.getStock());
+                        }
                         Product saved = productRepository.save(existing);
-                        applyInventoryStocks(List.of(saved));
                         return ResponseEntity.ok(ProductDTO.fromEntity(saved, true));
                     })
                     .orElse(ResponseEntity.notFound().build());
@@ -153,29 +152,4 @@ public class ProductController {
         }
     }
 
-    private void applyInventoryStocks(List<Product> products) {
-        if (products == null || products.isEmpty()) {
-            return;
-        }
-        List<Long> ids = products.stream()
-                .map(Product::getId)
-                .filter(id -> id != null)
-                .collect(Collectors.toList());
-        if (ids.isEmpty()) {
-            return;
-        }
-        List<InventoryClient.StockItem> stocks = inventoryClient.getStocks(ids);
-        Map<Long, Integer> stockMap = new java.util.HashMap<>();
-        for (InventoryClient.StockItem stock : stocks) {
-            if (stock != null && stock.getProductId() != null) {
-                stockMap.put(stock.getProductId(), stock.getStock() == null ? 0 : stock.getStock());
-            }
-        }
-        for (Product product : products) {
-            if (product == null || product.getId() == null) {
-                continue;
-            }
-            product.setStock(stockMap.getOrDefault(product.getId(), 0));
-        }
-    }
 }

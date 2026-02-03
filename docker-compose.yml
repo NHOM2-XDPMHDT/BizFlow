@@ -333,7 +333,10 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       INVENTORY_SERVICE_URL: http://inventory-service:8084
+      BIZFLOW_ASSETS_DIR: /assets
       JAVA_OPTS: -Xms128m -Xmx256m
+    volumes:
+      - ./BizFlow.Frontend/assets:/assets
     depends_on:
       mysql:
         condition: service_healthy
