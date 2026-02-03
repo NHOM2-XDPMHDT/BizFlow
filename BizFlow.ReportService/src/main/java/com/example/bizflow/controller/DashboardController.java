@@ -2,6 +2,7 @@ package com.example.bizflow.controller;
 
 import com.example.bizflow.dto.AdminDashboardSummary;
 import com.example.bizflow.dto.BranchSummary;
+import com.example.bizflow.dto.FinancialSummary;
 import com.example.bizflow.dto.OwnerDashboardSummary;
 import com.example.bizflow.dto.RecentUserSummary;
 import com.example.bizflow.dto.UserDetailDto;
@@ -37,6 +38,11 @@ public class DashboardController {
     @GetMapping("/admin-summary")
     public ResponseEntity<AdminDashboardSummary> getAdminSummary() {
         return ResponseEntity.ok(dashboardService.getAdminSummary());
+    }
+
+    @GetMapping("/financial-summary")
+    public ResponseEntity<FinancialSummary> getFinancialSummary() {
+        return ResponseEntity.ok(dashboardService.getFinancialSummary());
     }
 
     @GetMapping("/recent-users")
