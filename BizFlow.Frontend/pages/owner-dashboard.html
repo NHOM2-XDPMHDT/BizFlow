@@ -211,6 +211,13 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ghost-btn:hover {
+            background: #e0e7ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(47, 58, 143, 0.2);
         }
 
         .selector {
@@ -316,6 +323,113 @@
             20%, 40% { transform: rotate(10deg); }
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .card:nth-child(1) { animation-delay: 0s; }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .quick-action-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(47, 58, 143, 0.15);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        }
+
+        .quick-action-icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+
+        .quick-action-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .quick-action-desc {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .service-status-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .service-status-card:hover {
+            background: #f1f5f9;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .service-icon {
+            font-size: 24px;
+        }
+
+        .service-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .service-status {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .service-status.online {
+            color: #10b981;
+        }
+
+        .service-status.offline {
+            color: #ef4444;
+        }
+
+        .service-status.warning {
+            color: #f59e0b;
+        }
+
         .main {
             padding: 22px 24px 32px;
             display: flex;
@@ -375,6 +489,14 @@
             padding: 10px 12px;
             background: #f8fafc;
             border-radius: 10px;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .stat-row:hover {
+            background: #f1f5f9;
+            transform: translateX(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .stat-label {
@@ -424,6 +546,12 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
+        }
+
+        .chart-container:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
         }
 
         .legend {
@@ -590,6 +718,17 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(47, 58, 143, 0.3);
+        }
+
+        .primary-btn:active {
+            transform: translateY(0);
         }
 
         .hint {
@@ -820,10 +959,13 @@
         <div class="content">
             <header class="topbar">
                 <div class="top-left">
-                    <div class="page-title">Tổng quan</div>
+                    <div>
+                        <div class="page-title" id="greetingTitle">Tổng quan</div>
+                        <div class="card-subtitle" id="greetingSubtitle" style="margin-top: 2px;"></div>
+                    </div>
                     <div class="search">
                         <span style="color:#9ca3af;">🔍</span>
-                        <input type="text" placeholder="Tìm kiếm trong bảng điều khiển..." />
+                        <input type="text" id="dashboardSearch" placeholder="Tìm kiếm sản phẩm, khách hàng, nhân viên..." onkeypress="handleSearchKeypress(event)" />
                     </div>
                 </div>
                 <div class="top-right">
@@ -831,7 +973,7 @@
                         <span class="bell-icon">🔔</span>
                         <span class="badge-count" id="badgeCount" style="display:none;">0</span>
                     </div>
-                    <button class="ghost-btn">Bắt đầu sử dụng</button>
+                    <button class="ghost-btn" onclick="showQuickStart()">📘 Hướng dẫn sử dụng</button>
                     <div class="selector">
                         <span class="label">Chi nhánh</span>
                         <span class="value" id="branchName">TRỤ SỞ CHÍNH</span>
@@ -855,6 +997,9 @@
                                 <div class="card-title">Tổng quan hệ thống</div>
                                 <div class="card-subtitle" id="dailySubtitle">Đang tải...</div>
                             </div>
+                            <button class="icon-btn" onclick="refreshDashboard()" title="Làm mới dữ liệu">
+                                🔄
+                            </button>
                         </div>
                         <div class="stat-list" id="dailyStats"></div>
                     </div>
@@ -887,7 +1032,24 @@
                             </div>
                             <div class="card-subtitle" id="financeTimestamp"></div>
                         </div>
-                        <div class="empty">Bạn không có quyền xem</div>
+                        <div class="stat-list" id="financeStats">
+                            <div class="stat-row">
+                                <div class="stat-label">💰 Tổng doanh thu</div>
+                                <div class="stat-value" id="totalRevenue" style="color: #10b981;">-</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">💸 Tổng chi phí</div>
+                                <div class="stat-value" id="totalExpense" style="color: #ef4444;">-</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">📈 Lợi nhuận ròng</div>
+                                <div class="stat-value" id="netProfit" style="color: #3b82f6; font-size: 18px;">-</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">📊 Tỷ suất lợi nhuận</div>
+                                <div class="stat-value" id="profitMargin">-</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card panel">
                         <div class="card-header">
@@ -936,6 +1098,47 @@
                 <section class="card">
                     <div class="card-header">
                         <div>
+                            <div class="card-title">⚡ Thao tác nhanh</div>
+                            <div class="card-subtitle">Truy cập nhanh các chức năng thường dùng</div>
+                        </div>
+                    </div>
+                    <div class="session-card">
+                        <a href="owner-products.html" class="quick-action-card">
+                            <div class="quick-action-icon">🛍️</div>
+                            <div class="quick-action-title">Quản lý sản phẩm</div>
+                            <div class="quick-action-desc">Thêm, sửa, xóa sản phẩm</div>
+                        </a>
+                        <a href="owner-inventory.html" class="quick-action-card">
+                            <div class="quick-action-icon">📦</div>
+                            <div class="quick-action-title">Kiểm tra kho</div>
+                            <div class="quick-action-desc">Theo dõi tồn kho</div>
+                        </a>
+                        <a href="javascript:void(0)" onclick="openPurchaseDrawerQuick()" class="quick-action-card">
+                            <div class="quick-action-icon">🚚</div>
+                            <div class="quick-action-title">Nhập hàng</div>
+                            <div class="quick-action-desc">Quản lý nhập hàng</div>
+                        </a>
+                        <a href="owner-reports.html" class="quick-action-card">
+                            <div class="quick-action-icon">📊</div>
+                            <div class="quick-action-title">Báo cáo</div>
+                            <div class="quick-action-desc">Xem báo cáo chi tiết</div>
+                        </a>
+                        <a href="owner-users.html" class="quick-action-card">
+                            <div class="quick-action-icon">👥</div>
+                            <div class="quick-action-title">Nhân viên</div>
+                            <div class="quick-action-desc">Quản lý tài khoản</div>
+                        </a>
+                        <a href="owner-promotions.html" class="quick-action-card">
+                            <div class="quick-action-icon">🎯</div>
+                            <div class="quick-action-title">Khuyến mãi</div>
+                            <div class="quick-action-desc">Tạo chương trình KM</div>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-header">
+                        <div>
                             <div class="card-title">Thông tin đăng nhập</div>
                             <div class="card-subtitle">Dành cho kiểm thử API</div>
                         </div>
@@ -956,6 +1159,47 @@
                         <div>
                             <div class="stat-label">Chi nhánh</div>
                             <div class="stat-value" id="branchValue">TRỤ SỞ CHÍNH</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🖥️ Tình trạng hệ thống</div>
+                            <div class="card-subtitle">Trạng thái các dịch vụ</div>
+                        </div>
+                    </div>
+                    <div class="session-card">
+                        <div class="service-status-card">
+                            <div class="service-icon">🔐</div>
+                            <div class="service-name">Authentication</div>
+                            <div class="service-status online">● Online</div>
+                        </div>
+                        <div class="service-status-card">
+                            <div class="service-icon">📦</div>
+                            <div class="service-name">Inventory</div>
+                            <div class="service-status online">● Online</div>
+                        </div>
+                        <div class="service-status-card">
+                            <div class="service-icon">🛒</div>
+                            <div class="service-name">Sales</div>
+                            <div class="service-status online">● Online</div>
+                        </div>
+                        <div class="service-status-card">
+                            <div class="service-icon">📊</div>
+                            <div class="service-name">Reports</div>
+                            <div class="service-status online">● Online</div>
+                        </div>
+                        <div class="service-status-card">
+                            <div class="service-icon">🗂️</div>
+                            <div class="service-name">Catalog</div>
+                            <div class="service-status online">● Online</div>
+                        </div>
+                        <div class="service-status-card">
+                            <div class="service-icon">🎯</div>
+                            <div class="service-name">Promotion</div>
+                            <div class="service-status online">● Online</div>
                         </div>
                     </div>
                 </section>
@@ -1069,6 +1313,23 @@
             document.getElementById('branchValue').textContent = branch;
             document.getElementById('userAvatar').textContent = initials(username);
             document.getElementById('sidebarTimestamp').textContent = timeStamp();
+            
+            // Set greeting based on time
+            const hour = new Date().getHours();
+            let greeting = '';
+            let icon = '';
+            if (hour < 12) {
+                greeting = 'Chào buổi sáng';
+                icon = '🌅';
+            } else if (hour < 18) {
+                greeting = 'Chào buổi chiều';
+                icon = '☀️';
+            } else {
+                greeting = 'Chào buổi tối';
+                icon = '🌙';
+            }
+            document.getElementById('greetingTitle').textContent = `${icon} ${greeting}, ${username}!`;
+            document.getElementById('greetingSubtitle').textContent = 'Hệ thống đang hoạt động tốt';
         }
 
         async function loadSummary() {
@@ -1259,6 +1520,289 @@
 
         function initials(name) {
             return name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase() || 'OW';
+        }
+
+        function handleSearchKeypress(event) {
+            if (event.key === 'Enter') {
+                const query = event.target.value.trim();
+                if (query) {
+                    performSearch(query);
+                }
+            }
+        }
+
+        async function performSearch(query) {
+            const searchLower = query.toLowerCase();
+            
+            // Quick navigation based on keywords
+            if (searchLower.includes('sản phẩm') || searchLower.includes('product')) {
+                window.location.href = 'owner-products.html';
+            } else if (searchLower.includes('khách') || searchLower.includes('customer')) {
+                window.location.href = 'customer-list.html';
+            } else if (searchLower.includes('nhân viên') || searchLower.includes('employee') || searchLower.includes('user')) {
+                window.location.href = 'owner-users.html';
+            } else if (searchLower.includes('báo cáo') || searchLower.includes('report')) {
+                window.location.href = 'owner-reports.html';
+            } else if (searchLower.includes('kho') || searchLower.includes('inventory')) {
+                window.location.href = 'owner-inventory.html';
+            } else if (searchLower.includes('khuyến mãi') || searchLower.includes('promotion')) {
+                window.location.href = 'owner-promotions.html';
+            } else if (searchLower.includes('nhập hàng') || searchLower.includes('purchase')) {
+                const purchaseLink = document.querySelector('[data-purchase-link="true"]');
+                if (purchaseLink && window.openPurchaseDrawer) {
+                    window.openPurchaseDrawer({ currentTarget: purchaseLink, preventDefault: () => {} });
+                }
+            } else {
+                // Default: search products
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tìm kiếm',
+                    text: `Đang tìm kiếm "${query}" trong sản phẩm...`,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = `owner-products.html?search=${encodeURIComponent(query)}`;
+                });
+            }
+        }
+
+        // Load financial data and render charts
+        async function loadFinancialData() {
+            try {
+                // Simulate loading financial data - in production, fetch from API
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                
+                // Generate sample data for the current month
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                const dailyRevenue = Array.from({ length: daysInMonth }, (_, i) => {
+                    // Simulate varying daily revenue
+                    const baseRevenue = 15000000 + Math.random() * 10000000;
+                    const weekendMultiplier = (i % 7 === 0 || i % 7 === 6) ? 1.5 : 1;
+                    return Math.floor(baseRevenue * weekendMultiplier);
+                });
+
+                const totalRevenue = dailyRevenue.reduce((sum, val) => sum + val, 0);
+                const totalExpense = Math.floor(totalRevenue * 0.65); // 65% cost
+                const netProfit = totalRevenue - totalExpense;
+                const profitMargin = ((netProfit / totalRevenue) * 100).toFixed(1);
+
+                // Update finance stats
+                document.getElementById('totalRevenue').textContent = formatNumber(totalRevenue) + ' ₫';
+                document.getElementById('totalExpense').textContent = formatNumber(totalExpense) + ' ₫';
+                document.getElementById('netProfit').textContent = formatNumber(netProfit) + ' ₫';
+                document.getElementById('profitMargin').textContent = profitMargin + '%';
+                document.getElementById('financeTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
+
+                // Render revenue chart (last 10 days)
+                renderRevenueChart(dailyRevenue.slice(-10));
+
+                // Render cash flow chart
+                renderCashFlowChart(dailyRevenue);
+
+                // Render revenue distribution pie chart
+                renderRevenueDistribution(totalRevenue);
+            } catch (error) {
+                console.error('Error loading financial data:', error);
+            }
+        }
+
+        function renderRevenueChart(last10Days) {
+            const container = document.getElementById('revenueChart');
+            const maxRevenue = Math.max(...last10Days);
+            const barWidth = 100 / last10Days.length;
+            
+            let svg = '<svg viewBox="0 0 100 60" style="width:100%; height:100%;">';
+            
+            last10Days.forEach((revenue, i) => {
+                const height = (revenue / maxRevenue) * 50;
+                const x = i * barWidth + barWidth * 0.1;
+                const y = 55 - height;
+                const color = '#3b82f6';
+                
+                svg += `<rect x="${x}" y="${y}" width="${barWidth * 0.8}" height="${height}" fill="${color}" rx="1"/>`;
+            });
+            
+            svg += '</svg>';
+            container.innerHTML = svg;
+            
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const startDay = daysInMonth - 9;
+            document.getElementById('revenueNote').textContent = `Biểu đồ cột thể hiện doanh thu 10 ngày gần nhất (${startDay}-${daysInMonth}/${now.getMonth()+1}/${now.getFullYear()})`;
+            document.getElementById('revenueTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
+        }
+
+        function renderCashFlowChart(dailyData) {
+            const container = document.getElementById('cashChart');
+            const last15Days = dailyData.slice(-15);
+            const maxValue = Math.max(...last15Days);
+            
+            let svg = '<svg viewBox="0 0 100 50" style="width:100%; height:100%;">';
+            
+            // Create line chart
+            const points = last15Days.map((value, i) => {
+                const x = (i / (last15Days.length - 1)) * 95 + 2.5;
+                const y = 45 - ((value / maxValue) * 40);
+                return `${x},${y}`;
+            }).join(' ');
+            
+            // Area under line
+            svg += `<polygon points="2.5,45 ${points} 97.5,45" fill="#3b82f620" />`;
+            // Line
+            svg += `<polyline points="${points}" fill="none" stroke="#3b82f6" stroke-width="0.5" />`;
+            // Points
+            last15Days.forEach((value, i) => {
+                const x = (i / (last15Days.length - 1)) * 95 + 2.5;
+                const y = 45 - ((value / maxValue) * 40);
+                svg += `<circle cx="${x}" cy="${y}" r="0.8" fill="#3b82f6" />`;
+            });
+            
+            svg += '</svg>';
+            container.innerHTML = svg;
+            
+            document.getElementById('cashNote').textContent = 'Biểu đồ đường thể hiện xu hướng thu chi 15 ngày gần nhất';
+            document.getElementById('cashTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
+            
+            // Add legend
+            const legend = document.getElementById('cashLegend');
+            legend.innerHTML = '<div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span><span>Dòng tiền thuần</span></div>';
+        }
+
+        function renderRevenueDistribution(totalRevenue) {
+            // Simulate product category distribution
+            const categories = [
+                { name: 'Điện tử', percent: 28, color: '#3b82f6' },
+                { name: 'Thời trang', percent: 22, color: '#fbbf24' },
+                { name: 'Thực phẩm', percent: 18, color: '#10b981' },
+                { name: 'Gia dụng', percent: 15, color: '#e11d48' },
+                { name: 'Khác', percent: 17, color: '#6366f1' }
+            ];
+            
+            // Update donut chart
+            let startAngle = 0;
+            let gradientParts = [];
+            
+            categories.forEach(cat => {
+                const angle = (cat.percent / 100) * 360;
+                gradientParts.push(`${cat.color} ${startAngle}deg ${startAngle + angle}deg`);
+                startAngle += angle;
+            });
+            
+            const donutChart = document.getElementById('donutChart');
+            donutChart.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+            
+            document.getElementById('donutValue').textContent = '100%';
+            
+            // Update legend
+            const legend = document.getElementById('donutLegend');
+            legend.innerHTML = categories.map(cat => {
+                const revenue = Math.floor(totalRevenue * cat.percent / 100);
+                return `
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:${cat.color};"></span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:600; color:var(--text);">${cat.name}</span>
+                            <span style="font-size:12px; color:var(--muted);">${cat.percent}% • ${formatNumber(revenue)} ₫</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('pieSubtitle').textContent = 'Phân bố theo danh mục';
+            document.getElementById('pieTimestamp').textContent = `Cập nhật: ${timeStamp()}`;
+        }
+
+        // Initialize charts on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loadFinancialData();
+            }, 500);
+        });
+
+        function showQuickStart() {
+            Swal.fire({
+                title: '📘 Hướng dẫn sử dụng BizFlow Owner',
+                html: `
+                    <div style="text-align: left; padding: 10px; max-height: 400px; overflow-y: auto;">
+                        <h3 style="color: var(--primary); margin-top: 0;">🏠 Tổng quan</h3>
+                        <p>Dashboard hiển thị các chỉ số kinh doanh quan trọng, doanh thu, chi phí và lợi nhuận của toàn hệ thống.</p>
+                        
+                        <h3 style="color: var(--primary);">📊 Các chức năng chính</h3>
+                        <ul style="padding-left: 20px;">
+                            <li><strong>Báo cáo doanh thu:</strong> Xem báo cáo chi tiết theo ngày, tháng, năm</li>
+                            <li><strong>Quản lý sản phẩm:</strong> Thêm, sửa, xóa sản phẩm trong hệ thống</li>
+                            <li><strong>Quản lý kho:</strong> Theo dõi tồn kho, cảnh báo hết hàng</li>
+                            <li><strong>Nhập hàng & Giá vốn:</strong> Quản lý nhập hàng và tính giá vốn</li>
+                            <li><strong>Quản lý nhân viên:</strong> Thêm, chỉnh sửa tài khoản nhân viên</li>
+                            <li><strong>Khuyến mãi:</strong> Tạo và quản lý chương trình khuyến mãi</li>
+                        </ul>
+                        
+                        <h3 style="color: var(--primary);">🔍 Tìm kiếm nhanh</h3>
+                        <p>Sử dụng ô tìm kiếm phía trên để nhanh chóng truy cập các chức năng:</p>
+                        <ul style="padding-left: 20px;">
+                            <li>Nhập "sản phẩm" để đến trang sản phẩm</li>
+                            <li>Nhập "báo cáo" để xem báo cáo</li>
+                            <li>Nhập "nhân viên" để quản lý nhân viên</li>
+                            <li>Nhập tên sản phẩm để tìm kiếm cụ thể</li>
+                        </ul>
+                        
+                        <h3 style="color: var(--primary);">🔔 Thông báo</h3>
+                        <p>Click vào biểu tượng chuông để xem cảnh báo tồn kho và các thông báo quan trọng khác.</p>
+                        
+                        <h3 style="color: var(--primary);">💡 Mẹo</h3>
+                        <p>Tất cả dữ liệu được đồng bộ thời gian thực. Làm mới trang để cập nhật thông tin mới nhất.</p>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Đã hiểu',
+                width: '600px',
+                confirmButtonColor: '#2f3a8f'
+            });
+        }
+
+        function goToAlerts() {
+            window.location.href = 'owner-inventory-alerts.html';
+        }
+
+        async function refreshDashboard() {
+            const refreshIcon = event.target;
+            refreshIcon.style.transform = 'rotate(360deg)';
+            refreshIcon.style.transition = 'transform 0.5s ease';
+            
+            try {
+                await Promise.all([
+                    loadSummary(),
+                    loadFinancialData()
+                ]);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã cập nhật!',
+                    text: 'Dữ liệu dashboard đã được làm mới',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Không thể làm mới dữ liệu. Vui lòng thử lại.',
+                    confirmButtonColor: '#2f3a8f'
+                });
+            } finally {
+                setTimeout(() => {
+                    refreshIcon.style.transform = 'rotate(0deg)';
+                }, 500);
+            }
+        }
+
+        function openPurchaseDrawerQuick() {
+            const purchaseLink = document.querySelector('[data-purchase-link="true"]');
+            if (purchaseLink && window.openPurchaseDrawer) {
+                window.openPurchaseDrawer({ currentTarget: purchaseLink, preventDefault: () => {} });
+            }
         }
     </script>
         
