@@ -50,11 +50,27 @@ public class CatalogClient {
         }
     }
 
+    public void updateProductStock(Long id, Integer stock) {
+        if (id == null || stock == null || stock < 0) {
+            return;
+        }
+        try {
+            StockUpdateRequest request = new StockUpdateRequest();
+            request.stock = stock;
+            restTemplate.put(baseUrl + "/internal/catalog/products/" + id + "/stock", request);
+        } catch (Exception ignored) {
+        }
+    }
+
     private String normalizeBaseUrl(String raw) {
         if (raw == null || raw.isBlank()) {
             return "http://localhost:8083";
         }
         return raw.endsWith("/") ? raw.substring(0, raw.length() - 1) : raw;
+    }
+
+    private static class StockUpdateRequest {
+        public Integer stock;
     }
 
     public static class ProductSnapshot {

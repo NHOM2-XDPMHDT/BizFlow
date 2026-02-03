@@ -17,7 +17,20 @@ public class Shelf {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shelf_id")
     private Long id;
+
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
+    @Column(name = "shelf_code", nullable = false)
+    private String shelfCode;
+
+    @Column(name = "shelf_name")
+    private String shelfName;
+
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
@@ -46,6 +59,18 @@ public class Shelf {
 
     @PrePersist
     void onCreate() {
+        if (warehouseId == null) {
+            warehouseId = 1L;
+        }
+        if (shelfCode == null || shelfCode.isBlank()) {
+            shelfCode = productId == null ? "SHELF" : ("SHELF-" + productId);
+        }
+        if (shelfName == null || shelfName.isBlank()) {
+            shelfName = shelfCode;
+        }
+        if (status == null || status.isBlank()) {
+            status = "active";
+        }
         if (quantity == null) {
             quantity = 0;
         }
@@ -69,6 +94,38 @@ public class Shelf {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public String getShelfCode() {
+        return shelfCode;
+    }
+
+    public void setShelfCode(String shelfCode) {
+        this.shelfCode = shelfCode;
+    }
+
+    public String getShelfName() {
+        return shelfName;
+    }
+
+    public void setShelfName(String shelfName) {
+        this.shelfName = shelfName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Long getProductId() {

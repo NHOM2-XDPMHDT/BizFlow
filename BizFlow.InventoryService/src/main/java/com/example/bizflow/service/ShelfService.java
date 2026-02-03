@@ -61,7 +61,8 @@ public class ShelfService {
         }
 
         // Trừ từ kho
-        stock.setStock(available - quantity);
+        int newInventoryStock = available - quantity;
+        stock.setStock(newInventoryStock);
         stock.setUpdatedBy(userId);
         inventoryStockRepository.save(stock);
 
@@ -75,9 +76,12 @@ public class ShelfService {
 
         Integer shelfQuantity = shelf.getQuantity();
         int currentShelfQty = shelfQuantity != null ? shelfQuantity : 0;
-        shelf.setQuantity(currentShelfQty + quantity);
+        int newShelfQty = currentShelfQty + quantity;
+        shelf.setQuantity(newShelfQty);
         shelf.setUpdatedBy(userId);
         shelfRepository.save(shelf);
+
+        catalogClient.updateProductStock(productId, newInventoryStock + newShelfQty);
     }
 
     /**
@@ -124,9 +128,13 @@ public class ShelfService {
 
         Integer stockQuantity = stock.getStock();
         int currentStock = stockQuantity != null ? stockQuantity : 0;
-        stock.setStock(currentStock + quantity);
+        int newInventoryStock = currentStock + quantity;
+        stock.setStock(newInventoryStock);
         stock.setUpdatedBy(userId);
         inventoryStockRepository.save(stock);
+
+        int finalShelfQty = newShelfQty;
+        catalogClient.updateProductStock(productId, newInventoryStock + finalShelfQty);
     }
 
     /**
@@ -184,6 +192,13 @@ public class ShelfService {
             shelf.setUpdatedBy(userId);
             shelfRepository.save(shelf);
         }
+
+        int inventoryQty = inventoryStockRepository.findByProductId(productId)
+                .map(InventoryStock::getStock)
+                .map(q -> q == null ? 0 : q)
+                .orElse(0);
+        int shelfQty = newQty;
+        catalogClient.updateProductStock(productId, inventoryQty + shelfQty);
     }
 
     /**
