@@ -149,7 +149,7 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
     cpus: 1.0
 
   # =========================
@@ -174,7 +174,7 @@ services:
         condition: service_healthy
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 256m
     cpus: 1.0
 
   # =========================
@@ -505,7 +505,7 @@ services:
       - ./BizFlow.Frontend/pages:/usr/share/nginx/html/pages
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 128m
   # ========================
   # 13. PHPMYADMIN (DB WEB UI)
   # =========================
@@ -525,7 +525,7 @@ services:
       - mysql
     networks:
       - bizflow-net
-    mem_limit: 512m
+    mem_limit: 128m
   # =========================
   # 14. PROMOTION SERVICE (SPRING BOOT MICROSERVICE)
   # =========================
@@ -570,7 +570,7 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
     networks:
       - bizflow-net
-    mem_limit: 256m
+    mem_limit: 128m
 
   # =========================
   # 17. GRAFANA (MONITORING DASHBOARD)
