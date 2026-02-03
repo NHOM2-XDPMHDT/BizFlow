@@ -92,6 +92,7 @@ public class ProductImageController {
     }
 
     private void writeIndexEntries(List<String> entries) throws IOException {
+
         Path parent = IMAGE_INDEX.getParent();
         if (parent != null) {
             Files.createDirectories(parent);
