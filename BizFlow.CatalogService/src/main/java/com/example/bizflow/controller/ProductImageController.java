@@ -46,6 +46,7 @@ public class ProductImageController {
 
         try {
             Files.createDirectories(IMAGE_DIR);
+            Files.createDirectories(IMAGE_INDEX.getParent());
             String filename = sanitizedName;
             if (filename.isEmpty()) {
                 filename = baseName + "." + ext;
@@ -70,25 +71,37 @@ public class ProductImageController {
     }
 
     private void updateImageIndex(String webPath) throws IOException {
-        List<String> entries = readIndexEntries();
-        if (entries.contains(webPath)) {
-            return;
+        List<String> entries = readIndexEntriesSafe();
+        boolean exists = entries.stream().anyMatch(path -> path.equalsIgnoreCase(webPath));
+        if (!exists) {
+            entries.add(webPath);
+            writeIndexEntries(entries);
         }
-        entries.add(webPath);
-        writeIndexEntries(entries);
     }
 
-    private List<String> readIndexEntries() throws IOException {
+    private List<String> readIndexEntriesSafe() {
         if (!Files.exists(IMAGE_INDEX)) {
             return new ArrayList<>();
         }
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(IMAGE_INDEX.toFile(), new TypeReference<List<String>>() {});
+        try {
+            return mapper.readValue(IMAGE_INDEX.toFile(), new TypeReference<List<String>>() {});
+        } catch (IOException ex) {
+            // If the index is missing, empty, or corrupted, recover gracefully.
+            return new ArrayList<>();
+        }
     }
 
     private void writeIndexEntries(List<String> entries) throws IOException {
+        Files.createDirectories(IMAGE_INDEX.getParent());
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(IMAGE_INDEX.toFile(), entries);
+        Path tmp = Files.createTempFile(IMAGE_INDEX.getParent(), "product-image-files", ".json");
+        mapper.writerWithDefaultPrettyPrinter().writeValue(tmp.toFile(), entries);
+        try {
+            Files.move(tmp, IMAGE_INDEX, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException ex) {
+            Files.move(tmp, IMAGE_INDEX, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     private String getExtension(String filename) {
