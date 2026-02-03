@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary: #2f3a8f;
@@ -271,6 +273,47 @@
             display: grid;
             place-items: center;
             cursor: pointer;
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .notification-badge:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .notification-badge .bell-icon {
+            font-size: 20px;
+            display: block;
+        }
+
+        .notification-badge .badge-count {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .notification-badge.has-danger .bell-icon {
+            animation: ring 2s ease-in-out infinite;
+        }
+
+        @keyframes ring {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
         }
 
         .main {
@@ -784,6 +827,10 @@
                     </div>
                 </div>
                 <div class="top-right">
+                    <div class="notification-badge" id="notificationBadge" onclick="goToAlerts()" title="Xem thông báo">
+                        <span class="bell-icon">🔔</span>
+                        <span class="badge-count" id="badgeCount" style="display:none;">0</span>
+                    </div>
                     <button class="ghost-btn">Bắt đầu sử dụng</button>
                     <div class="selector">
                         <span class="label">Chi nhánh</span>
@@ -1295,7 +1342,9 @@
         if (window.self !== window.top) {
             document.body.classList.add('in-drawer');
         }
-    </script></body>
+    </script>
+    <script src="../assets/js/inventory-alerts-notification.js"></script>
+</body>
 </html>
 
 

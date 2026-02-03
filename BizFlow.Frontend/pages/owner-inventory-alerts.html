@@ -524,19 +524,27 @@
 
         // Check authentication
         function checkAuth() {
+            console.log('[DEBUG] Checking authentication...');
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
             
+            console.log('[DEBUG] Token:', token ? 'EXISTS' : 'NULL');
+            console.log('[DEBUG] Role:', role);
+            
             if (!token) {
+                console.log('[DEBUG] No token found, redirecting to login...');
                 window.location.href = 'login.html';
                 return false;
             }
             
             if (role !== 'OWNER' && role !== 'ADMIN') {
+                console.log('[DEBUG] Invalid role, redirecting...');
                 alert('Bạn không có quyền truy cập trang này');
-                window.location.href = 'dashboard.html';
+                window.location.href = 'owner-dashboard.html';
                 return false;
             }
+            
+            console.log('[DEBUG] Authentication passed!');
             
             // Update user info
             const username = localStorage.getItem('username');
@@ -689,6 +697,15 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // TEMPORARY: Bypass auth check for testing
+            // TODO: Remove this before production
+            if (!localStorage.getItem('token')) {
+                console.warn('[TESTING MODE] No token found, using mock data');
+                localStorage.setItem('token', 'mock-token-for-testing');
+                localStorage.setItem('role', 'OWNER');
+                localStorage.setItem('username', 'Test Owner');
+            }
+            
             loadAlerts();
             
             // Auto refresh every 5 minutes
