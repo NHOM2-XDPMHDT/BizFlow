@@ -1,6 +1,7 @@
 package com.example.bizflow.controller;
 
 import com.example.bizflow.dto.InventoryAdjustRequest;
+import com.example.bizflow.dto.InventoryAlertDTO;
 import com.example.bizflow.dto.InventoryHistoryItem;
 import com.example.bizflow.dto.InventoryReceiptRequest;
 import com.example.bizflow.dto.InventoryReceiptResponse;
@@ -10,11 +11,13 @@ import com.example.bizflow.entity.InventoryTransaction;
 import com.example.bizflow.integration.CatalogClient;
 import com.example.bizflow.repository.InventoryStockRepository;
 import com.example.bizflow.repository.InventoryTransactionRepository;
+import com.example.bizflow.service.InventoryAlertService;
 import com.example.bizflow.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,15 +35,18 @@ public class InventoryController {
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final InventoryService inventoryService;
+    private final InventoryAlertService inventoryAlertService;
 
     public InventoryController(CatalogClient catalogClient,
             InventoryTransactionRepository inventoryTransactionRepository,
             InventoryStockRepository inventoryStockRepository,
-            InventoryService inventoryService) {
+            InventoryService inventoryService,
+            InventoryAlertService inventoryAlertService) {
         this.catalogClient = catalogClient;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.inventoryStockRepository = inventoryStockRepository;
         this.inventoryService = inventoryService;
+        this.inventoryAlertService = inventoryAlertService;
     }
 
     // ==================== XEM TỒN KHO ====================
@@ -214,5 +220,33 @@ public class InventoryController {
         }
 
         return ResponseEntity.ok(items);
+    }
+
+    // ==================== THÔNG BÁO TỒN KHO & TỒN KỆ ====================
+    /**
+     * API lấy tất cả thông báo cảnh báo tồn kho và tồn kệ
+     * 
+     * @param lastChecked Ngày kiểm tra cuối (format: yyyy-MM-dd). 
+     *                    Nếu null hoặc < today → hiển thị thông báo kho.
+     *                    Thông báo kệ luôn hiển thị realtime.
+     * 
+     * @return List<InventoryAlertDTO> danh sách thông báo
+     */
+    @GetMapping("/alerts")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<List<InventoryAlertDTO>> getInventoryAlerts(
+            @RequestParam(required = false) String lastChecked) {
+        
+        LocalDate lastCheckedDate = null;
+        if (lastChecked != null && !lastChecked.trim().isEmpty()) {
+            try {
+                lastCheckedDate = LocalDate.parse(lastChecked);
+            } catch (Exception e) {
+                // Invalid format, treat as null
+            }
+        }
+
+        List<InventoryAlertDTO> alerts = inventoryAlertService.getAllAlerts(lastCheckedDate);
+        return ResponseEntity.ok(alerts);
     }
 }
