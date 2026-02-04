@@ -188,11 +188,15 @@ public class OrderController {
                     if (product == null) {
                         return null;
                     }
+                    int promoQty = Math.abs(item.getQuantity());
+                    if (promoQty <= 0) {
+                        return null;
+                    }
                     PromotionClient.CartItem cartItem = new PromotionClient.CartItem();
                     cartItem.setProductId(product.getId());
                     cartItem.setCategoryId(product.getCategoryId());
                     cartItem.setBasePrice(product.getPrice());
-                    cartItem.setQuantity(item.getQuantity());
+                    cartItem.setQuantity(promoQty);
                     return cartItem;
                 })
                 .filter(item -> item != null)
@@ -202,6 +206,9 @@ public class OrderController {
 
         BigDecimal total = BigDecimal.ZERO;
         List<OrderItem> items = new ArrayList<>();
+
+        boolean allowNegativeQty = "EXCHANGE".equalsIgnoreCase(request.getOrderType())
+                || "RETURN".equalsIgnoreCase(request.getOrderType());
 
         for (OrderItemRequest req : request.getItems()) {
 
@@ -216,11 +223,14 @@ public class OrderController {
             }
 
             int qty = req.getQuantity();
-            if (qty <= 0) {
+            if (qty == 0) {
+                return ResponseEntity.badRequest().body("Quantity must be > 0");
+            }
+            if (qty < 0 && !allowNegativeQty) {
                 return ResponseEntity.badRequest().body("Quantity must be > 0");
             }
 
-            if (paid) {
+            if (paid && qty > 0) {
                 int currentStock = stockByProduct.getOrDefault(productId, inventoryClient.getStock(productId));
                 if (currentStock < qty) {
                     return ResponseEntity.badRequest().body("Insufficient stock for product: " + product.getName());

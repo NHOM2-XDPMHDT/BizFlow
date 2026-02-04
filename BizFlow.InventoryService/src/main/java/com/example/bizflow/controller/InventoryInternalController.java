@@ -47,8 +47,13 @@ public class InventoryInternalController {
         }
         // Trừ từ shelf thay vì inventory_stock
         for (SaleItem item : request.items) {
-            if (item.productId != null && item.quantity != null && item.quantity > 0) {
+            if (item.productId == null || item.quantity == null) {
+                continue;
+            }
+            if (item.quantity > 0) {
                 shelfService.deductFromShelf(item.productId, item.quantity, request.orderId, request.userId);
+            } else if (item.quantity < 0) {
+                shelfService.addToShelf(item.productId, Math.abs(item.quantity), request.orderId, request.userId);
             }
         }
         return ResponseEntity.ok().build();
