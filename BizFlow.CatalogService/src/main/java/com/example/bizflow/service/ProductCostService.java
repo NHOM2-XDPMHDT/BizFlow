@@ -12,6 +12,8 @@ import com.example.bizflow.repository.ProductCostRepository;
 import com.example.bizflow.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -148,7 +150,30 @@ public class ProductCostService {
         product.setStock(0);
         Product saved = productRepository.save(product);
 
-        return recordPurchase(saved.getId(), costPrice, quantity, request.getNote(), userId);
+        ProductCost productCost = new ProductCost(saved.getId(), costPrice);
+        productCostRepository.save(productCost);
+
+        ProductCostHistory history = new ProductCostHistory(
+                saved.getId(),
+                costPrice,
+                quantity,
+                request.getNote(),
+                userId
+        );
+        costHistoryRepository.save(history);
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    inventoryClient.receiveStock(saved.getId(), quantity, costPrice, request.getNote(), userId);
+                }
+            });
+        } else {
+            inventoryClient.receiveStock(saved.getId(), quantity, costPrice, request.getNote(), userId);
+        }
+
+        return history;
     }
 
     private BigDecimal resolveCostPrice(Long productId, BigDecimal inputCost) {
