@@ -17,20 +17,8 @@ public class Shelf {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "shelf_id")
+    @Column(name = "id")
     private Long id;
-
-    @Column(name = "warehouse_id", nullable = false)
-    private Long warehouseId;
-
-    @Column(name = "shelf_code", nullable = false)
-    private String shelfCode;
-
-    @Column(name = "shelf_name")
-    private String shelfName;
-
-    @Column(name = "status")
-    private String status;
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
@@ -47,6 +35,18 @@ public class Shelf {
     @Column(name = "updated_by")
     private Long updatedBy;
 
+    @Column(name = "shelf_code", nullable = false)
+    private String shelfCode;
+
+    @Column(name = "shelf_name")
+    private String shelfName;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     // Constructors
     public Shelf() {
     }
@@ -59,6 +59,15 @@ public class Shelf {
 
     @PrePersist
     void onCreate() {
+        if (quantity == null) {
+            quantity = 0;
+        }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
         if (warehouseId == null) {
             warehouseId = 1L;
         }
@@ -70,15 +79,6 @@ public class Shelf {
         }
         if (status == null || status.isBlank()) {
             status = "active";
-        }
-        if (quantity == null) {
-            quantity = 0;
-        }
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (updatedAt == null) {
-            updatedAt = LocalDateTime.now();
         }
     }
 
@@ -94,38 +94,6 @@ public class Shelf {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getWarehouseId() {
-        return warehouseId;
-    }
-
-    public void setWarehouseId(Long warehouseId) {
-        this.warehouseId = warehouseId;
-    }
-
-    public String getShelfCode() {
-        return shelfCode;
-    }
-
-    public void setShelfCode(String shelfCode) {
-        this.shelfCode = shelfCode;
-    }
-
-    public String getShelfName() {
-        return shelfName;
-    }
-
-    public void setShelfName(String shelfName) {
-        this.shelfName = shelfName;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public Long getProductId() {
@@ -166,5 +134,37 @@ public class Shelf {
 
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public String getShelfCode() {
+        return shelfCode;
+    }
+
+    public void setShelfCode(String shelfCode) {
+        this.shelfCode = shelfCode;
+    }
+
+    public String getShelfName() {
+        return shelfName;
+    }
+
+    public void setShelfName(String shelfName) {
+        this.shelfName = shelfName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(Long warehouseId) {
+        this.warehouseId = warehouseId;
     }
 }
