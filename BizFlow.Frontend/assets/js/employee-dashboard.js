@@ -27,6 +27,7 @@ let activeInventoryProductId = null;
 let allPromotions = []; // Luu t?t c? khuy?n m×i cho AI combo
 let isAnalyzingCombo = false; // Flag d? tr×nh v×ng l?p v× h?n
 let activeCustomerDetailId = null;
+let editingCustomerId = null;
 const customerOrderCache = new Map();
 const TIER_DISCOUNT_BY_100 = {
     DONG: 10000,
@@ -2758,6 +2759,8 @@ function openCustomerModalWithPhone(phone) {
     const form = document.getElementById('customerForm');
     if (!modal || !form) return;
 
+    editingCustomerId = null;
+    setAddressRequired(true);
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     form.reset();
@@ -2790,8 +2793,18 @@ function openCustomerModalWithPhone(phone) {
 function closeCustomerModal() {
     const modal = document.getElementById('customerModal');
     if (!modal) return;
+    editingCustomerId = null;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
+}
+
+function setAddressRequired(required) {
+    const cityInput = document.getElementById('customerCityInput');
+    const districtInput = document.getElementById('customerDistrictInput');
+    const wardInput = document.getElementById('customerWardInput');
+    if (cityInput) cityInput.required = required;
+    if (districtInput) districtInput.required = required;
+    if (wardInput) wardInput.required = required;
 }
 
 async function createCustomerFromForm() {
@@ -2799,10 +2812,14 @@ async function createCustomerFromForm() {
     const phone = document.getElementById('customerPhoneInput')?.value.trim();
     const email = document.getElementById('customerEmailInput')?.value.trim();
     const address = document.getElementById('customerAddressInput')?.value.trim();
+    const cccd = document.getElementById('customerCccdInput')?.value.trim();
+    const dob = document.getElementById('customerDobInput')?.value;
+    const gender = document.querySelector('input[name="customerGender"]:checked')?.value || 'UNKNOWN';
     const cityInput = document.getElementById('customerCityInput');
     const districtInput = document.getElementById('customerDistrictInput');
     const wardInput = document.getElementById('customerWardInput');
     const confirmed = document.getElementById('customerConfirmInput')?.checked;
+    const isEditing = Boolean(editingCustomerId);
 
     if (!name) {
         showPopup('Vui lòng nhập tên khách hàng.', { type: 'error' });
@@ -2831,19 +2848,29 @@ async function createCustomerFromForm() {
     const cityCode = cityInput?.dataset.code || '';
     const districtCode = districtInput?.dataset.code || '';
     const wardCode = wardInput?.dataset.code || '';
-    if (!cityInput?.value || !districtInput?.value || !wardInput?.value || !address || !cityCode || !districtCode || !wardCode) {
-        showPopup('Vui lòng nhập đầy đủ địa chỉ.', { type: 'error' });
+    if (!isEditing) {
+        if (!cityInput?.value || !districtInput?.value || !wardInput?.value || !address || !cityCode || !districtCode || !wardCode) {
+            showPopup('Vui lòng nhập đầy đủ địa chỉ.', { type: 'error' });
+            return;
+        }
+        if (!confirmed) {
+            showPopup('Vui lòng xác nhận thông tin khách hàng.', { type: 'error' });
+            return;
+        }
+    } else if (!address) {
+        showPopup('Vui lòng nhập địa chỉ.', { type: 'error' });
         return;
     }
 
-    if (!confirmed) {
-        showPopup('Vui lòng xác nhận thông tin khách hàng.', { type: 'error' });
-        return;
-    }
+    const hasFullAddressParts = cityInput?.value && districtInput?.value && wardInput?.value;
+    const mergedAddress = hasFullAddressParts
+        ? `${address}, ${wardInput.value}, ${districtInput.value}, ${cityInput.value}`
+        : address;
 
     try {
-        const res = await fetch(`${API_BASE}/customers`, {
-            method: 'POST',
+        const url = isEditing ? `${API_BASE}/customers/${editingCustomerId}` : `${API_BASE}/customers`;
+        const res = await fetch(url, {
+            method: isEditing ? 'PUT' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
@@ -2852,31 +2879,42 @@ async function createCustomerFromForm() {
                 name,
                 phone: phone || null,
                 email: email || null,
-                address: address || null
+                address: mergedAddress || null,
+                cccd: cccd || null,
+                dob: dob || null,
+                gender: gender || null
             })
         });
 
         if (!res.ok) {
             const message = await res.text();
-            showPopup(message || 'Không thể tạo khách hàng.', { type: 'error' });
+            showPopup(message || (isEditing ? 'Không thể cập nhật khách hàng.' : 'Không thể tạo khách hàng.'), { type: 'error' });
             return;
         }
 
-        const created = await res.json();
-        customers.unshift(created);
+        const saved = await res.json();
+        const index = customers.findIndex(c => c.id === saved.id);
+        if (index >= 0) {
+            customers[index] = saved;
+        } else {
+            customers.unshift(saved);
+        }
         customersLoaded = true;
         customerSearchTerm = '';
         const searchInput = document.getElementById('customerSearch');
         if (searchInput) searchInput.value = '';
         applyCustomerFilter();
         closeCustomerModal();
-        selectCustomer(null, created.id, created.name, created.phone || '-');
+        selectCustomer(null, saved.id, saved.name, saved.phone || '-');
         if (searchInput) {
-            searchInput.value = created.name || created.phone || '';
+            searchInput.value = saved.name || saved.phone || '';
             searchInput.classList.add('has-selection');
         }
+        if (activeCustomerDetailId === saved.id) {
+            applyCustomerDetailData(saved);
+        }
     } catch (err) {
-        showPopup('Lỗi kết nối khi tạo khách hàng.', { type: 'error' });
+        showPopup(isEditing ? 'Lỗi kết nối khi cập nhật khách hàng.' : 'Lỗi kết nối khi tạo khách hàng.', { type: 'error' });
     }
 }
 
@@ -3724,6 +3762,7 @@ function applyCustomerDetailData(customer) {
     setText('detailCustomerAddressInfo', customer.address || '-');
     setText('detailCustomerCccdInfo', customer.cccd || '-');
     setText('detailCustomerDobInfo', customer.dob ? formatDateTime(customer.dob) : '-');
+    setText('detailCustomerGenderInfo', formatGenderLabel(customer.gender));
 
     const detailPoints = getCustomerPoints(customer);
     const detailTier = getEffectiveTier(customer);
@@ -3734,6 +3773,14 @@ function applyCustomerDetailData(customer) {
     const earnPolicyAmount = POINTS_EARN_RATE_VND * EARN_POLICY_POINTS;
     setText('detailEarnPolicy', `${formatCompactNumber(earnPolicyAmount)}đ = ${formatCompactNumber(EARN_POLICY_POINTS)} điểm`);
     setText('detailRedeemPolicy', redeemRate ? `100 điểm = ${formatCompactNumber(redeemRate)}d` : '-');
+}
+
+function formatGenderLabel(value) {
+    const normalized = (value || '').toString().trim().toUpperCase();
+    if (!normalized) return 'Chưa có thông tin';
+    if (normalized === 'MALE' || normalized === 'NAM') return 'Nam';
+    if (normalized === 'FEMALE' || normalized === 'NU' || normalized === 'NỮ') return 'Nữ';
+    return 'Không xác định';
 }
 
 async function refreshCustomerDetailFromApi(customerId) {
@@ -3803,6 +3850,12 @@ function updateCustomerDetailActions(key) {
 
     if (key === 'info') {
         primary.textContent = 'Sửa';
+        primary.onclick = () => {
+            const customer = customers.find(c => c.id === activeCustomerDetailId);
+            if (customer) {
+                openCustomerModalForEdit(customer);
+            }
+        };
         return;
     }
     if (key === 'history') {
@@ -3816,6 +3869,55 @@ function updateCustomerDetailActions(key) {
         return;
     }
     primary.textContent = 'Xác nhận';
+}
+
+function openCustomerModalForEdit(customer) {
+    if (!customer || !customer.id) return;
+    editingCustomerId = customer.id;
+    const modal = document.getElementById('customerModal');
+    const form = document.getElementById('customerForm');
+    if (!modal || !form) return;
+
+    setAddressRequired(false);
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    form.reset();
+
+    document.getElementById('customerNameInput').value = customer.name || '';
+    document.getElementById('customerPhoneInput').value = customer.phone || '';
+    document.getElementById('customerEmailInput').value = customer.email || '';
+    document.getElementById('customerCccdInput').value = customer.cccd || '';
+    const dobInput = document.getElementById('customerDobInput');
+    if (dobInput) {
+        dobInput.value = customer.dob ? String(customer.dob).slice(0, 10) : '';
+    }
+
+    const genderValue = (customer.gender || 'UNKNOWN').toString().toUpperCase();
+    const genderInputs = document.querySelectorAll('input[name="customerGender"]');
+    genderInputs.forEach(input => {
+        input.checked = input.value === genderValue;
+    });
+
+    const addressInput = document.getElementById('customerAddressInput');
+    if (addressInput) addressInput.value = customer.address || '';
+
+    const confirmInput = document.getElementById('customerConfirmInput');
+    if (confirmInput) confirmInput.checked = true;
+
+    // Không bắt buộc địa chỉ theo tỉnh/huyện/xã khi sửa
+    const cityInput = document.getElementById('customerCityInput');
+    const districtInput = document.getElementById('customerDistrictInput');
+    const wardInput = document.getElementById('customerWardInput');
+    if (cityInput) {
+        cityInput.value = '';
+        cityInput.dataset.code = '';
+    }
+    resetAddressInput(districtInput);
+    resetAddressInput(wardInput);
+    const districtList = document.getElementById('customerDistrictList');
+    const wardList = document.getElementById('customerWardList');
+    if (districtList) districtList.innerHTML = '';
+    if (wardList) wardList.innerHTML = '';
 }
 
 function resetCustomerHistoryView() {

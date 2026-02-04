@@ -73,22 +73,18 @@ public class ProductImageController {
     @GetMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN', 'EMPLOYEE')")
     public ResponseEntity<?> listProductImages() {
-        try {
-            List<String> entries = readIndexEntries();
-            List<String> apiEntries = entries.stream()
-                    .map(this::toApiPath)
-                    .filter(path -> path != null && !path.isBlank())
-                    .collect(Collectors.toList());
-            List<String> merged = new ArrayList<>(apiEntries);
-            for (String entry : entries) {
-                if (entry != null && !entry.isBlank() && !merged.contains(entry)) {
-                    merged.add(entry);
-                }
+        List<String> entries = readIndexEntriesSafe();
+        List<String> apiEntries = entries.stream()
+                .map(this::toApiPath)
+                .filter(path -> path != null && !path.isBlank())
+                .collect(Collectors.toList());
+        List<String> merged = new ArrayList<>(apiEntries);
+        for (String entry : entries) {
+            if (entry != null && !entry.isBlank() && !merged.contains(entry)) {
+                merged.add(entry);
             }
-            return ResponseEntity.ok(merged);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Failed to load image list"));
         }
+        return ResponseEntity.ok(merged);
     }
 
     @GetMapping(path = "/files/{filename:.+}")

@@ -366,18 +366,18 @@
                         </label>
                         <label class="form-field">
                             <span>CCCD</span>
-                            <input type="text" placeholder="S&#7889; c&#259;n c&#432;&#7899;c c&#244;ng d&#226;n">
+                            <input id="customerCccdInput" type="text" placeholder="S&#7889; c&#259;n c&#432;&#7899;c c&#244;ng d&#226;n">
                         </label>
                         <label class="form-field">
                             <span>Ngày sinh</span>
-                            <input type="date">
+                            <input id="customerDobInput" type="date">
                         </label>
                         <div class="form-field inline-group">
                             <span>Giới tính</span>
                             <div class="radio-group">
-                                <label><input type="radio" name="gender"> Nam</label>
-                                <label><input type="radio" name="gender"> Nữ</label>
-                                <label><input type="radio" name="gender" checked> Không xác định</label>
+                                <label><input type="radio" name="customerGender" value="MALE"> Nam</label>
+                                <label><input type="radio" name="customerGender" value="FEMALE"> Nữ</label>
+                                <label><input type="radio" name="customerGender" value="UNKNOWN" checked> Không xác định</label>
                             </div>
                         </div>
                         <div class="form-field address-group">
@@ -693,7 +693,7 @@
                             </div>
                             <div class="info-row">
                                 <span>Giới tính</span>
-                                <strong class="muted">Chưa có thông tin</strong>
+                                <strong id="detailCustomerGenderInfo" class="muted">Chưa có thông tin</strong>
                             </div>
                             <div class="info-row">
                                 <span>Email</span>

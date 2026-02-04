@@ -202,6 +202,36 @@ public class ShelfService {
     }
 
     /**
+     * Cộng kệ khi trả/đổi hàng (dùng bởi SalesService)
+     */
+    @Transactional
+    public void addToShelf(Long productId, int quantity, Long orderId, Long userId) {
+        if (productId == null || quantity <= 0) {
+            return;
+        }
+
+        Shelf shelf = shelfRepository.findByProductId(productId).orElseGet(() -> {
+            Shelf created = new Shelf();
+            created.setProductId(productId);
+            created.setQuantity(0);
+            return created;
+        });
+
+        Integer shelfQuantity = shelf.getQuantity();
+        int currentShelfQty = shelfQuantity != null ? shelfQuantity : 0;
+        int newQty = currentShelfQty + quantity;
+        shelf.setQuantity(newQty);
+        shelf.setUpdatedBy(userId);
+        shelfRepository.save(shelf);
+
+        int inventoryQty = inventoryStockRepository.findByProductId(productId)
+                .map(InventoryStock::getStock)
+                .map(q -> q == null ? 0 : q)
+                .orElse(0);
+        catalogClient.updateProductStock(productId, inventoryQty + newQty);
+    }
+
+    /**
      * Xác định alert level
      */
     public String getAlertLevel(int quantity) {

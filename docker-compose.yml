@@ -21,7 +21,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 5s
@@ -150,7 +150,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 256m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 4.2 ADMIN PRODUCT SERVICE (SPRING BOOT)
@@ -175,7 +175,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 256m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 4.3 ADMIN ORDER SERVICE (SPRING BOOT)
@@ -200,7 +200,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 4.4 ADMIN REPORT SERVICE (SPRING BOOT)
@@ -228,7 +228,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 4.4.1 ADMIN REPORT WORKER (SPRING BOOT - RabbitMQ Consumer)
@@ -255,7 +255,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 4.1 ADMIN USER SERVICE (SPRING BOOT)
@@ -280,7 +280,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
 
   # =========================
   # 5. SALES SERVICE (SPRING BOOT)
@@ -550,7 +550,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 512m
-    cpus: 1.0
+    cpus: 0.3
   # =========================
   # 16. PROMETHEUS (METRICS COLLECTION)
   # =========================
