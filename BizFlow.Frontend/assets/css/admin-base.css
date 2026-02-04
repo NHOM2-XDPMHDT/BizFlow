@@ -2,14 +2,17 @@
 
 :root {
     --primary: #1f2937;
-    --accent: #0f766e;
-    --accent-soft: #e6fffb;
-    --bg: #f3f4f6;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #eff6ff;
+    --accent-rgb: 37, 99, 235;
+    --bg: #f4f7ff;
     --card: #ffffff;
     --text: #111827;
     --muted: #6b7280;
     --border: #e5e7eb;
     --shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    --sidebar-bg: #0b1f3b;
 }
 
 * {
@@ -31,7 +34,7 @@ body {
 }
 
 .sidebar {
-    background: #111827;
+    background: var(--sidebar-bg);
     color: #e5e7eb;
     padding: 20px 16px;
     display: flex;
@@ -103,7 +106,7 @@ body {
 }
 
 .nav-item.active {
-    background: rgba(15, 118, 110, 0.2);
+    background: rgba(var(--accent-rgb), 0.22);
     border-left-color: var(--accent);
     color: #fff;
 }
@@ -171,6 +174,11 @@ body {
     min-width: 320px;
 }
 
+.search:focus-within {
+    border-color: rgba(var(--accent-rgb), 0.45);
+    box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.12);
+}
+
 .search input {
     border: none;
     background: transparent;
@@ -192,7 +200,7 @@ body {
     border-radius: 999px;
     padding: 6px 12px;
     font-size: 12px;
-    border: 1px solid rgba(15, 118, 110, 0.2);
+    border: 1px solid rgba(var(--accent-rgb), 0.25);
 }
 
 .user-chip {
@@ -209,7 +217,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 12px;
-    background: #111827;
+    background: var(--sidebar-bg);
     color: #fff;
     display: grid;
     place-items: center;
@@ -230,6 +238,15 @@ body {
     display: grid;
     place-items: center;
     cursor: pointer;
+}
+
+.icon-btn:hover {
+    border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.icon-btn:focus-visible {
+    outline: 3px solid rgba(var(--accent-rgb), 0.25);
+    outline-offset: 2px;
 }
 
 .main {
@@ -347,10 +364,23 @@ body {
     font-weight: 600;
 }
 
+.action-btn:hover {
+    border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.action-btn:focus-visible {
+    outline: 3px solid rgba(var(--accent-rgb), 0.25);
+    outline-offset: 2px;
+}
+
 .action-btn.primary {
     background: var(--accent);
     color: #fff;
     border-color: transparent;
+}
+
+.action-btn.primary:hover {
+    background: var(--accent-hover);
 }
 
 .action-btn.secondary {
@@ -384,6 +414,14 @@ body {
     border: 1px solid var(--border);
     background: #fff;
     font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: rgba(var(--accent-rgb), 0.55);
+    box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.12);
 }
 
 .form-actions {
