@@ -6,6 +6,7 @@ import com.example.bizflow.entity.InventoryTransactionType;
 import com.example.bizflow.integration.CatalogClient;
 import com.example.bizflow.repository.InventoryStockRepository;
 import com.example.bizflow.repository.InventoryTransactionRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +21,16 @@ public class InventoryService {
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final CatalogClient catalogClient;
+    private final JdbcTemplate jdbcTemplate;
 
     public InventoryService(InventoryTransactionRepository inventoryTransactionRepository,
                             InventoryStockRepository inventoryStockRepository,
-                            CatalogClient catalogClient) {
+                            CatalogClient catalogClient,
+                            JdbcTemplate jdbcTemplate) {
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.inventoryStockRepository = inventoryStockRepository;
         this.catalogClient = catalogClient;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional
@@ -55,6 +59,8 @@ public class InventoryService {
         stockRow.setStock(updated);
         stockRow.setUpdatedBy(userId);
         inventoryStockRepository.save(stockRow);
+
+        syncCatalogTotalStock(productId, updated);
 
         InventoryTransaction tx = new InventoryTransaction();
         tx.setProductId(productId);
@@ -113,6 +119,8 @@ public class InventoryService {
             stockRow.setUpdatedBy(userId);
             inventoryStockRepository.save(stockRow);
 
+            syncCatalogTotalStock(item.getProductId(), updated);
+
             InventoryTransaction tx = new InventoryTransaction();
             tx.setProductId(item.getProductId());
             tx.setTransactionType(InventoryTransactionType.SALE);
@@ -158,6 +166,8 @@ public class InventoryService {
         stockRow.setUpdatedBy(userId);
         inventoryStockRepository.save(stockRow);
 
+        syncCatalogTotalStock(productId, newQuantity);
+
         InventoryTransaction tx = new InventoryTransaction();
         tx.setProductId(productId);
         tx.setTransactionType(InventoryTransactionType.ADJUST);
@@ -197,6 +207,8 @@ public class InventoryService {
         stockRow.setUpdatedBy(userId);
         inventoryStockRepository.save(stockRow);
 
+        syncCatalogTotalStock(productId, newStock);
+
         InventoryTransaction tx = new InventoryTransaction();
         tx.setProductId(productId);
         tx.setTransactionType(InventoryTransactionType.OUT);
@@ -215,6 +227,25 @@ public class InventoryService {
             return base + " | " + userNote;
         }
         return base;
+    }
+
+    private void syncCatalogTotalStock(Long productId, int inventoryStockQuantity) {
+        if (productId == null || inventoryStockQuantity < 0) {
+            return;
+        }
+        int shelfQuantity = 0;
+        try {
+            Integer sum = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(SUM(quantity), 0) FROM shelves WHERE product_id = ?",
+                    Integer.class,
+                    productId
+            );
+            shelfQuantity = sum == null ? 0 : sum;
+        } catch (Exception ignored) {
+            shelfQuantity = 0;
+        }
+        int total = inventoryStockQuantity + shelfQuantity;
+        catalogClient.updateProductStock(productId, total);
     }
 
     public static class SaleItem {

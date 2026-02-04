@@ -20,8 +20,8 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d
     networks:
       - bizflow-net
-    mem_limit: 768m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 1.0
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 5s
@@ -38,12 +38,9 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
     networks:
       - bizflow-net
-    mem_limit: 64m
+    mem_limit: 128m
 
   # =========================
   # 3. RABBITMQ (Message Queue)
@@ -55,11 +52,9 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672" # dashboard
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - bizflow-net
-    mem_limit: 64m
+    mem_limit: 128m
 
   # =========================
   # 3.5 KAFKA MESSAGE BROKER
@@ -75,7 +70,7 @@ services:
       - "2181:2181"
     networks:
       - bizflow-net
-    mem_limit: 128m
+    mem_limit: 256m
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -92,6 +87,24 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+
+  # =========================
+  # 3.6 KAFKA UI (Web Console)
+  # =========================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: bizflow-kafka-ui
+    restart: always
+    ports:
+      - "8089:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: bizflow
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      - kafka
     networks:
       - bizflow-net
     mem_limit: 256m
@@ -137,7 +150,7 @@ services:
     networks:
       - bizflow-net
     mem_limit: 256m
-    cpus: 0.3
+    cpus: 1.0
 
   # =========================
   # 4.2 ADMIN PRODUCT SERVICE (SPRING BOOT)
@@ -155,14 +168,14 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - bizflow-net
     mem_limit: 256m
-    cpus: 0.3
+    cpus: 1.0
 
   # =========================
   # 4.3 ADMIN ORDER SERVICE (SPRING BOOT)
@@ -180,14 +193,14 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.3
+    mem_limit: 512m
+    cpus: 1.0
 
   # =========================
   # 4.4 ADMIN REPORT SERVICE (SPRING BOOT)
@@ -205,14 +218,44 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      JAVA_OPTS: -Xms64m -Xmx128m
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.3
+    mem_limit: 512m
+    cpus: 1.0
+
+  # =========================
+  # 4.4.1 ADMIN REPORT WORKER (SPRING BOOT - RabbitMQ Consumer)
+  # =========================
+  admin-report-worker:
+    build:
+      context: ./BizFlow.AdminReportService
+      dockerfile: Dockerfile
+    container_name: bizflow-admin-report-worker
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      JAVA_OPTS: -Xms128m -Xmx256m
+    command: ["--spring.profiles.active=worker", "--spring.main.web-application-type=none"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - bizflow-net
+    mem_limit: 512m
+    cpus: 1.0
 
   # =========================
   # 4.1 ADMIN USER SERVICE (SPRING BOOT)
@@ -230,14 +273,14 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.3
+    mem_limit: 512m
+    cpus: 1.0
 
   # =========================
   # 5. SALES SERVICE (SPRING BOOT)
@@ -261,7 +304,7 @@ services:
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       AUTH_SERVICE_URL: http://authentication-service:8086
       PROMOTION_SERVICE_URL: http://promotion-service:8082
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
@@ -271,8 +314,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 6. CATALOG SERVICE (SPRING BOOT)
@@ -290,7 +333,10 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       INVENTORY_SERVICE_URL: http://inventory-service:8084
-      JAVA_OPTS: -Xms64m -Xmx128m
+      BIZFLOW_ASSETS_DIR: /assets
+      JAVA_OPTS: -Xms128m -Xmx256m
+    volumes:
+      - ./BizFlow.Frontend/assets:/assets
     depends_on:
       mysql:
         condition: service_healthy
@@ -298,8 +344,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 7. INVENTORY SERVICE (SPRING BOOT)
@@ -317,14 +363,14 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
       CATALOG_SERVICE_URL: http://catalog-service:8083
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 8. CUSTOMER SERVICE (SPRING BOOT)
@@ -344,7 +390,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       SALES_SERVICE_URL: http://sales-service:8081
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
@@ -356,8 +402,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 9. AUTHENTICATION SERVICE (SPRING BOOT)
@@ -376,7 +422,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
@@ -386,8 +432,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 10. REPORT SERVICE (SPRING BOOT)
@@ -409,7 +455,7 @@ services:
       INVENTORY_SERVICE_URL: http://inventory-service:8084
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       AUTH_SERVICE_URL: http://authentication-service:8086
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
@@ -425,8 +471,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.5
+    mem_limit: 512m
+    cpus: 2.0
 
   # =========================
   # 11. AI SERVICE (PYTHON FASTAPI)
@@ -441,7 +487,7 @@ services:
       - "5000:5000"
     networks:
       - bizflow-net
-    mem_limit: 64m
+    mem_limit: 128m
   # =========================
   # 12. FRONTEND WEB (NGINX)
   # =========================
@@ -465,7 +511,7 @@ services:
   # =========================
 
   phpmyadmin:
-    image: arm64v8/phpmyadmin
+    image: phpmyadmin/phpmyadmin
     container_name: bizflow-phpmyadmin
     restart: always
     ports:
@@ -495,7 +541,7 @@ services:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       REDIS_HOST: redis
-      JAVA_OPTS: -Xms64m -Xmx128m
+      JAVA_OPTS: -Xms128m -Xmx256m
     depends_on:
       mysql:
         condition: service_healthy
@@ -503,8 +549,8 @@ services:
         condition: service_started
     networks:
       - bizflow-net
-    mem_limit: 256m
-    cpus: 0.3
+    mem_limit: 512m
+    cpus: 1.0
   # =========================
   # 16. PROMETHEUS (METRICS COLLECTION)
   # =========================
@@ -545,15 +591,13 @@ services:
       - prometheus
     networks:
       - bizflow-net
-    mem_limit: 128m
+    mem_limit: 256m
 
 # =========================
 # VOLUMES
 # =========================
 volumes:
   mysql_data:
-  redis_data:
-  rabbitmq_data:
   prometheus_data:
   grafana_data:
 # =========================

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BizFlow - Báo cáo (Admin)</title>
-    <link rel="stylesheet" href="../assets/css/admin-base.css">
-    <link rel="stylesheet" href="../assets/css/admin-reports.css">
+    <link rel="stylesheet" href="../assets/css/admin-base.css?v=20260204">
+    <link rel="stylesheet" href="../assets/css/admin-reports.css?v=20260204">
 </head>
 <body data-admin-page="reports">
     <div class="layout">
@@ -20,7 +20,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -29,10 +28,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -89,11 +85,7 @@
                             </div>
                         </div>
 
-                        <ul class="info-list">
-                            <li>Chọn khoảng thời gian (tuần, tháng, quý) bằng bộ lọc ngày.</li>
-                            <li>Kết xuất CSV / PDF / Excel để gửi ban lãnh đạo.</li>
-                            <li>Xem nhanh: tổng số đơn, số đơn đã thanh toán, doanh thu, giá trị đơn trung bình.</li>
-                        </ul>
+ 
 
                         <div class="kpi-grid" id="salesKpis">
                             <div class="kpi"><div class="kpi-label">Tổng số đơn</div><div class="kpi-value">—</div></div>
@@ -116,8 +108,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
                     </section>
 
                     <section class="card report-panel" aria-label="Báo cáo tồn kho và đơn hàng">
@@ -144,11 +134,7 @@
                             </div>
                         </div>
 
-                        <ul class="info-list">
-                            <li>Danh sách sản phẩm dưới mức tồn tối thiểu (theo ngưỡng).</li>
-                            <li>Thống kê đơn hàng theo trạng thái: xem tại <a class="inline-link" href="admin-orders.html">Trang Đơn hàng</a>.</li>
-                            <li>So sánh tồn kho giữa các chi nhánh: có thể mở rộng khi có API theo chi nhánh.</li>
-                        </ul>
+ 
 
                         <div class="table-wrap" aria-label="Bảng tồn kho thấp">
                             <table class="table">
@@ -164,8 +150,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="help-text">Dữ liệu lấy từ Admin Report Service qua Gateway: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">/api/admin/reports/analytics</span></div>
                     </section>
                 </section>
             </main>
@@ -236,6 +220,32 @@
                 throw new Error(`HTTP ${res.status} ${text}`.trim());
             }
             return res.json();
+        }
+
+        async function postJson(url) {
+            const res = await fetch(url, { method: 'POST' });
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status} ${text}`.trim());
+            }
+            return res.json();
+        }
+
+        async function waitForJob(jobId, options) {
+            const timeoutMs = options?.timeoutMs ?? 60_000;
+            const pollMs = options?.pollMs ?? 1000;
+            const start = Date.now();
+
+            while (true) {
+                const job = await fetchJson(`/api/admin/reports/export/jobs/${encodeURIComponent(jobId)}`);
+                const status = (job?.status || '').toUpperCase();
+
+                if (status === 'SUCCEEDED' || status === 'FAILED') return job;
+                if (Date.now() - start > timeoutMs) {
+                    throw new Error('Timeout waiting for export job');
+                }
+                await new Promise((r) => setTimeout(r, pollMs));
+            }
         }
 
         function extractFilenameFromContentDisposition(contentDisposition) {
@@ -399,26 +409,74 @@
             }
         }
 
-        function exportSales(format) {
+        async function exportSales(format, btn) {
             const from = document.getElementById('salesFrom')?.value;
             const to = document.getElementById('salesTo')?.value;
             const ext = (format === 'pdf') ? 'pdf' : (format === 'xlsx' ? 'xlsx' : 'csv');
             const q = buildQuery({ from, to, format });
-            downloadFile(`${API_EXPORT_BASE_URL}/sales${q}`, `sales-report.${ext}`).catch((e) => {
+
+            // Prefer async job via Kafka/worker.
+            try {
+                setButtonLoading(btn, true, 'Đang xếp hàng...');
+                const created = await postJson(`/api/admin/reports/export/jobs/sales${q}`);
+                const jobId = created?.jobId;
+                if (!jobId) throw new Error('Missing jobId');
+
+                setButtonLoading(btn, true, 'Đang xử lý...');
+                const job = await waitForJob(jobId, { timeoutMs: 60_000, pollMs: 1000 });
+
+                if ((job?.status || '').toUpperCase() !== 'SUCCEEDED') {
+                    const err = job?.error ? ` (${job.error})` : '';
+                    throw new Error(`Job failed: ${job?.status || 'UNKNOWN'}${err}`);
+                }
+
+                await downloadFile(`/api/admin/reports/export/jobs/${encodeURIComponent(jobId)}/download`, `sales-report.${ext}`);
+                return;
+            } catch (e) {
                 console.error(e);
-                alert(`Không thể xuất báo cáo: ${e.message}`);
-            });
+                // Fallback to direct export endpoint if job flow is unavailable.
+                downloadFile(`${API_EXPORT_BASE_URL}/sales${q}`, `sales-report.${ext}`).catch((e2) => {
+                    console.error(e2);
+                    alert(`Không thể xuất báo cáo: ${e2.message}`);
+                });
+            } finally {
+                setButtonLoading(btn, false);
+            }
         }
 
-        function exportLowStock(format) {
+        async function exportLowStock(format, btn) {
             const threshold = document.getElementById('lowStockThreshold')?.value;
             const limit = document.getElementById('lowStockLimit')?.value;
             const ext = (format === 'pdf') ? 'pdf' : (format === 'xlsx' ? 'xlsx' : 'csv');
             const q = buildQuery({ threshold, limit, format });
-            downloadFile(`${API_EXPORT_BASE_URL}/inventory/low-stock${q}`, `low-stock.${ext}`).catch((e) => {
+
+            // Prefer async job via Kafka/worker.
+            try {
+                setButtonLoading(btn, true, 'Đang xếp hàng...');
+                const created = await postJson(`/api/admin/reports/export/jobs/inventory/low-stock${q}`);
+                const jobId = created?.jobId;
+                if (!jobId) throw new Error('Missing jobId');
+
+                setButtonLoading(btn, true, 'Đang xử lý...');
+                const job = await waitForJob(jobId, { timeoutMs: 60_000, pollMs: 1000 });
+
+                if ((job?.status || '').toUpperCase() !== 'SUCCEEDED') {
+                    const err = job?.error ? ` (${job.error})` : '';
+                    throw new Error(`Job failed: ${job?.status || 'UNKNOWN'}${err}`);
+                }
+
+                await downloadFile(`/api/admin/reports/export/jobs/${encodeURIComponent(jobId)}/download`, `low-stock.${ext}`);
+                return;
+            } catch (e) {
                 console.error(e);
-                alert(`Không thể xuất báo cáo: ${e.message}`);
-            });
+                // Fallback to direct export endpoint if job flow is unavailable.
+                downloadFile(`${API_EXPORT_BASE_URL}/inventory/low-stock${q}`, `low-stock.${ext}`).catch((e2) => {
+                    console.error(e2);
+                    alert(`Không thể xuất báo cáo: ${e2.message}`);
+                });
+            } finally {
+                setButtonLoading(btn, false);
+            }
         }
 
 
@@ -430,14 +488,14 @@
             setDefaultDateRange();
 
             document.getElementById('salesLoadBtn')?.addEventListener('click', loadSalesReport);
-            document.getElementById('salesExportCsv')?.addEventListener('click', () => exportSales('csv'));
-            document.getElementById('salesExportPdf')?.addEventListener('click', () => exportSales('pdf'));
-            document.getElementById('salesExportXlsx')?.addEventListener('click', () => exportSales('xlsx'));
+            document.getElementById('salesExportCsv')?.addEventListener('click', (e) => exportSales('csv', e.currentTarget));
+            document.getElementById('salesExportPdf')?.addEventListener('click', (e) => exportSales('pdf', e.currentTarget));
+            document.getElementById('salesExportXlsx')?.addEventListener('click', (e) => exportSales('xlsx', e.currentTarget));
 
             document.getElementById('lowStockLoadBtn')?.addEventListener('click', loadLowStockReport);
-            document.getElementById('lowStockExportCsv')?.addEventListener('click', () => exportLowStock('csv'));
-            document.getElementById('lowStockExportPdf')?.addEventListener('click', () => exportLowStock('pdf'));
-            document.getElementById('lowStockExportXlsx')?.addEventListener('click', () => exportLowStock('xlsx'));
+            document.getElementById('lowStockExportCsv')?.addEventListener('click', (e) => exportLowStock('csv', e.currentTarget));
+            document.getElementById('lowStockExportPdf')?.addEventListener('click', (e) => exportLowStock('pdf', e.currentTarget));
+            document.getElementById('lowStockExportXlsx')?.addEventListener('click', (e) => exportLowStock('xlsx', e.currentTarget));
 
             // Load initial previews
             loadSalesReport();

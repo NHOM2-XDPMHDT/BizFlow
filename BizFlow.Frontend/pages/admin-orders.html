@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BizFlow - Quản lý Đơn hàng (Admin)</title>
-    <link rel="stylesheet" href="../assets/css/admin-base.css">
+    <link rel="stylesheet" href="../assets/css/admin-base.css?v=20260204">
     <style>
         .modal-backdrop {
             position: fixed;
@@ -140,7 +140,6 @@
 
             <div class="nav-group">
                 <div class="nav-title">Tổng quan</div>
-                <a class="nav-item" data-page="dashboard" href="admin-dashboard.html"><span class="icon" data-icon="D"></span><span>Dashboard</span></a>
                 <a class="nav-item" data-page="home" href="admin-home.html"><span class="icon" data-icon="H"></span><span>Trang chủ</span></a>
                 <a class="nav-item" data-page="users" href="admin-users.html"><span class="icon" data-icon="U"></span><span>Người dùng</span></a>
                 <a class="nav-item" data-page="products" href="admin-products.html"><span class="icon" data-icon="P"></span><span>Sản phẩm</span></a>
@@ -149,10 +148,7 @@
 
             <div class="nav-group">
                 <div class="nav-title">Hệ thống</div>
-                <a class="nav-item" data-page="roles" href="#"><span class="icon" data-icon="R"></span><span>Phân quyền</span></a>
                 <a class="nav-item" data-page="reports" href="admin-reports.html"><span class="icon" data-icon="B"></span><span>Báo cáo</span></a>
-                <a class="nav-item" data-page="settings" href="#"><span class="icon" data-icon="C"></span><span>Cấu hình</span></a>
-                <a class="nav-item" data-page="integrations" href="#"><span class="icon" data-icon="I"></span><span>Tích hợp</span></a>
             </div>
 
             <div class="sidebar-footer">
@@ -189,7 +185,7 @@
                     <div class="card-subtitle">Dữ liệu lấy từ microservice Đơn hàng.</div>
                     <div class="actions">
                         <button class="action-btn" type="button" onclick="location.href='admin-home.html'">Quay lại</button>
-                        <button class="action-btn primary" type="button">Tạo đơn mới</button>
+                        
                         <div style="flex: 1;"></div>
                         <select id="statusFilter" class="mini-select" aria-label="Lọc theo trạng thái">
                             <option value="">Tất cả trạng thái</option>
@@ -316,6 +312,8 @@
         let currentStatus = '';
         let currentPage = 1;
         let currentPageSize = 20;
+        let totalCount = 0;
+        let totalPages = 1;
 
         function pick(obj, ...keys) {
             for (const k of keys) {
@@ -325,32 +323,41 @@
         }
 
         function clampPage() {
-            const totalPages = Math.max(1, Math.ceil((allOrders?.length || 0) / currentPageSize));
-            currentPage = Math.min(Math.max(1, currentPage), totalPages);
-            return totalPages;
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(Math.max(1, currentPage), tp);
+            return tp;
         }
 
         function buildOrdersUrl() {
             const params = new URLSearchParams();
             if (currentStatus) params.set('status', currentStatus);
             if (currentQuery) params.set('q', currentQuery);
+
+            // Server-side pagination (0-based page index on backend)
+            params.set('page', String(Math.max(0, (currentPage || 1) - 1)));
+            params.set('size', String(currentPageSize || 20));
+
             const qs = params.toString();
             return qs ? `${API_BASE_URL}?${qs}` : `${API_BASE_URL}`;
         }
 
         function renderPagination() {
-            const total = allOrders?.length || 0;
+            const headerTotal = Number(totalCount);
+            const bodyTotal = Array.isArray(allOrders) ? allOrders.length : 0;
+            const total = headerTotal > 0 ? headerTotal : bodyTotal;
             const totalPages = clampPage();
             const pageInfo = document.getElementById('pageInfo');
             const prevBtn = document.getElementById('prevPageBtn');
             const nextBtn = document.getElementById('nextPageBtn');
             const meta = document.getElementById('ordersMeta');
 
+            const shown = Array.isArray(allOrders) ? allOrders.length : 0;
+
             const from = total === 0 ? 0 : (currentPage - 1) * currentPageSize + 1;
-            const to = Math.min(total, currentPage * currentPageSize);
+            const to = total === 0 ? 0 : Math.min(total, (currentPage - 1) * currentPageSize + (allOrders?.length || 0));
 
             if (pageInfo) pageInfo.textContent = `Trang ${currentPage}/${totalPages}`;
-            if (meta) meta.textContent = `Hiển thị ${from}-${to} / ${total} đơn`;
+            if (meta) meta.textContent = total === 0 ? 'Hiển thị 0 / 0 đơn' : `Hiển thị ${shown} / ${total} đơn`;
             if (prevBtn) prevBtn.disabled = currentPage <= 1;
             if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
         }
@@ -366,11 +373,7 @@
                 return;
             }
 
-            clampPage();
-            const start = (currentPage - 1) * currentPageSize;
-            const pageItems = allOrders.slice(start, start + currentPageSize);
-
-            pageItems.forEach(order => {
+            allOrders.forEach(order => {
                 const row = document.createElement('tr');
                 const currentRowStatus = safeUpper(order.status || '');
                 if (order && order.id !== undefined && order.id !== null) {
@@ -408,8 +411,18 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
+                const headerTotalCount = Number(response.headers.get('X-Total-Count'));
+                const headerTotalPages = Number(response.headers.get('X-Total-Pages'));
+
                 allOrders = await response.json();
-                currentPage = 1;
+                const bodyCount = Array.isArray(allOrders) ? allOrders.length : 0;
+
+                // Fallback when backend doesn't return pagination headers
+                totalCount = (Number.isFinite(headerTotalCount) && headerTotalCount > 0) ? headerTotalCount : bodyCount;
+                totalPages = (Number.isFinite(headerTotalPages) && headerTotalPages > 0)
+                    ? headerTotalPages
+                    : Math.max(1, Math.ceil((totalCount || 0) / (currentPageSize || 20)));
+
                 renderOrdersTable();
             } catch (error) {
                 console.error('Error loading orders:', error);
@@ -418,19 +431,21 @@
                     <small>Đảm bảo AdminOrderService đang chạy và gateway route hoạt động: ${escapeHtml(API_BASE_URL)}</small>
                 </td></tr>`;
                 allOrders = [];
+                totalCount = 0;
+                totalPages = 1;
                 renderPagination();
             }
         }
 
         function goPrevPage() {
             currentPage = Math.max(1, currentPage - 1);
-            renderOrdersTable();
+            fetchOrders();
         }
 
         function goNextPage() {
-            const totalPages = Math.max(1, Math.ceil((allOrders?.length || 0) / currentPageSize));
-            currentPage = Math.min(totalPages, currentPage + 1);
-            renderOrdersTable();
+            const tp = Math.max(1, Number(totalPages || 1));
+            currentPage = Math.min(tp, currentPage + 1);
+            fetchOrders();
         }
 
         async function viewOrder(id) {
@@ -659,6 +674,7 @@
 
             statusFilter.addEventListener('change', () => {
                 currentStatus = statusFilter.value;
+                currentPage = 1;
                 fetchOrders();
             });
 
@@ -666,7 +682,7 @@
                 const val = parseInt(pageSizeEl.value, 10);
                 currentPageSize = Number.isFinite(val) && val > 0 ? val : 20;
                 currentPage = 1;
-                renderOrdersTable();
+                fetchOrders();
             });
 
             // Init state

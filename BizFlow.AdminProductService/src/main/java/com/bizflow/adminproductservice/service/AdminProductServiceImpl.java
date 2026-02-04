@@ -1,10 +1,12 @@
 package com.bizflow.adminproductservice.service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +28,24 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductOverviewDto> listProducts(String query, Boolean active) {
-        return productRepository.findAll().stream()
-                .filter(product -> matchesActive(active, product))
-                .filter(product -> matchesQuery(query, product))
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return productRepository
+            .searchProducts(query, active, PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "updatedAt", "id")))
+            .getContent()
+            .stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
     }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductOverviewDto> listProductsPage(String query, Boolean active, int page, int size) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.min(Math.max(1, size), 200);
+
+        return productRepository
+            .searchProducts(query, active, PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "updatedAt", "id")))
+            .map(this::toDto);
+        }
 
     @Override
     @Transactional(readOnly = true)
@@ -67,19 +81,4 @@ public class AdminProductServiceImpl implements AdminProductService {
         );
     }
 
-    private boolean matchesActive(Boolean active, Product product) {
-        if (active == null) {
-            return true;
-        }
-        return active.equals(product.getActive());
-    }
-
-    private boolean matchesQuery(String query, Product product) {
-        if (query == null || query.isBlank()) {
-            return true;
-        }
-        String normalized = query.trim().toLowerCase(Locale.ROOT);
-        return (product.getSku() != null && product.getSku().toLowerCase(Locale.ROOT).contains(normalized))
-                || (product.getProductName() != null && product.getProductName().toLowerCase(Locale.ROOT).contains(normalized));
-    }
 }

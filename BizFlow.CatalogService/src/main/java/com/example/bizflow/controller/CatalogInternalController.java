@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +52,27 @@ public class CatalogInternalController {
                 .map(ProductCostSummary::fromView)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/products/{id}/stock")
+    public ResponseEntity<Void> updateProductStock(@PathVariable("id") Long id,
+                                                   @RequestBody StockUpdateRequest request) {
+        if (id == null || request == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Integer value = request.stock;
+        int newStock = value != null ? value : 0;
+        return productRepository.findById(id)
+                .map(product -> {
+                    product.setStock(newStock);
+                    productRepository.save(product);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    public static class StockUpdateRequest {
+        public Integer stock;
     }
 
     public static class ProductSummary {

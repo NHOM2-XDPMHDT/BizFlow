@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/product-images")
 public class ProductImageController {
 
-    private static final Path ASSETS_ROOT = Paths.get(
-            Optional.ofNullable(System.getenv("BIZFLOW_ASSETS_DIR")).orElse("FE/assets"));
+    private static final Path ASSETS_ROOT = resolveAssetsRoot();
     private static final Path IMAGE_DIR = ASSETS_ROOT.resolve(Paths.get("img", "img_sanpham"));
     private static final Path IMAGE_INDEX = ASSETS_ROOT.resolve(Paths.get("data", "product-image-files.json"));
     private static final String WEB_PREFIX = "/assets/img/img_sanpham/";
@@ -46,6 +46,7 @@ public class ProductImageController {
 
         try {
             Files.createDirectories(IMAGE_DIR);
+            Files.createDirectories(IMAGE_INDEX.getParent());
             String filename = sanitizedName;
             if (filename.isEmpty()) {
                 filename = baseName + "." + ext;
@@ -69,26 +70,86 @@ public class ProductImageController {
         }
     }
 
-    private void updateImageIndex(String webPath) throws IOException {
-        List<String> entries = readIndexEntries();
-        if (entries.contains(webPath)) {
-            return;
+    @GetMapping
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<?> listProductImages() {
+        try {
+            List<String> entries = readIndexEntries();
+            List<String> apiEntries = entries.stream()
+                    .map(this::toApiPath)
+                    .filter(path -> path != null && !path.isBlank())
+                    .collect(Collectors.toList());
+            List<String> merged = new ArrayList<>(apiEntries);
+            for (String entry : entries) {
+                if (entry != null && !entry.isBlank() && !merged.contains(entry)) {
+                    merged.add(entry);
+                }
+            }
+            return ResponseEntity.ok(merged);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to load image list"));
         }
-        entries.add(webPath);
-        writeIndexEntries(entries);
     }
 
-    private List<String> readIndexEntries() throws IOException {
+    @GetMapping(path = "/files/{filename:.+}")
+    public ResponseEntity<?> serveProductImage(@PathVariable("filename") String filename) {
+        if (filename == null || filename.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Filename is required"));
+        }
+        try {
+            Path target = IMAGE_DIR.resolve(filename).normalize();
+            if (!target.startsWith(IMAGE_DIR) || !Files.exists(target)) {
+                return ResponseEntity.notFound().build();
+            }
+            String contentType = Files.probeContentType(target);
+            if (contentType == null || contentType.isBlank()) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+            byte[] content = Files.readAllBytes(target);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(content);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to read image"));
+        }
+    }
+
+    private void updateImageIndex(String webPath) throws IOException {
+        List<String> entries = readIndexEntriesSafe();
+        boolean exists = entries.stream().anyMatch(path -> path.equalsIgnoreCase(webPath));
+        if (!exists) {
+            entries.add(webPath);
+            writeIndexEntries(entries);
+        }
+    }
+
+    private List<String> readIndexEntriesSafe() {
         if (!Files.exists(IMAGE_INDEX)) {
             return new ArrayList<>();
         }
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(IMAGE_INDEX.toFile(), new TypeReference<List<String>>() {});
+        try {
+            return mapper.readValue(IMAGE_INDEX.toFile(), new TypeReference<List<String>>() {});
+        } catch (IOException ex) {
+            // If the index is missing, empty, or corrupted, recover gracefully.
+            return new ArrayList<>();
+        }
     }
 
     private void writeIndexEntries(List<String> entries) throws IOException {
+
+        Path parent = IMAGE_INDEX.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(IMAGE_INDEX.toFile(), entries);
+        Path tmp = Files.createTempFile(IMAGE_INDEX.getParent(), "product-image-files", ".json");
+        mapper.writerWithDefaultPrettyPrinter().writeValue(tmp.toFile(), entries);
+        try {
+            Files.move(tmp, IMAGE_INDEX, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException ex) {
+            Files.move(tmp, IMAGE_INDEX, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     private String getExtension(String filename) {
@@ -123,5 +184,35 @@ public class ProductImageController {
             return "";
         }
         return justName.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    private String toApiPath(String webPath) {
+        if (webPath == null || webPath.isBlank()) {
+            return "";
+        }
+        Path name = Paths.get(webPath).getFileName();
+        if (name == null) {
+            return "";
+        }
+        return "/api/product-images/files/" + name.toString();
+    }
+
+    private static Path resolveAssetsRoot() {
+        String override = System.getenv("BIZFLOW_ASSETS_DIR");
+        if (override != null && !override.isBlank()) {
+            return Paths.get(override);
+        }
+        List<Path> candidates = List.of(
+                Paths.get("BizFlow.Frontend", "assets"),
+                Paths.get("FE", "assets"),
+                Paths.get("frontend", "assets"),
+                Paths.get("assets")
+        );
+        for (Path candidate : candidates) {
+            if (Files.exists(candidate)) {
+                return candidate;
+            }
+        }
+        return Paths.get("BizFlow.Frontend", "assets");
     }
 }

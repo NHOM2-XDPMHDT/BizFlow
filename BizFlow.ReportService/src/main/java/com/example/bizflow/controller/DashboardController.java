@@ -2,6 +2,7 @@ package com.example.bizflow.controller;
 
 import com.example.bizflow.dto.AdminDashboardSummary;
 import com.example.bizflow.dto.BranchSummary;
+import com.example.bizflow.dto.FinancialSummary;
 import com.example.bizflow.dto.OwnerDashboardSummary;
 import com.example.bizflow.dto.RecentUserSummary;
 import com.example.bizflow.dto.UserDetailDto;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -38,6 +40,11 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getAdminSummary());
     }
 
+    @GetMapping("/financial-summary")
+    public ResponseEntity<FinancialSummary> getFinancialSummary() {
+        return ResponseEntity.ok(dashboardService.getFinancialSummary());
+    }
+
     @GetMapping("/recent-users")
     public ResponseEntity<List<RecentUserSummary>> getRecentUsers() {
         return ResponseEntity.ok(dashboardService.getRecentUsers());
@@ -49,7 +56,13 @@ public class DashboardController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserSearchItem>> getUsersForSearch() {
+    public ResponseEntity<List<UserSearchItem>> getUsersForSearch(
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "limit", required = false) Integer limit) {
+        if (q != null && !q.trim().isEmpty()) {
+            int l = (limit == null) ? 10 : limit;
+            return ResponseEntity.ok(dashboardService.searchUsersForSearch(q, l));
+        }
         return ResponseEntity.ok(dashboardService.getAllUsersForSearch());
     }
 
